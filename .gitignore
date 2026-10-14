@@ -31,4 +31,5 @@ __pycache__/
 .snapshots/
 scratch/
 
-
+# Temporary MS Office files
+~$*
