@@ -1,0 +1,34 @@
+# Keystores, certificates and private keys
+*.p12*
+*.pfx*
+*.keystore*
+*.jks*
+*.key*
+*.pem*
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Build and dependencies
+node_modules/
+target/
+dist/
+.DS_Store
+*.log
+*.bak*
+
+# Backups and database dumps
+backups/
+*.dump
+*.tar.gz
+
+# Python and AI scratch
+__pycache__/
+*.pyc
+.snapshots/
+scratch/
+
+

@@ -1,0 +1,5 @@
+# Profile: operational-test
+# Explicitly enables failure simulation header (X-Test-Simulate-Failure) for operational test runs
+edms:
+  testing:
+    failure-simulation-enabled: true

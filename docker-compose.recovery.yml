@@ -1,0 +1,77 @@
+name: edms-recovery
+
+services:
+  recovery-postgres:
+    image: postgres:16-alpine
+    container_name: edms-recovery-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: edms_db
+      POSTGRES_USER: edms_user
+      POSTGRES_PASSWORD: edms_pass
+    ports:
+      - "15432:5432"
+    volumes:
+      - edms_recovery_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U edms_user -d edms_db"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+    networks:
+      - edms-recovery-network
+
+  recovery-backend:
+    image: doan_cnpmnc-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: edms-recovery-backend
+    restart: unless-stopped
+    ports:
+      - "18080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://recovery-postgres:5432/edms_db
+      SPRING_DATASOURCE_USERNAME: edms_user
+      SPRING_DATASOURCE_PASSWORD: edms_pass
+      EDMS_STORAGE_DIR: /app/storage/uploads
+      EDMS_KEYSTORE_PATH: /app/keys/edms-signing.p12
+      EDMS_KEYSTORE_PASSWORD: ${EDMS_KEYSTORE_PASSWORD}
+      EDMS_KEYSTORE_LEGACY_PASSWORD: ${EDMS_KEYSTORE_LEGACY_PASSWORD:-}
+      SPRING_PROFILES_ACTIVE: prod
+      JAVA_TOOL_OPTIONS: "-Xms512m -Xmx2048m -XX:+UseG1GC"
+    volumes:
+      - edms_recovery_storage:/app/storage/uploads
+      - edms_recovery_keystore:/app/keys
+    depends_on:
+      recovery-postgres:
+        condition: service_healthy
+    networks:
+      - edms-recovery-network
+
+  recovery-frontend:
+    image: doan_cnpmnc-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: edms-recovery-frontend
+    restart: unless-stopped
+    ports:
+      - "15173:5173"
+    depends_on:
+      - recovery-backend
+    networks:
+      - edms-recovery-network
+
+volumes:
+  edms_recovery_pgdata:
+    name: edms_recovery_pgdata
+  edms_recovery_storage:
+    name: edms_recovery_storage
+  edms_recovery_keystore:
+    name: edms_recovery_keystore
+
+networks:
+  edms-recovery-network:
+    name: edms-recovery-network
+    driver: bridge

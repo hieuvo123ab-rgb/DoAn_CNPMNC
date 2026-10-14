@@ -1,0 +1,88 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: edms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: edms_db
+      POSTGRES_USER: edms_user
+      POSTGRES_PASSWORD: edms_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - edms_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U edms_user -d edms_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - edms-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: edms-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/edms_db
+      SPRING_DATASOURCE_USERNAME: edms_user
+      SPRING_DATASOURCE_PASSWORD: edms_pass
+      EDMS_STORAGE_DIR: /app/storage/uploads
+      EDMS_KEYSTORE_PATH: /app/keys/edms-signing.p12
+      EDMS_KEYSTORE_PASSWORD: ${EDMS_KEYSTORE_PASSWORD}
+      EDMS_KEYSTORE_LEGACY_PASSWORD: ${EDMS_KEYSTORE_LEGACY_PASSWORD:-}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-operational-test}
+      JAVA_TOOL_OPTIONS: "-Xms512m -Xmx2048m -XX:+UseG1GC"
+    volumes:
+      - edms_storage_data:/app/storage/uploads
+      - edms_keystore_data:/app/keys
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - edms-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: edms-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - edms-network
+
+volumes:
+  edms_pgdata:
+    name: edms_pgdata
+  edms_storage_data:
+    name: edms_storage_data
+  edms_keystore_data:
+    name: edms_keystore_data
+
+networks:
+  edms-network:
+    name: edms-network
+    driver: bridge

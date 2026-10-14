@@ -1,0 +1,50 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: edms-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/edms_db}
+    username: ${SPRING_DATASOURCE_USERNAME:edms_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:edms_pass}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 20MB
+      max-request-size: 25MB
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [corr=%X{correlationId:-NONE}] - %msg%n"
+
+edms:
+  jwt:
+    secret: ${EDMS_JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+    expiration-ms: 86400000 # 24 hours
+  storage:
+    upload-dir: ${EDMS_STORAGE_DIR:/app/storage/uploads}
+  # Phase 13: Digital Signature — Self-Signed RSA-2048 KeyStore (PKCS12)
+  keystore:
+    path: ${EDMS_KEYSTORE_PATH:/app/keys/edms-signing.p12}
+    password: ${EDMS_KEYSTORE_PASSWORD}
+    legacy-password: ${EDMS_KEYSTORE_LEGACY_PASSWORD:}
+    alias: ${EDMS_KEYSTORE_ALIAS:edms-signing}
+  # Phase 16: Failure Simulation Testing Isolation
+  testing:
+    failure-simulation-enabled: ${EDMS_FAILURE_SIMULATION_ENABLED:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

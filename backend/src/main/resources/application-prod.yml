@@ -1,0 +1,5 @@
+# Profile: prod
+# Production profile: strictly disables failure simulation (X-Test-Simulate-Failure header is ignored)
+edms:
+  testing:
+    failure-simulation-enabled: false

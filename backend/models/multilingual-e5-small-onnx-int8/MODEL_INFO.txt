@@ -1,0 +1,11 @@
+EDMS Phase 12 - Local Embedding Model
+=====================================
+Source: Xenova/multilingual-e5-small (HuggingFace)
+Base model: intfloat/multilingual-e5-small
+Format: ONNX int8 quantized
+Embedding dimension: 384
+Languages: 100 (including Vietnamese and English)
+License: MIT
+model.onnx size: 112.8 MB
+Input prefix: 'query: ' for queries, 'passage: ' for documents
+Model ID: multilingual-e5-small-onnx-int8-v1
