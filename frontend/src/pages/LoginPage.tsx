@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Lock, User, AlertCircle, ArrowRight } from 'lucide-react';
+import { Lock, AlertCircle, ArrowRight } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -27,12 +27,6 @@ export const LoginPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const fillQuickAccount = (u: string, p: string) => {
-    setUsername(u);
-    setPassword(p);
-    setError(null);
   };
 
   return (
@@ -63,7 +57,7 @@ export const LoginPage: React.FC = () => {
                 id="username-input"
                 type="text"
                 className="form-input"
-                placeholder="Nhập username (VD: hieu hoặc tin)"
+                placeholder="Nhập tên đăng nhập"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="username"
@@ -97,35 +91,12 @@ export const LoginPage: React.FC = () => {
             disabled={isLoading}
             id="login-submit-btn"
           >
-            <span>{isLoading ? 'Đang xác thực...' : 'Đăng nhập (US-01)'}</span>
+            <span>{isLoading ? 'Đang xác thực...' : 'Đăng nhập'}</span>
             <ArrowRight size={18} />
           </button>
         </form>
-
-        <div className="demo-accounts">
-          <p>Tài khoản thử nghiệm nhóm (Seed data):</p>
-          <div className="demo-buttons">
-            <button
-              type="button"
-              className="btn-demo"
-              onClick={() => fillQuickAccount('hieu', 'password123')}
-              id="demo-hieu-btn"
-            >
-              <User size={13} style={{ display: 'inline', marginRight: 4 }} />
-              <strong>hieu</strong> (Team Lead)
-            </button>
-            <button
-              type="button"
-              className="btn-demo"
-              onClick={() => fillQuickAccount('tin', 'password123')}
-              id="demo-tin-btn"
-            >
-              <User size={13} style={{ display: 'inline', marginRight: 4 }} />
-              <strong>tin</strong> (Developer)
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
 };
+

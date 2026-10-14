@@ -104,7 +104,7 @@ export const Navbar: React.FC = () => {
           </div>
           <div className="navbar-title-wrap">
             <h1>EDMS Hệ Thống Lưu Trữ Điện Tử</h1>
-            <p>Phase 14 — Notifications & User Task Center</p>
+            <p>Quản lý tài liệu & Lưu trữ doanh nghiệp</p>
           </div>
         </div>
 

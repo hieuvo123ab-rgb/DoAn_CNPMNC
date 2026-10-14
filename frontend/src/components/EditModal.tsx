@@ -111,7 +111,7 @@ export const EditModal: React.FC<EditModalProps> = ({
 
             <div className="form-group">
               <label className="form-label" htmlFor="edit-type-select">
-                Phân loại tài liệu (US-14) <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Phân loại tài liệu <span style={{ color: 'var(--color-danger)' }}>*</span>
               </label>
               <select
                 className="form-select"

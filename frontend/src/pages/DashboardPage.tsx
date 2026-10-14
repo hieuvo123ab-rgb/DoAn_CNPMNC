@@ -69,7 +69,7 @@ export const DashboardPage: React.FC = () => {
         {/* Header */}
         <div className="dashboard-header d-flex justify-content-between align-items-center mb-4">
           <div>
-            <h2 className="dashboard-title">Bảng điều khiển & Giám sát (US-16)</h2>
+            <h2 className="dashboard-title">Bảng điều khiển & Giám sát</h2>
             <p className="dashboard-subtitle text-secondary mb-0">
               Dữ liệu giám sát hoạt động và thống kê tài nguyên hệ thống EDMS thời gian thực
             </p>
@@ -155,7 +155,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="card shadow-sm border-0 h-100 p-4">
                   <div className="d-flex align-items-center gap-2 mb-3">
                     <FolderCheck size={20} className="text-primary" />
-                    <h5 className="mb-0 fw-semibold">Phân loại tài liệu (US-17)</h5>
+                    <h5 className="mb-0 fw-semibold">Phân loại tài liệu</h5>
                   </div>
                   <p className="text-secondary small mb-3">
                     Cơ cấu và tỷ trọng các phân loại tài liệu đang lưu trữ trong hệ thống
@@ -198,7 +198,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="card shadow-sm border-0 h-100 p-4">
                   <div className="d-flex align-items-center gap-2 mb-3">
                     <Activity size={20} className="text-primary" />
-                    <h5 className="mb-0 fw-semibold">Thống kê tần suất sử dụng (US-18 Usage Analytics)</h5>
+                    <h5 className="mb-0 fw-semibold">Thống kê tần suất sử dụng</h5>
                   </div>
                   <p className="text-secondary small mb-3">
                     Tần suất các thao tác xử lý tài liệu được ghi nhận thực tế từ hệ thống kiểm toán
@@ -254,7 +254,7 @@ export const DashboardPage: React.FC = () => {
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <div className="d-flex align-items-center gap-2">
                   <Activity size={20} className="text-primary" />
-                  <h5 className="mb-0 fw-semibold">Hoạt động gần đây (US-19 Recent Activities)</h5>
+                  <h5 className="mb-0 fw-semibold">Hoạt động gần đây</h5>
                 </div>
                 <span className="badge bg-secondary">10 sự kiện mới nhất</span>
               </div>

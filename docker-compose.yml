@@ -40,7 +40,7 @@ services:
       EDMS_KEYSTORE_PATH: /app/keys/edms-signing.p12
       EDMS_KEYSTORE_PASSWORD: ${EDMS_KEYSTORE_PASSWORD}
       EDMS_KEYSTORE_LEGACY_PASSWORD: ${EDMS_KEYSTORE_LEGACY_PASSWORD:-}
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-operational-test}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
       JAVA_TOOL_OPTIONS: "-Xms512m -Xmx2048m -XX:+UseG1GC"
     volumes:
       - edms_storage_data:/app/storage/uploads

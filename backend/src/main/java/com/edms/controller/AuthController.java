@@ -3,8 +3,10 @@ package com.edms.controller;
 import com.edms.dto.LoginRequest;
 import com.edms.dto.LoginResponse;
 import com.edms.service.AuthService;
+import com.edms.service.OperationalDiagnosticsService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,10 +23,14 @@ public class AuthController {
 
     private final AuthService authService;
     private final com.edms.security.LoginRateLimiterService loginRateLimiterService;
+    private final OperationalDiagnosticsService diagnosticsService;
 
-    public AuthController(AuthService authService, com.edms.security.LoginRateLimiterService loginRateLimiterService) {
+    public AuthController(AuthService authService,
+                          com.edms.security.LoginRateLimiterService loginRateLimiterService,
+                          OperationalDiagnosticsService diagnosticsService) {
         this.authService = authService;
         this.loginRateLimiterService = loginRateLimiterService;
+        this.diagnosticsService = diagnosticsService;
     }
 
     @PostMapping("/login")
@@ -33,7 +39,7 @@ public class AuthController {
             @RequestHeader(value = "X-Test-Lockout-Seconds", required = false) Long testLockoutSeconds,
             jakarta.servlet.http.HttpServletRequest httpRequest) {
 
-        if (testLockoutSeconds != null && testLockoutSeconds > 0) {
+        if (testLockoutSeconds != null && testLockoutSeconds > 0 && diagnosticsService.isFailureSimulationAllowed()) {
             loginRateLimiterService.setLockoutSeconds(testLockoutSeconds);
         }
 
@@ -43,6 +49,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset-rate-limit")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Map<String, String>> resetRateLimit() {
         loginRateLimiterService.resetDefaults();
         loginRateLimiterService.clearAll();

@@ -339,7 +339,7 @@ export const DocumentsPage: React.FC = () => {
               id="open-upload-modal-btn"
             >
               <Plus size={18} />
-              <span>Tải lên tài liệu (US-10)</span>
+              <span>Tải lên tài liệu</span>
             </button>
           </div>
         </div>
@@ -362,21 +362,21 @@ export const DocumentsPage: React.FC = () => {
           </div>
         )}
 
-        {/* Tab switcher: US-03 vs US-15 vs Phase 5 Shared */}
+        {/* Tab switcher: All vs Mine vs Shared */}
         <div className="tabs-nav">
           <button
             className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
             onClick={() => setActiveTab('all')}
             id="tab-all-docs"
           >
-            Tất cả tài liệu (US-03)
+            Tất cả tài liệu
           </button>
           <button
             className={`tab-btn ${activeTab === 'mine' ? 'active' : ''}`}
             onClick={() => setActiveTab('mine')}
             id="tab-mine-docs"
           >
-            Tài liệu của tôi (US-15)
+            Tài liệu của tôi
           </button>
           <button
             className={`tab-btn ${activeTab === 'shared' ? 'active' : ''}`}
@@ -420,16 +420,16 @@ export const DocumentsPage: React.FC = () => {
               onClick={() => setSearchQuery(searchInput)}
               id="submit-search-btn"
             >
-              Tìm kiếm (US-04)
+              Tìm kiếm
             </button>
 
-            {/* Phase 10: Search Scope Selector */}
+            {/* Search Scope Selector */}
             <select
               className="filter-select-field"
               value={searchScope}
               onChange={(e) => setSearchScope(e.target.value as any)}
               id="search-scope-select"
-              title="Phạm vi tìm kiếm (Phase 10)"
+              title="Phạm vi tìm kiếm"
             >
               <option value="METADATA">Tìm trong: Thông tin tài liệu</option>
               <option value="CONTENT">Tìm trong: Nội dung tài liệu</option>
@@ -454,14 +454,14 @@ export const DocumentsPage: React.FC = () => {
               <option value="HYBRID">⚡ Kết hợp (Lai)</option>
             </select>
 
-            {/* US-05: Filter by Document Type */}
+            {/* Filter by Document Type */}
             <select
               className="filter-select-field"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               id="doc-type-filter"
             >
-              <option value="">-- Tất cả loại tài liệu (US-05) --</option>
+              <option value="">-- Tất cả loại tài liệu --</option>
               {DOCUMENT_TYPES.map((type) => (
                 <option key={type} value={type}>
                   {type}
@@ -495,31 +495,31 @@ export const DocumentsPage: React.FC = () => {
               </button>
             )}
 
-            {/* US-07: Save current search button */}
+            {/* Save current search button */}
             <button
               type="button"
               className="btn btn-outline-primary btn-sm"
               onClick={() => setIsSaveModalOpen(true)}
-              title="Lưu điều kiện tìm kiếm hiện tại (US-07)"
+              title="Lưu điều kiện tìm kiếm hiện tại"
               id="open-save-search-btn"
             >
               <BookmarkPlus size={14} />
-              <span>Lưu bộ lọc (US-07)</span>
+              <span>Lưu bộ lọc</span>
             </button>
           </div>
 
           <div className="filter-right-group">
-            {/* US-07: Saved Searches Dropdown */}
+            {/* Saved Searches Dropdown */}
             <div className="saved-searches-container">
               <button
                 type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={() => setIsSavedSearchesOpen(!isSavedSearchesOpen)}
                 id="saved-searches-dropdown-btn"
-                title="Xem và tái sử dụng các bộ lọc đã lưu (US-07)"
+                title="Xem và tái sử dụng các bộ lọc đã lưu"
               >
                 <Bookmark size={14} />
-                <span>Tìm kiếm đã lưu ({savedSearches.length}) (US-07)</span>
+                <span>Tìm kiếm đã lưu ({savedSearches.length})</span>
               </button>
 
               {isSavedSearchesOpen && (
@@ -590,7 +590,7 @@ export const DocumentsPage: React.FC = () => {
 
               {isColSelectOpen && (
                 <div className="column-dropdown-card">
-                  <div className="column-dropdown-title">Tùy chọn hiển thị (US-06)</div>
+                  <div className="column-dropdown-title">Tùy chọn hiển thị</div>
                   <label className="column-checkbox-row">
                     <input
                       type="checkbox"
@@ -1103,7 +1103,7 @@ export const DocumentsPage: React.FC = () => {
                                 doc.lifecycleStatus === 'ARCHIVED'
                                   ? 'Tài liệu đã lưu trữ ở chế độ chỉ đọc, không thể chỉnh sửa'
                                   : canEdit
-                                  ? 'Chỉnh sửa thông tin & phân loại tài liệu (US-13, US-14)'
+                                  ? 'Chỉnh sửa thông tin & phân loại tài liệu'
                                   : 'Bạn không có quyền chỉnh sửa tài liệu này'
                               }
                               disabled={!canEdit || doc.lifecycleStatus === 'ARCHIVED'}
@@ -1128,7 +1128,7 @@ export const DocumentsPage: React.FC = () => {
                                 title={
                                   doc.lifecycleStatus === 'ARCHIVED'
                                     ? 'Tài liệu đã lưu trữ không thể thay đổi phân quyền'
-                                    : 'Phân quyền & Chia sẻ tài liệu (Phase 5)'
+                                    : 'Phân quyền & Chia sẻ tài liệu'
                                 }
                                 disabled={doc.lifecycleStatus === 'ARCHIVED'}
                                 onClick={() => {
@@ -1149,10 +1149,10 @@ export const DocumentsPage: React.FC = () => {
                               </button>
                             )}
 
-                            {/* Phase 6: Document Versions */}
+                             {/* Document Versions */}
                             <button
                               className="action-btn version-btn"
-                              title="Lịch sử phiên bản tài liệu (Phase 6)"
+                              title="Lịch sử phiên bản tài liệu"
                               onClick={() => {
                                 setVersionDoc(doc);
                                 setIsVersionOpen(true);
@@ -1172,7 +1172,7 @@ export const DocumentsPage: React.FC = () => {
                                   doc.lifecycleStatus === 'ARCHIVED'
                                     ? 'Tài liệu đã lưu trữ không thể gửi xét duyệt'
                                     : (doc.currentReviewStatus || doc.reviewStatus || 'DRAFT') === 'DRAFT'
-                                    ? 'Gửi phiên bản hiện tại để quản trị viên xét duyệt (Phase 7)'
+                                    ? 'Gửi phiên bản hiện tại để quản trị viên xét duyệt'
                                     : (doc.currentReviewStatus || doc.reviewStatus) === 'PENDING'
                                     ? 'Phiên bản này đang chờ xét duyệt'
                                     : (doc.currentReviewStatus || doc.reviewStatus) === 'APPROVED'
@@ -1210,10 +1210,10 @@ export const DocumentsPage: React.FC = () => {
                               </button>
                             )}
 
-                            {/* Phase 8: Lifecycle Management (Archive / Unarchive / Retention / Hold) */}
+                            {/* Lifecycle Management (Archive / Unarchive / Retention / Hold) */}
                             <button
                               className="action-btn"
-                              title="Quản lý vòng đời, lưu trữ & thời hạn retention (Phase 8)"
+                              title="Quản lý vòng đời, lưu trữ & thời hạn retention"
                               onClick={() => {
                                 setLifecycleDoc(doc);
                                 setIsLifecycleOpen(true);
@@ -1230,10 +1230,10 @@ export const DocumentsPage: React.FC = () => {
                               </span>
                             </button>
 
-                            {/* Phase 7: Review History */}
+                            {/* Review History */}
                             <button
                               className="action-btn"
-                              title="Xem lịch sử xét duyệt của tài liệu này (Phase 7)"
+                              title="Xem lịch sử xét duyệt của tài liệu này"
                               onClick={() => {
                                 setHistoryModalDoc(doc);
                                 setIsHistoryModalOpen(true);

@@ -218,7 +218,7 @@ export const ReviewQueuePage: React.FC = () => {
                   Hàng đợi xét duyệt tài liệu
                 </h2>
                 <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-text-muted)', marginTop: '0.2rem' }}>
-                  Phê duyệt hoặc từ chối các phiên bản tài liệu do người dùng gửi duyệt (Phase 7 Approval Workflow)
+                  Phê duyệt hoặc từ chối các phiên bản tài liệu do người dùng gửi duyệt
                 </p>
               </div>
             </div>

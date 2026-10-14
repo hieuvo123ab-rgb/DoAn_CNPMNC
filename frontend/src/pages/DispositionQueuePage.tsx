@@ -156,7 +156,7 @@ export const DispositionQueuePage: React.FC = () => {
           <div>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
               <Archive size={24} color="#dc2626" />
-              <span>Hàng Đợi Tiêu Hủy Tài Liệu (Phase 9)</span>
+              <span>Hàng Đợi Tiêu Hủy Tài Liệu</span>
             </h2>
             <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
               Quy trình tiêu hủy có kiểm soát (Controlled Disposition Workflow). Tài liệu được xử lý logic sang trạng thái DISPOSED, toàn bộ file và lịch sử vẫn được bảo toàn.
@@ -433,7 +433,7 @@ export const DispositionQueuePage: React.FC = () => {
                   lineHeight: '1.4',
                 }}
               >
-                <strong>Lưu ý quan trọng:</strong> Phê duyệt sẽ chuyển tài liệu sang trạng thái <strong>DISPOSED</strong>. File vật lý và lịch sử vẫn được bảo toàn trong Phase 9.
+                <strong>Lưu ý quan trọng:</strong> Phê duyệt sẽ chuyển tài liệu sang trạng thái <strong>DISPOSED</strong>. Tệp vật lý và lịch sử kiểm toán được lưu trữ theo quy định bảo lưu.
               </div>
 
               <div style={{ marginBottom: '1rem', fontSize: '0.88rem' }}>
