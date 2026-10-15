@@ -11,7 +11,8 @@ import org.springframework.test.context.TestPropertySource;
         "spring.datasource.username=sa",
         "spring.datasource.password=",
         "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
-        "edms.storage.upload-dir=./target/test-storage"
+        "edms.storage.upload-dir=./target/test-storage",
+        "edms.keystore.path=./target/test-keys/edms-signing.p12"
 })
 class EdmsApplicationTests {
 
