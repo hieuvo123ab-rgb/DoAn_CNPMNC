@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: edms_user
       POSTGRES_PASSWORD: edms_pass
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - edms_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -38,6 +38,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: edms_pass
       EDMS_STORAGE_DIR: /app/storage/uploads
       EDMS_KEYSTORE_PATH: /app/keys/edms-signing.p12
+      EDMS_JWT_SECRET: ${EDMS_JWT_SECRET:?EDMS_JWT_SECRET must be set to a unique strong value in .env}
       EDMS_KEYSTORE_PASSWORD: ${EDMS_KEYSTORE_PASSWORD}
       EDMS_KEYSTORE_LEGACY_PASSWORD: ${EDMS_KEYSTORE_LEGACY_PASSWORD:-}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
