@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -50,12 +49,25 @@ public class AuthController {
 
     @PostMapping("/reset-rate-limit")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<Map<String, String>> resetRateLimit() {
+    public ResponseEntity<Map<String, String>> resetRateLimit(
+            @RequestBody(required = false) Map<String, String> request) {
+        if (request != null && request.containsKey("username")) {
+            String username = request.get("username");
+            if (username == null || username.isBlank()) {
+                return ResponseEntity.badRequest().body(
+                        Map.of("message", "username must not be blank"));
+            }
+
+            int cleared = loginRateLimiterService.clearUser(username);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Rate limit cleared for the selected user",
+                    "clearedEntries", Integer.toString(cleared)));
+        }
+
+        // Backward-compatible global administrative reset (no request body).
         loginRateLimiterService.resetDefaults();
         loginRateLimiterService.clearAll();
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Rate limit state reset successfully");
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of("message", "Rate limit state reset successfully"));
     }
 
     @PostMapping("/logout")
