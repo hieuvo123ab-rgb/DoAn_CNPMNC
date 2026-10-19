@@ -31,17 +31,24 @@ Toàn bộ hồ sơ kiểm toán, củng cố an ninh, kiểm tra tích hợp v�
 ## 2. TỔNG HỢP CÁC TỆP NGUỒN ĐÃ SỬA ĐỔI VÀ NÂNG CẤP
 
 ### 2.1 Backend (Java Spring Boot 3.3.3)
+- [`backend/pom.xml`](file:///f:/DoAn_CNPMNC/backend/pom.xml): Bổ sung `spring-boot-starter-websocket` hỗ trợ truyền thông hai chiều STOMP Broker.
+- [`backend/src/main/java/com/edms/config/WebSocketConfig.java`](file:///f:/DoAn_CNPMNC/backend/src/main/java/com/edms/config/WebSocketConfig.java): Thiết lập STOMP message broker (`/topic`, `/queue`), endpoint `/ws-edms` hỗ trợ cả WebSocket native và SockJS fallback; tích hợp interceptor xác thực JWT Bearer token và phân quyền truy cập admin topic.
+- [`backend/src/main/java/com/edms/service/NotificationService.java`](file:///f:/DoAn_CNPMNC/backend/src/main/java/com/edms/service/NotificationService.java): Tích hợp `SimpMessagingTemplate` đẩy thông báo thời gian thực tới user queue `/user/{username}/queue/notifications` và `/topic/admin/notifications`.
 - [`backend/src/main/java/com/edms/config/DataInitializer.java`](file:///f:/DoAn_CNPMNC/backend/src/main/java/com/edms/config/DataInitializer.java): Bổ sung `@Profile("!prod & !production")`, cô lập seed data khỏi production.
-- [`backend/src/main/java/com/edms/security/SecurityConfig.java`](file:///f:/DoAn_CNPMNC/backend/src/main/java/com/edms/security/SecurityConfig.java): Thêm quy tắc bảo vệ endpoint reset rate-limit: `.requestMatchers("/api/auth/reset-rate-limit").hasAuthority("ROLE_ADMIN")`.
+- [`backend/src/main/java/com/edms/security/SecurityConfig.java`](file:///f:/DoAn_CNPMNC/backend/src/main/java/com/edms/security/SecurityConfig.java): Cho phép kết nối `/ws-edms/**`; bảo vệ endpoint reset rate-limit: `.requestMatchers("/api/auth/reset-rate-limit").hasAuthority("ROLE_ADMIN")`.
 - [`backend/src/main/java/com/edms/security/JwtTokenProvider.java`](file:///f:/DoAn_CNPMNC/backend/src/main/java/com/edms/security/JwtTokenProvider.java): Bổ sung phương thức kiểm tra độ dài khóa ký HMAC-SHA256 tối thiểu 256-bit và chặn placeholder trên `prod`.
-- [`backend/src/main/java/com/edms/controller/AuthController.java`](file:///f:/DoAn_CNPMNC/backend/src/main/java/com/edms/controller/AuthController.java): Thêm `@PreAuthorize("hasAuthority('ROLE_ADMIN')")` cho endpoint reset rate-limit; chặn header `X-Test-Lockout-Seconds` trên `prod`.
+- [`backend/src/main/java/com/edms/controller/AuthController.java`](file:///f:/DoAn_CNPMNC/backend/src/main/java/com/edms/controller/AuthController.java): Hỗ trợ reset rate-limit có chọn lọc theo username; chặn header `X-Test-Lockout-Seconds` trên `prod`.
 - [`backend/src/main/java/com/edms/controller/DocumentController.java`](file:///f:/DoAn_CNPMNC/backend/src/main/java/com/edms/controller/DocumentController.java): Chặn các header can thiệp lỗi mô phỏng (`X-Force-Extraction-Failure`, `X-Force-Ocr-Timeout`) trên `prod`.
 
 ### 2.2 Frontend (React 18, TypeScript, Vite)
+- [`frontend/src/services/websocket.ts`](file:///f:/DoAn_CNPMNC/frontend/src/services/websocket.ts): Xây dựng service WebSocket STOMP client (sử dụng `@stomp/stompjs` + `sockjs-client`), tự động kết nối bằng JWT, tự động kết nối lại (reconnect delay 5s), chống trùng lặp ID và phát custom events đồng bộ toàn ứng dụng.
+- [`frontend/src/components/Navbar.tsx`](file:///f:/DoAn_CNPMNC/frontend/src/components/Navbar.tsx): Kết nối WebSocket STOMP push channel, loại bỏ hoàn toàn cơ chế Polling định kỳ; chuẩn hóa tiêu đề doanh nghiệp.
+- [`frontend/src/components/NotificationPanel.tsx`](file:///f:/DoAn_CNPMNC/frontend/src/components/NotificationPanel.tsx): Lắng nghe sự kiện WebSocket push notification để hiển thị tức thì mà không cần tải lại trang.
+- [`frontend/src/pages/TaskCenterPage.tsx`](file:///f:/DoAn_CNPMNC/frontend/src/pages/TaskCenterPage.tsx): Tự động cập nhật danh sách tác vụ thời gian thực khi nhận sự kiện từ hệ thống.
+- [`frontend/src/pages/DocumentsPage.tsx`](file:///f:/DoAn_CNPMNC/frontend/src/pages/DocumentsPage.tsx): Bổ sung giao diện thẻ di động `mobile-doc-card` tối ưu hóa trải nghiệm trên màn hình < 480px; gỡ toàn bộ nhãn đồ án.
+- [`frontend/src/index.css`](file:///f:/DoAn_CNPMNC/frontend/src/index.css): Cấu hình CSS Media Query `@media (max-width: 480px)` cho Mobile Card View.
 - [`frontend/src/pages/LoginPage.tsx`](file:///f:/DoAn_CNPMNC/frontend/src/pages/LoginPage.tsx): Gỡ bỏ nhãn `(US-01)`, gỡ bỏ khối tài khoản demo `hieu` / `tin`, chuẩn hóa giao diện đăng nhập doanh nghiệp kèm cảnh báo Rate Limit đếm ngược.
-- [`frontend/src/pages/DocumentsPage.tsx`](file:///f:/DoAn_CNPMNC/frontend/src/pages/DocumentsPage.tsx): Loại bỏ toàn bộ nhãn `US-03`, `US-04`, `US-05`, `US-06`, `US-07`, `US-10`, `US-15` và các nhãn Phase trong tooltips; sửa placeholder thành chuẩn nghiệp vụ.
 - [`frontend/src/components/UploadModal.tsx`](file:///f:/DoAn_CNPMNC/frontend/src/components/UploadModal.tsx): Gỡ nhãn `US-10/12`, sửa giới hạn dung lượng hiển thị từ `50MB` về đúng chuẩn cấu hình `20MB`.
-- [`frontend/src/components/Navbar.tsx`](file:///f:/DoAn_CNPMNC/frontend/src/components/Navbar.tsx): Chuẩn hóa tiêu đề phụ thành `"Quản lý tài liệu & Lưu trữ doanh nghiệp"`.
 - [`frontend/src/pages/UsersPage.tsx`](file:///f:/DoAn_CNPMNC/frontend/src/pages/UsersPage.tsx): Gỡ bỏ nhãn `US-21 to US-26` trong tiêu đề, tab và bảng phân quyền.
 - [`frontend/src/pages/DashboardPage.tsx`](file:///f:/DoAn_CNPMNC/frontend/src/pages/DashboardPage.tsx): Gỡ bỏ nhãn `US-16`, `US-17`, `US-18`, `US-19`.
 - [`frontend/src/pages/AuditLogPage.tsx`](file:///f:/DoAn_CNPMNC/frontend/src/pages/AuditLogPage.tsx): Gỡ bỏ nhãn `US-19 / US-20`.
@@ -53,7 +60,7 @@ Toàn bộ hồ sơ kiểm toán, củng cố an ninh, kiểm tra tích hợp v�
 - [`frontend/src/components/EditModal.tsx`](file:///f:/DoAn_CNPMNC/frontend/src/components/EditModal.tsx): Gỡ bỏ nhãn `US-14`.
 - [`frontend/src/components/CreateUserModal.tsx`](file:///f:/DoAn_CNPMNC/frontend/src/components/CreateUserModal.tsx): Gỡ bỏ nhãn `US-22`.
 - [`frontend/src/components/DocumentLifecycleModal.tsx`](file:///f:/DoAn_CNPMNC/frontend/src/components/DocumentLifecycleModal.tsx): Gỡ bỏ nhãn `Phase 9`.
-- [`frontend/vite.config.ts`](file:///f:/DoAn_CNPMNC/frontend/vite.config.ts): Bổ sung cấu hình `preview: { host: '0.0.0.0', port: 5173, strictPort: true }`.
+- [`frontend/vite.config.ts`](file:///f:/DoAn_CNPMNC/frontend/vite.config.ts): Cấu hình proxy `/ws-edms` hỗ trợ WebSocket và `preview: { host: '0.0.0.0', port: 5173, strictPort: true }`.
 - [`frontend/Dockerfile`](file:///f:/DoAn_CNPMNC/frontend/Dockerfile): Chuyển sang build tĩnh và phục vụ qua `vite preview`.
 
 ### 2.3 DevOps & Containerization
