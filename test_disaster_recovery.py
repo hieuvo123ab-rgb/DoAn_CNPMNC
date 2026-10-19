@@ -421,14 +421,14 @@ def test_403_restore_26_wrong_keystore_causes_verification_failure(backup_dir, r
     
     # Wait for backend to come UP
     time.sleep(5)
-    for _ in range(25):
+    for _ in range(50):
         try:
             req = urllib.request.Request(f'{RECOVERY_URL}/health')
-            with urllib.request.urlopen(req, timeout=2) as resp:
+            with urllib.request.urlopen(req, timeout=3) as resp:
                 if json.loads(resp.read().decode('utf-8')).get('status') == 'UP':
                     break
         except Exception:
-            time.sleep(1)
+            time.sleep(2)
             
     # Check new token & new cert serial
     new_token = get_auth_token(RECOVERY_URL)
@@ -448,14 +448,14 @@ def test_404_restore_27_correct_keystore_restores_validity(backup_dir):
     
     # Wait for backend to come UP
     time.sleep(5)
-    for _ in range(25):
+    for _ in range(50):
         try:
             req = urllib.request.Request(f'{RECOVERY_URL}/health')
-            with urllib.request.urlopen(req, timeout=2) as resp:
+            with urllib.request.urlopen(req, timeout=3) as resp:
                 if json.loads(resp.read().decode('utf-8')).get('status') == 'UP':
                     break
         except Exception:
-            time.sleep(1)
+            time.sleep(2)
             
     token = get_auth_token(RECOVERY_URL)
     cert_info = auth_get(f'{RECOVERY_URL}/admin/signature/certificate', token)

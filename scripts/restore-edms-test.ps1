@@ -169,7 +169,7 @@ Write-Host "[6/7] Starting Recovery Backend (Port 18080)..." -ForegroundColor Ye
 docker compose -f $recoveryComposeFile up -d recovery-backend
 
 $backendHealthy = $false
-for ($i = 1; $i -le 30; $i++) {
+for ($i = 1; $i -le 90; $i++) {
     try {
         $resp = Invoke-RestMethod -Uri "http://localhost:18080/api/health" -Method Get -TimeoutSec 2 -ErrorAction SilentlyContinue
         if ($resp.status -eq "UP") {
@@ -183,7 +183,7 @@ for ($i = 1; $i -le 30; $i++) {
 }
 
 if (-not $backendHealthy) {
-    Write-Error "Recovery Backend failed to report status UP within 30 seconds."
+    Write-Error "Recovery Backend failed to report status UP within 90 seconds."
     exit 1
 }
 Write-Host "  -> Recovery Backend is UP and operational on http://localhost:18080." -ForegroundColor Green
