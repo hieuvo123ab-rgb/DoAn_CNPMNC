@@ -21,6 +21,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Instant;
 import java.util.List;
@@ -162,8 +164,8 @@ public class NotificationService {
             log.info("[Notification] Created {} for user={}, docId={}, eventKey={}",
                     type, recipientUsername, documentId, eventKey);
 
-            // Phase 17: Push notification via WebSocket STOMP
-            pushWebSocketNotification(saved, recipientUsername, type, relatedEntityType);
+            // Never expose a notification over STOMP until its own DB transaction commits.
+            scheduleWebSocketNotificationAfterCommit(saved, recipientUsername, type, relatedEntityType);
 
             return saved;
         } catch (DataIntegrityViolationException e) {
@@ -286,6 +288,23 @@ public class NotificationService {
     public boolean existsForEvent(String recipientUsername, NotificationType type, Long documentId, Integer versionNumber) {
         return notificationRepository.existsByRecipientUsernameAndTypeAndDocumentIdAndVersionNumber(
                 recipientUsername, type, documentId, versionNumber);
+    }
+
+    private void scheduleWebSocketNotificationAfterCommit(Notification notification, String recipientUsername,
+                                                          NotificationType type, String relatedEntityType) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()
+                && TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    pushWebSocketNotification(notification, recipientUsername, type, relatedEntityType);
+                }
+            });
+        } else {
+            // Covers explicit autocommit invocations outside a Spring-managed transaction.
+            // The persistence call has returned; this path is not used in the normal service proxy.
+            pushWebSocketNotification(notification, recipientUsername, type, relatedEntityType);
+        }
     }
 
     private void pushWebSocketNotification(Notification notification, String recipientUsername,
