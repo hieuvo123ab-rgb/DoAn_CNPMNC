@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,13 +34,23 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final SimpMessagingTemplate messagingTemplate;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public NotificationService(NotificationRepository notificationRepository,
+                               UserRepository userRepository,
+                               ApplicationEventPublisher eventPublisher,
+                               Optional<SimpMessagingTemplate> messagingTemplate) {
+        this.notificationRepository = notificationRepository;
+        this.userRepository = userRepository;
+        this.eventPublisher = eventPublisher;
+        this.messagingTemplate = messagingTemplate.orElse(null);
+    }
 
     public NotificationService(NotificationRepository notificationRepository,
                                UserRepository userRepository,
                                ApplicationEventPublisher eventPublisher) {
-        this.notificationRepository = notificationRepository;
-        this.userRepository = userRepository;
-        this.eventPublisher = eventPublisher;
+        this(notificationRepository, userRepository, eventPublisher, Optional.empty());
     }
 
     // -------------------------------------------------------------------------
@@ -150,6 +161,10 @@ public class NotificationService {
             Notification saved = notificationRepository.save(notification);
             log.info("[Notification] Created {} for user={}, docId={}, eventKey={}",
                     type, recipientUsername, documentId, eventKey);
+
+            // Phase 17: Push notification via WebSocket STOMP
+            pushWebSocketNotification(saved, recipientUsername, type, relatedEntityType);
+
             return saved;
         } catch (DataIntegrityViolationException e) {
             log.info("[Notification] Database-level duplicate prevented for user={}, eventKey={}", recipientUsername, eventKey);
@@ -271,5 +286,24 @@ public class NotificationService {
     public boolean existsForEvent(String recipientUsername, NotificationType type, Long documentId, Integer versionNumber) {
         return notificationRepository.existsByRecipientUsernameAndTypeAndDocumentIdAndVersionNumber(
                 recipientUsername, type, documentId, versionNumber);
+    }
+
+    private void pushWebSocketNotification(Notification notification, String recipientUsername,
+                                           NotificationType type, String relatedEntityType) {
+        if (messagingTemplate != null && notification != null) {
+            try {
+                NotificationResponse dto = NotificationResponse.fromEntity(notification);
+                // 1. Send to user's personal queue (/user/{recipient}/queue/notifications)
+                messagingTemplate.convertAndSendToUser(recipientUsername.trim(), "/queue/notifications", dto);
+
+                // 2. Broadcast to admin topic if security alert or tamper detected
+                if (NotificationType.INTEGRITY_TAMPER_DETECTED.equals(type) || "ADMIN".equalsIgnoreCase(relatedEntityType)) {
+                    messagingTemplate.convertAndSend("/topic/admin/notifications", dto);
+                }
+                log.info("[WebSocket] Real-time notification #{} dispatched to user {}", notification.getId(), recipientUsername);
+            } catch (Exception wsEx) {
+                log.warn("[WebSocket] Failed to dispatch STOMP notification: {}", wsEx.getMessage());
+            }
+        }
     }
 }

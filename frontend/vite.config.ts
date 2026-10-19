@@ -11,6 +11,11 @@ export default defineConfig({
       '/api': {
         target: process.env.VITE_BACKEND_URL || 'http://backend:8080',
         changeOrigin: true,
+      },
+      '/ws-edms': {
+        target: process.env.VITE_BACKEND_URL || 'http://backend:8080',
+        changeOrigin: true,
+        ws: true,
       }
     }
   },
@@ -21,6 +26,11 @@ export default defineConfig({
       '/api': {
         target: process.env.VITE_BACKEND_URL || 'http://backend:8080',
         changeOrigin: true,
+      },
+      '/ws-edms': {
+        target: process.env.VITE_BACKEND_URL || 'http://backend:8080',
+        changeOrigin: true,
+        ws: true,
       }
     }
   }

@@ -38,6 +38,13 @@ export const TaskCenterPage: React.FC = () => {
 
   useEffect(() => {
     fetchTasks();
+    const handleUpdate = () => {
+      fetchTasks();
+    };
+    window.addEventListener('notifications-updated', handleUpdate);
+    return () => {
+      window.removeEventListener('notifications-updated', handleUpdate);
+    };
   }, [fetchTasks]);
 
   const handleAction = (task: TaskDto) => {

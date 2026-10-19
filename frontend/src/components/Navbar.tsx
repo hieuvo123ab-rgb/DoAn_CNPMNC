@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { notificationApi } from '../api/notificationApi';
 import { NotificationPanel } from './NotificationPanel';
+import { webSocketService } from '../services/websocket';
 
 export type AppView = 'dashboard' | 'documents' | 'users' | 'audit' | 'review-queue' | 'disposition-queue' | 'tasks' | 'system-status';
 
@@ -50,16 +51,22 @@ export const Navbar: React.FC = () => {
     }
   }, [user]);
 
+  // Phase 17: Connect WebSocket STOMP push channel and eliminate polling interval
   useEffect(() => {
-    fetchUnread();
-    const interval = setInterval(fetchUnread, 30000);
+    if (user) {
+      webSocketService.connect(user.username, user.role);
+      fetchUnread();
+    } else {
+      webSocketService.disconnect();
+      setUnreadCount(0);
+    }
+
     const handleUpdate = () => fetchUnread();
     window.addEventListener('notifications-updated', handleUpdate);
     return () => {
-      clearInterval(interval);
       window.removeEventListener('notifications-updated', handleUpdate);
     };
-  }, [fetchUnread]);
+  }, [user, fetchUnread]);
 
   // Click outside to close notification panel
   useEffect(() => {
@@ -267,7 +274,10 @@ export const Navbar: React.FC = () => {
             </div>
 
             <button
-              onClick={logout}
+              onClick={() => {
+                webSocketService.disconnect();
+                logout();
+              }}
               className="btn btn-outline-danger btn-sm"
               title="Đăng xuất khỏi hệ thống"
               id="logout-btn"
