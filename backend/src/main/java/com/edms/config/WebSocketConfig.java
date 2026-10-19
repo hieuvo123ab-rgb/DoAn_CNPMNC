@@ -4,6 +4,7 @@ import com.edms.security.CustomUserDetailsService;
 import com.edms.security.JwtTokenProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -37,10 +38,22 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService userDetailsService;
+    private final String[] allowedOrigins;
 
-    public WebSocketConfig(JwtTokenProvider jwtTokenProvider, CustomUserDetailsService userDetailsService) {
+    public WebSocketConfig(JwtTokenProvider jwtTokenProvider,
+                           CustomUserDetailsService userDetailsService,
+                           @Value("${EDMS_WEBSOCKET_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080,http://127.0.0.1:8080}") String configuredOrigins) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userDetailsService = userDetailsService;
+        if (!StringUtils.hasText(configuredOrigins)) {
+            throw new IllegalArgumentException("EDMS WebSocket allowed origins must not be empty");
+        }
+        this.allowedOrigins = configuredOrigins.trim().split("\\s*,\\s*");
+        for (String origin : allowedOrigins) {
+            if (!StringUtils.hasText(origin) || "*".equals(origin)) {
+                throw new IllegalArgumentException("WebSocket allowed origins must be explicit, not wildcard");
+            }
+        }
     }
 
     @Override
@@ -57,12 +70,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // SockJS fallback endpoint (WebSocket -> xhr-streaming -> xhr-polling)
         registry.addEndpoint("/ws-edms")
-                .setAllowedOriginPatterns("*")
+                .setAllowedOriginPatterns(allowedOrigins)
                 .withSockJS();
 
         // Direct native WebSocket endpoint
         registry.addEndpoint("/ws-edms")
-                .setAllowedOriginPatterns("*");
+                .setAllowedOriginPatterns(allowedOrigins);
     }
 
     @Override
@@ -97,37 +110,39 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     log.info("[WebSocket] STOMP CONNECT authenticated for user: {}", username);
                 }
 
-                // 2. Authorize destination on STOMP SUBSCRIBE frame
-                else if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
-                    Principal principal = accessor.getUser();
-                    if (principal == null) {
-                        log.warn("[WebSocket] STOMP SUBSCRIBE rejected: unauthenticated session");
-                        throw new AccessDeniedException("Unauthenticated STOMP subscription rejected");
-                    }
+                // Broker destinations are server-published only. Never let a client
+                // impersonate a notification by sending to /topic or /queue.
+                else if (StompCommand.SEND.equals(accessor.getCommand())) {
+                    throw new AccessDeniedException("Client STOMP SEND is disabled for notification channels");
+                }
 
-                    String destination = accessor.getDestination();
-                    if (destination != null) {
-                        // Admin topic requires ROLE_ADMIN
-                        if (destination.startsWith("/topic/admin")) {
-                            boolean isAdmin = false;
-                            if (principal instanceof Authentication auth) {
-                                isAdmin = auth.getAuthorities().stream()
-                                        .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-                            }
-                            if (!isAdmin) {
-                                log.warn("[WebSocket] STOMP SUBSCRIBE forbidden: user {} tried accessing admin topic {}",
-                                        principal.getName(), destination);
-                                throw new AccessDeniedException("Forbidden: Administrator privileges required for " + destination);
-                            }
-                        }
-                        log.debug("[WebSocket] STOMP SUBSCRIBE granted: user {} -> destination {}",
-                                principal.getName(), destination);
-                    }
+                // Restrict subscription paths to the only two destinations
+                // actually used by the application.
+                else if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+                    authorizeSubscription(accessor.getDestination(), accessor.getUser());
                 }
 
                 return message;
             }
         });
+    }
+
+    static void authorizeSubscription(String destination, Principal principal) {
+        if (principal == null) {
+            throw new AccessDeniedException("Unauthenticated STOMP subscription rejected");
+        }
+        if ("/user/queue/notifications".equals(destination)) {
+            return;
+        }
+        if ("/topic/admin/notifications".equals(destination)) {
+            if (principal instanceof Authentication authentication
+                    && authentication.getAuthorities().stream()
+                            .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()))) {
+                return;
+            }
+            throw new AccessDeniedException("Administrator privileges required for this destination");
+        }
+        throw new AccessDeniedException("STOMP subscription destination is not allowed");
     }
 
     private String extractJwt(StompHeaderAccessor accessor) {
