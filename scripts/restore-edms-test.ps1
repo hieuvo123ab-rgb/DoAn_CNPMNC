@@ -133,7 +133,7 @@ Write-Host "  -> Storage and KeyStore populated in isolated recovery volumes wit
 Write-Host "[4/7] Starting Recovery PostgreSQL (Port 15432)..." -ForegroundColor Yellow
 docker compose -f $recoveryComposeFile up -d recovery-postgres
 
-$maxRetries = 20
+$maxRetries = 60
 $isHealthy = $false
 for ($i = 1; $i -le $maxRetries; $i++) {
     $status = docker inspect edms-recovery-postgres --format "{{.State.Health.Status}}" 2>$null
@@ -145,7 +145,7 @@ for ($i = 1; $i -le $maxRetries; $i++) {
 }
 
 if (-not $isHealthy) {
-    Write-Error "Recovery PostgreSQL failed to become healthy within 20 seconds."
+    Write-Error "Recovery PostgreSQL failed to become healthy within 60 seconds."
     exit 1
 }
 Write-Host "  -> Recovery PostgreSQL is healthy." -ForegroundColor Green

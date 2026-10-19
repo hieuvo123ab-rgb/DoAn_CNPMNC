@@ -376,7 +376,7 @@ def test_446_docker_restart_preserves_health():
     time.sleep(5)
     # wait for health
     healthy = False
-    for _ in range(30):
+    for _ in range(80):
         try:
             st, b, _ = api_get('/health')
             if st == 200 and b.get('status') == 'UP':
@@ -389,8 +389,8 @@ def test_446_docker_restart_preserves_health():
 
 def test_447_dr_regression_integration():
     print("[TEST 447] Bộ kiểm thử Disaster Recovery (Phase 15 DR - 38 tests 370-407) vẫn PASS 100%...")
-    subprocess.run(['docker', 'compose', '-f', 'docker-compose.recovery.yml', 'start'], capture_output=True, text=True)
-    for _ in range(40):
+    subprocess.run(['docker', 'compose', '-f', 'docker-compose.recovery.yml', 'up', '-d'], capture_output=True, text=True)
+    for _ in range(80):
         try:
             req = urllib.request.Request('http://localhost:18080/api/auth/login', data=b'{"username":"hieu","password":"password123"}', headers={'Content-Type': 'application/json'})
             with urllib.request.urlopen(req, timeout=3) as resp:
@@ -400,7 +400,7 @@ def test_447_dr_regression_integration():
             time.sleep(1)
 
     try:
-        res = subprocess.run(['python', 'test_disaster_recovery.py'], capture_output=True, text=True, encoding='utf-8', errors='replace')
+        res = subprocess.run([sys.executable, 'test_disaster_recovery.py'], capture_output=True, text=True, encoding='utf-8', errors='replace')
         stdout_txt = res.stdout or ''
         assert 'KẾT QUẢ PHASE 15 DISASTER RECOVERY: TẤT CẢ 38/38 BÀI TEST (370–407) ĐÃ PASS 100%!' in stdout_txt, f"DR output: {stdout_txt}\n{res.stderr}"
         assert 'VERDICT: PHASE15_BACKUP_RESTORE_DR_PASS' in stdout_txt

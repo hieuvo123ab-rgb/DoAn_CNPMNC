@@ -42,7 +42,7 @@ services:
       EDMS_KEYSTORE_PASSWORD: ${EDMS_KEYSTORE_PASSWORD}
       EDMS_KEYSTORE_LEGACY_PASSWORD: ${EDMS_KEYSTORE_LEGACY_PASSWORD:-}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
-      JAVA_TOOL_OPTIONS: "-Xms512m -Xmx2048m -XX:+UseG1GC"
+      JAVA_TOOL_OPTIONS: "-Xms512m -Xmx3584m -XX:+UseG1GC"
     volumes:
       - edms_storage_data:/app/storage/uploads
       - edms_keystore_data:/app/keys

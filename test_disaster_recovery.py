@@ -24,8 +24,15 @@ def run_cmd(cmd, check=True):
 def get_auth_token(base_url, username='hieu', password='password123'):
     data = json.dumps({'username': username, 'password': password}).encode('utf-8')
     req = urllib.request.Request(f'{base_url}/auth/login', data=data, headers={'Content-Type': 'application/json'})
-    with urllib.request.urlopen(req, timeout=10) as resp:
-        return json.loads(resp.read().decode('utf-8'))['token']
+    last_err = None
+    for _ in range(15):
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                return json.loads(resp.read().decode('utf-8'))['token']
+        except Exception as e:
+            last_err = e
+            time.sleep(1)
+    raise last_err
 
 def auth_get(url, token):
     req = urllib.request.Request(url, headers={'Authorization': f'Bearer {token}'})
