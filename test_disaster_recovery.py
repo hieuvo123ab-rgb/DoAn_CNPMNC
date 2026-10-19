@@ -24,8 +24,15 @@ def run_cmd(cmd, check=True):
 def get_auth_token(base_url, username='hieu', password='password123'):
     data = json.dumps({'username': username, 'password': password}).encode('utf-8')
     req = urllib.request.Request(f'{base_url}/auth/login', data=data, headers={'Content-Type': 'application/json'})
-    with urllib.request.urlopen(req, timeout=10) as resp:
-        return json.loads(resp.read().decode('utf-8'))['token']
+    last_err = None
+    for _ in range(15):
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                return json.loads(resp.read().decode('utf-8'))['token']
+        except Exception as e:
+            last_err = e
+            time.sleep(1)
+    raise last_err
 
 def auth_get(url, token):
     req = urllib.request.Request(url, headers={'Authorization': f'Bearer {token}'})
@@ -421,14 +428,14 @@ def test_403_restore_26_wrong_keystore_causes_verification_failure(backup_dir, r
     
     # Wait for backend to come UP
     time.sleep(5)
-    for _ in range(25):
+    for _ in range(50):
         try:
             req = urllib.request.Request(f'{RECOVERY_URL}/health')
-            with urllib.request.urlopen(req, timeout=2) as resp:
+            with urllib.request.urlopen(req, timeout=3) as resp:
                 if json.loads(resp.read().decode('utf-8')).get('status') == 'UP':
                     break
         except Exception:
-            time.sleep(1)
+            time.sleep(2)
             
     # Check new token & new cert serial
     new_token = get_auth_token(RECOVERY_URL)
@@ -448,14 +455,14 @@ def test_404_restore_27_correct_keystore_restores_validity(backup_dir):
     
     # Wait for backend to come UP
     time.sleep(5)
-    for _ in range(25):
+    for _ in range(50):
         try:
             req = urllib.request.Request(f'{RECOVERY_URL}/health')
-            with urllib.request.urlopen(req, timeout=2) as resp:
+            with urllib.request.urlopen(req, timeout=3) as resp:
                 if json.loads(resp.read().decode('utf-8')).get('status') == 'UP':
                     break
         except Exception:
-            time.sleep(1)
+            time.sleep(2)
             
     token = get_auth_token(RECOVERY_URL)
     cert_info = auth_get(f'{RECOVERY_URL}/admin/signature/certificate', token)

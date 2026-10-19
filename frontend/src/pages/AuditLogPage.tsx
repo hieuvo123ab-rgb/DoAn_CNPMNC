@@ -96,7 +96,7 @@ export const AuditLogPage: React.FC = () => {
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div>
-            <h2 className="audit-title">Nhật ký & Kiểm toán hệ thống (US-19 / US-20)</h2>
+            <h2 className="audit-title">Nhật ký & Kiểm toán hệ thống</h2>
           <p className="audit-subtitle text-secondary mb-0">
             Truy vết hoạt động, kiểm tra an ninh và lịch sử thao tác của các tài khoản trên hệ thống
           </p>

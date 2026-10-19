@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -76,7 +77,7 @@ public class LoginRateLimiterService {
     }
 
     private String buildKey(String username, String clientIp) {
-        String u = username != null ? username.trim().toLowerCase() : "anonymous";
+        String u = username != null ? username.trim().toLowerCase(Locale.ROOT) : "anonymous";
         String ip = clientIp != null ? clientIp.trim() : "unknown";
         return u + "|" + ip;
     }
@@ -150,6 +151,22 @@ public class LoginRateLimiterService {
      */
     public void clear(String username, String clientIp) {
         attemptCache.remove(buildKey(username, clientIp));
+    }
+
+    /**
+     * Admin-only reset helper: clears attempts for one user across all IPs.
+     * Does not modify tracking for any other username.
+     *
+     * @return number of entries cleared
+     */
+    public int clearUser(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("username must not be blank");
+        }
+        String prefix = username.trim().toLowerCase(Locale.ROOT) + "|";
+        int before = attemptCache.size();
+        attemptCache.keySet().removeIf(key -> key.startsWith(prefix));
+        return before - attemptCache.size();
     }
 
     /**

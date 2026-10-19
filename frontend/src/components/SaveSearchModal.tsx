@@ -58,7 +58,7 @@ export const SaveSearchModal: React.FC<SaveSearchModalProps> = ({
         <div className="modal-header">
           <div className="modal-title-group">
             <BookmarkPlus size={20} className="text-primary" />
-            <h3 id="save-search-modal-title">Lưu bộ lọc tìm kiếm (US-07)</h3>
+            <h3 id="save-search-modal-title">Lưu bộ lọc tìm kiếm</h3>
           </div>
           <button
             type="button"

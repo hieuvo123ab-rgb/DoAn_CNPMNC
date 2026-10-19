@@ -1635,3 +1635,290 @@ body {
   animation: spin 1s linear infinite;
 }
 
+/* =========================================================================
+   Phase 17: Mobile Card View & Responsive UI (< 480px)
+   ========================================================================= */
+
+.mobile-card-feed {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  /* Hide the wide desktop table */
+  .desktop-table-view {
+    display: none !important;
+  }
+
+  /* Show the touch-friendly mobile card feed */
+  .mobile-card-feed {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 14px;
+    width: 100%;
+  }
+
+  .mobile-doc-card {
+    background: var(--color-surface, #ffffff);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 12px;
+    padding: 14px 14px 10px 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .mobile-doc-card:active {
+    background-color: #f8fafc;
+  }
+
+  .mobile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .mobile-card-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .mobile-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-text-main, #0f172a);
+    word-break: break-word;
+    line-height: 1.35;
+  }
+
+  .mobile-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .mobile-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .badge-private {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  .badge-public {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .badge-type {
+    background-color: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+  }
+
+  .badge-version {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    font-weight: 700;
+  }
+
+  .mobile-card-description {
+    font-size: 0.8rem;
+    color: var(--color-text-muted, #64748b);
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  .mobile-card-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: #475569;
+  }
+
+  .mobile-detail-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    word-break: break-all;
+  }
+
+  .mobile-file-name {
+    color: var(--color-primary, #3b82f6);
+    font-weight: 600;
+  }
+
+  .mobile-file-size {
+    color: #94a3b8;
+    font-size: 0.75rem;
+  }
+
+  .mobile-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    color: #64748b;
+    font-size: 0.75rem;
+  }
+
+  .mobile-status-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .mobile-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .pill-active {
+    background-color: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+
+  .pill-archived {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+  }
+
+  .pill-hold {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+
+  .pill-review-approved {
+    background-color: #dcfce7;
+    color: #15803d;
+  }
+
+  .pill-review-pending {
+    background-color: #fef9c3;
+    color: #a16207;
+  }
+
+  .pill-review-rejected {
+    background-color: #fee2e2;
+    color: #b91c1c;
+  }
+
+  /* Grid of touch-friendly action buttons */
+  .mobile-card-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-top: 6px;
+    padding-top: 10px;
+    border-top: 1px dashed #e2e8f0;
+  }
+
+  .mobile-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    cursor: pointer;
+    touch-action: manipulation;
+    min-height: 38px;
+  }
+
+  .mobile-action-btn:active {
+    background: #f1f5f9;
+    transform: scale(0.98);
+  }
+
+  .mobile-action-btn.btn-view {
+    color: var(--color-primary, #3b82f6);
+    border-color: #bfdbfe;
+    background: #eff6ff;
+  }
+
+  .mobile-action-btn.btn-download {
+    color: #0284c7;
+    border-color: #bae6fd;
+  }
+
+  .mobile-action-btn.btn-edit {
+    color: #d97706;
+    border-color: #fde68a;
+  }
+
+  .mobile-action-btn.btn-share {
+    color: #4f46e5;
+    border-color: #c7d2fe;
+  }
+
+  .mobile-action-btn.btn-version {
+    color: #0284c7;
+    border-color: #bae6fd;
+  }
+
+  .mobile-action-btn.btn-lifecycle {
+    color: #0d9488;
+    border-color: #ccfbf1;
+  }
+
+  .mobile-action-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  /* Responsive Navbar & Container under 480px */
+  .navbar-inner {
+    padding: 8px 10px;
+    flex-wrap: wrap;
+  }
+
+  .page-container {
+    padding: 10px 8px;
+  }
+
+  .content-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .search-input-wrapper {
+    width: 100% !important;
+  }
+}
+
