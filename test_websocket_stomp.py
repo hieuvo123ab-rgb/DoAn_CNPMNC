@@ -5,6 +5,7 @@ import urllib.request
 import urllib.error
 import time
 import websocket
+import uuid
 
 BASE_URL = 'http://localhost:8080/api'
 WS_URL = 'ws://localhost:8080/ws-edms'
@@ -158,7 +159,7 @@ def test_5_admin_permitted_on_admin_topic():
         ws.close()
 
 def test_6_realtime_push_notification_delivery():
-    print("[TEST WS-06] Real-time notification delivered over STOMP on event trigger...")
+    print("[TEST WS-06] Verify an actual STOMP MESSAGE containing a persisted notification...")
     token = get_token('hieu')
     ws = websocket.create_connection(WS_URL, timeout=10)
     try:
@@ -167,35 +168,44 @@ def test_6_realtime_push_notification_delivery():
             'Authorization': f'Bearer {token}'
         })
         resp = read_stomp_frame(ws)
-        assert resp['command'] == 'CONNECTED'
+        assert resp is not None and resp['command'] == 'CONNECTED', "STOMP CONNECT failed"
 
-        # Subscribe to user queue and admin topic
         send_stomp_frame(ws, 'SUBSCRIBE', {
             'id': 'sub-user-push',
-            'destination': '/user/queue/notifications'
+            'destination': '/user/queue/notifications',
+            'ack': 'auto'
         })
-        send_stomp_frame(ws, 'SUBSCRIBE', {
-            'id': 'sub-admin-push',
-            'destination': '/topic/admin/notifications'
-        })
-        time.sleep(0.5)
+        # Trigger a real, uniquely keyed notification for the authenticated user.
+        # This test must run against an isolated disposable test database.
+        event_key = f'WS-INTEGRATION-{uuid.uuid4().hex}'
+        req = urllib.request.Request(
+            f'{BASE_URL}/notifications/test-dedup?eventKey={event_key}',
+            data=b'',
+            method='POST',
+            headers={'Authorization': f'Bearer {token}'}
+        )
+        with urllib.request.urlopen(req, timeout=10) as response:
+            assert response.status == 200
+            created = json.loads(response.read().decode('utf-8'))
+        assert created and created.get('id'), "Notification was not persisted"
 
-        # Trigger a test notification via API: Document 1958 v1 integrity check or simulated event
-        # Let's call /documents/1958/versions/1/integrity
-        req = urllib.request.Request(f'{BASE_URL}/documents/1958/versions/1/integrity',
-                                     headers={'Authorization': f'Bearer {token}'})
-        with urllib.request.urlopen(req, timeout=5) as r:
-            pass
-
-        print("  -> Triggered backend operation. Listening for STOMP MESSAGE frames...")
-        # Now create an explicit tamper alert or review submit to verify push
-        # Let's submit a review on a document created by hieu
-        req_rev = urllib.request.Request(f'{BASE_URL}/documents/105/versions',
-                                         headers={'Authorization': f'Bearer {token}'})
-        with urllib.request.urlopen(req_rev, timeout=5) as r:
-            versions = json.loads(r.read().decode())
-        
-        print(f"  -> PASS: STOMP listener active; subscription endpoints operational.")
+        deadline = time.monotonic() + 10
+        received = None
+        while time.monotonic() < deadline:
+            frame = read_stomp_frame(ws, timeout=min(2, max(0.1, deadline - time.monotonic())))
+            if not frame:
+                continue
+            if frame['command'] == 'ERROR':
+                raise AssertionError(f"STOMP broker error: {frame['body']}")
+            if frame['command'] != 'MESSAGE':
+                continue
+            payload = json.loads(frame['body'])
+            if payload.get('id') == created['id']:
+                received = payload
+                break
+        assert received is not None, f"No STOMP MESSAGE received for notification {created['id']}"
+        assert received['id'] == created['id']
+        print(f"  -> PASS: Received persisted notification #{created['id']} as a STOMP MESSAGE.")
     finally:
         ws.close()
 
@@ -223,6 +233,12 @@ def test_8_sse_honesty_check():
     print(f"  -> PASS: Documented real-time transport is strictly WebSocket STOMP with SockJS fallback (HTTP status: {status}).")
 
 def run_all_websocket_tests():
+    import os
+    if os.environ.get('EDMS_ISOLATED_INTEGRATION_TEST') != '1':
+        raise SystemExit(
+            'BLOCKED: WebSocket tests require a disposable isolated EDMS instance. '
+            'Set EDMS_ISOLATED_INTEGRATION_TEST=1 only after verifying isolation.'
+        )
     print("=" * 70)
     print("EDMS WEBSOCKET STOMP / SOCKJS VERIFICATION SUITE")
     print("=" * 70)
