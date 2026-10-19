@@ -662,8 +662,8 @@ export const DocumentsPage: React.FC = () => {
           </div>
         )}
 
-        {/* Document Table Card */}
-        <div className="card-table">
+        {/* Document Table Card (Desktop / Tablet View) */}
+        <div className="card-table desktop-table-view">
           <div className="table-responsive">
             <table className="custom-table" id="documents-table">
               <thead>
@@ -1267,6 +1267,200 @@ export const DocumentsPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Mobile Card View (Viewport <= 480px) */}
+        <div className="mobile-card-feed" id="documents-mobile-card-feed">
+          {isLoading ? (
+            <div className="mobile-loading-card">
+              <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', padding: '1.5rem' }}>
+                Đang tải danh sách tài liệu...
+              </p>
+            </div>
+          ) : documents.length === 0 ? (
+            <div className="mobile-empty-card">
+              <div className="empty-state">
+                <div className="empty-state-icon">
+                  <Inbox size={36} color="var(--color-text-muted)" />
+                </div>
+                <p style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--color-text-main)' }}>
+                  {isFiltered
+                    ? 'Không tìm thấy tài liệu phù hợp'
+                    : 'Chưa có tài liệu nào trong danh mục'}
+                </p>
+              </div>
+            </div>
+          ) : (
+            documents.map((doc) => {
+              const canEdit =
+                user?.role === 'ROLE_ADMIN' ||
+                user?.username === doc.createdBy ||
+                doc.userPermission === 'EDIT';
+              const canShare =
+                user?.role === 'ROLE_ADMIN' || user?.username === doc.createdBy;
+
+              return (
+                <div key={`mobile-${doc.id}`} className="mobile-doc-card" data-mobile-id={doc.id}>
+                  <div className="mobile-card-header">
+                    <div className="mobile-card-title-group">
+                      <span className="mobile-card-title">{doc.title}</span>
+                      <div className="mobile-badge-row">
+                        {doc.accessMode === 'PRIVATE' ? (
+                          <span className="mobile-badge badge-private">
+                            <Lock size={10} /> Riêng tư
+                          </span>
+                        ) : (
+                          <span className="mobile-badge badge-public">
+                            <Globe size={10} /> Công khai
+                          </span>
+                        )}
+                        <span className="mobile-badge badge-type">
+                          {doc.documentType}
+                        </span>
+                        {doc.currentVersionNumber && (
+                          <span className="mobile-badge badge-version">
+                            v{doc.currentVersionNumber}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {doc.description && (
+                    <p className="mobile-card-description">{doc.description}</p>
+                  )}
+
+                  <div className="mobile-card-details">
+                    <div className="mobile-detail-row">
+                      <FileText size={13} color="var(--color-primary)" />
+                      <span className="mobile-file-name" title={doc.originalFileName}>
+                        {doc.originalFileName}
+                      </span>
+                      <span className="mobile-file-size">
+                        ({formatFileSize(doc.fileSize)})
+                      </span>
+                    </div>
+
+                    <div className="mobile-detail-meta">
+                      <span>Người tạo: <strong>{doc.createdBy}</strong></span>
+                      <span>•</span>
+                      <span>{formatDate(doc.createdAt)}</span>
+                    </div>
+
+                    <div className="mobile-status-badges">
+                      {doc.lifecycleStatus === 'ARCHIVED' ? (
+                        <span className="mobile-status-pill pill-archived">
+                          <Archive size={10} /> Đã lưu trữ
+                        </span>
+                      ) : (
+                        <span className="mobile-status-pill pill-active">
+                          <CheckCircle2 size={10} /> Đang hoạt động
+                        </span>
+                      )}
+
+                      {doc.legalHold && (
+                        <span className="mobile-status-pill pill-hold">
+                          <ShieldAlert size={10} /> Legal Hold
+                        </span>
+                      )}
+
+                      {doc.currentReviewStatus && (
+                        <span className={`mobile-status-pill pill-review-${doc.currentReviewStatus.toLowerCase()}`}>
+                          Duyệt: {doc.currentReviewStatus}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mobile-card-actions">
+                    <button
+                      type="button"
+                      className="mobile-action-btn btn-view"
+                      onClick={() => {
+                        setPreviewDoc(doc);
+                        setIsPreviewOpen(true);
+                      }}
+                      id={`mobile-preview-btn-${doc.id}`}
+                    >
+                      <Eye size={13} />
+                      <span>Xem</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="mobile-action-btn btn-download"
+                      disabled={downloadingId === doc.id}
+                      onClick={() => handleDownload(doc)}
+                      id={`mobile-download-btn-${doc.id}`}
+                    >
+                      {downloadingId === doc.id ? (
+                        <Loader2 size={13} className="animate-spin" />
+                      ) : (
+                        <Download size={13} />
+                      )}
+                      <span>Tải về</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="mobile-action-btn btn-edit"
+                      disabled={!canEdit || doc.lifecycleStatus === 'ARCHIVED'}
+                      onClick={() => {
+                        setEditingDoc(doc);
+                        setIsEditOpen(true);
+                      }}
+                      id={`mobile-edit-btn-${doc.id}`}
+                    >
+                      <Edit3 size={13} />
+                      <span>Sửa</span>
+                    </button>
+
+                    {canShare && (
+                      <button
+                        type="button"
+                        className="mobile-action-btn btn-share"
+                        disabled={doc.lifecycleStatus === 'ARCHIVED'}
+                        onClick={() => {
+                          setAccessDoc(doc);
+                          setIsAccessOpen(true);
+                        }}
+                        id={`mobile-share-btn-${doc.id}`}
+                      >
+                        <Shield size={13} />
+                        <span>Chia sẻ</span>
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      className="mobile-action-btn btn-version"
+                      onClick={() => {
+                        setVersionDoc(doc);
+                        setIsVersionOpen(true);
+                      }}
+                      id={`mobile-version-btn-${doc.id}`}
+                    >
+                      <History size={13} />
+                      <span>Phiên bản</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="mobile-action-btn btn-lifecycle"
+                      onClick={() => {
+                        setLifecycleDoc(doc);
+                        setIsLifecycleOpen(true);
+                      }}
+                      id={`mobile-lifecycle-btn-${doc.id}`}
+                    >
+                      <Archive size={13} />
+                      <span>Vòng đời</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </main>
 
