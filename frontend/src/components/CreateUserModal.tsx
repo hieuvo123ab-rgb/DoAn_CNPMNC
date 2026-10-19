@@ -61,7 +61,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
         <div className="modal-header">
           <div className="modal-title-group">
             <UserPlus size={20} className="text-primary" />
-            <h3 id="create-user-modal-title">Thêm người dùng mới (US-22)</h3>
+            <h3 id="create-user-modal-title">Thêm người dùng mới</h3>
           </div>
           <button
             type="button"

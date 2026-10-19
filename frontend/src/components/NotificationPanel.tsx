@@ -40,6 +40,26 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, on
     }
   }, [isOpen, filterUnread]);
 
+  // Real-time WebSocket push updates
+  useEffect(() => {
+    const handlePushNotification = (e: any) => {
+      if (e.detail) {
+        setNotifications(prev => [e.detail, ...prev.filter(n => n.id !== e.detail.id)]);
+      }
+    };
+    const handlePushRefresh = () => {
+      if (isOpen) {
+        fetchNotifications();
+      }
+    };
+    window.addEventListener('notification-received', handlePushNotification);
+    window.addEventListener('notifications-updated', handlePushRefresh);
+    return () => {
+      window.removeEventListener('notification-received', handlePushNotification);
+      window.removeEventListener('notifications-updated', handlePushRefresh);
+    };
+  }, [isOpen]);
+
   // Click outside to close
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

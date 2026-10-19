@@ -1,16 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Lock, User, AlertCircle, ArrowRight } from 'lucide-react';
+import {
+  Lock,
+  AlertCircle,
+  ArrowRight,
+  ShieldCheck,
+  Eye,
+  EyeOff,
+  FileCheck,
+  Cpu,
+  Radio,
+  ExternalLink,
+  Loader2
+} from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lockoutSeconds, setLockoutSeconds] = useState<number | null>(null);
+
+  // Rate-limit countdown timer
+  useEffect(() => {
+    if (lockoutSeconds === null || lockoutSeconds <= 0) return;
+    const timer = setInterval(() => {
+      setLockoutSeconds((prev) => {
+        if (prev === null || prev <= 1) {
+          setError(null);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [lockoutSeconds]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (lockoutSeconds !== null && lockoutSeconds > 0) return;
+
     if (!username.trim() || !password.trim()) {
       setError('Vui lòng nhập tên đăng nhập và mật khẩu.');
       return;
@@ -22,107 +53,192 @@ export const LoginPage: React.FC = () => {
       await login({ username: username.trim(), password });
     } catch (err: any) {
       console.error('Login error:', err);
-      const msg = err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.';
-      setError(msg);
+      const resData = err.response?.data;
+      const status = err.response?.status;
+
+      if (status === 429) {
+        const secs = resData?.retryAfterSeconds || resData?.lockoutSeconds || 60;
+        setLockoutSeconds(secs);
+        setError(`Tài khoản tạm thời bị giới hạn do quá nhiều lần thử sai. Vui lòng thử lại sau ${secs} giây.`);
+      } else {
+        const msg = resData?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin xác thực.';
+        setError(msg);
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const fillQuickAccount = (u: string, p: string) => {
-    setUsername(u);
-    setPassword(p);
-    setError(null);
-  };
-
   return (
-    <div className="login-wrap">
-      <div className="login-card">
-        <div className="login-header">
-          <div className="logo-badge">
-            <Lock size={26} />
+    <div className="ent-login-layout">
+      {/* Left Column: Enterprise Hero Showcase */}
+      <div className="ent-login-hero">
+        <div className="ent-login-hero__overlay" />
+        <div className="ent-login-hero__content">
+          <div className="ent-login-hero__brand">
+            <div className="ent-login-hero__logo">
+              <FileCheck size={28} className="text-white" />
+            </div>
+            <div>
+              <h1 className="ent-login-hero__title">EDMS Enterprise</h1>
+              <p className="ent-login-hero__subtitle">Electronic Document Management System</p>
+            </div>
           </div>
-          <h2>Đăng Nhập Hệ Thống EDMS</h2>
-          <p>Hệ thống Lưu trữ Điện tử & Quản lý Tài liệu</p>
+
+          <div className="ent-login-hero__features">
+            <div className="ent-login-feature-item">
+              <div className="ent-login-feature-item__icon">
+                <ShieldCheck size={20} />
+              </div>
+              <div>
+                <h4 className="ent-login-feature-item__title">Chữ Ký Số & Toàn Vẹn Dữ Liệu</h4>
+                <p className="ent-login-feature-item__desc">
+                  Niêm phong tài liệu bằng chuẩn RSA-2048, xác thực tức thời qua mã băm SHA-256.
+                </p>
+              </div>
+            </div>
+
+            <div className="ent-login-feature-item">
+              <div className="ent-login-feature-item__icon">
+                <Cpu size={20} />
+              </div>
+              <div>
+                <h4 className="ent-login-feature-item__title">Tìm Kiếm Ngữ Nghĩa AI & OCR</h4>
+                <p className="ent-login-feature-item__desc">
+                  Mô hình nhúng cục bộ Multilingual E5 kết hợp trích xuất Tesseract OCR tiếng Việt.
+                </p>
+              </div>
+            </div>
+
+            <div className="ent-login-feature-item">
+              <div className="ent-login-feature-item__icon">
+                <Radio size={20} />
+              </div>
+              <div>
+                <h4 className="ent-login-feature-item__title">Thời Gian Thực STOMP Broker</h4>
+                <p className="ent-login-feature-item__desc">
+                  Đồng bộ tác vụ, thông báo phê duyệt và vòng đời tài liệu với độ trễ dưới 150ms.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="ent-login-hero__footer">
+            <span className="ent-login-hero__status-indicator" />
+            <span>Hệ thống đạt chuẩn an toàn thông tin doanh nghiệp</span>
+          </div>
         </div>
+      </div>
 
-        {error && (
-          <div className="alert alert-danger" id="login-error-alert">
-            <AlertCircle size={18} />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="username-input">
-              Tên đăng nhập
-            </label>
-            <div style={{ position: 'relative' }}>
-              <input
-                id="username-input"
-                type="text"
-                className="form-input"
-                placeholder="Nhập username (VD: hieu hoặc tin)"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                autoComplete="username"
-                required
-              />
+      {/* Right Column: Clean Enterprise Login Form */}
+      <div className="ent-login-form-pane">
+        <div className="ent-login-form-container">
+          <div className="ent-login-card">
+            <div className="ent-login-card__header">
+              <div className="ent-login-card__badge">
+                <Lock size={22} />
+              </div>
+              <h2 className="ent-login-card__title">Đăng Nhập Hệ Thống</h2>
+              <p className="ent-login-card__desc">
+                Nhập thông tin xác thực để truy cập kho lưu trữ điện tử
+              </p>
             </div>
-          </div>
 
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-            <label className="form-label" htmlFor="password-input">
-              Mật khẩu
-            </label>
-            <div style={{ position: 'relative' }}>
-              <input
-                id="password-input"
-                type="password"
-                className="form-input"
-                placeholder="Nhập mật khẩu"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                required
-              />
+            {error && (
+              <div className="ent-alert ent-alert--danger mb-4" id="login-error-alert" role="alert">
+                <AlertCircle size={18} className="ent-alert__icon" />
+                <div className="ent-alert__content">
+                  <span>{error}</span>
+                  {lockoutSeconds !== null && lockoutSeconds > 0 && (
+                    <div className="ent-alert__countdown">
+                      Mở khóa sau: <strong>{lockoutSeconds}s</strong>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="ent-login-form">
+              <div className="ent-form-group">
+                <label className="ent-form-label" htmlFor="username-input">
+                  Tên đăng nhập
+                </label>
+                <div className="ent-input-wrapper">
+                  <input
+                    id="username-input"
+                    type="text"
+                    className="ent-input"
+                    placeholder="ví dụ: hieu hoặc tin"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    autoComplete="username"
+                    required
+                    disabled={isLoading || (lockoutSeconds !== null && lockoutSeconds > 0)}
+                  />
+                </div>
+              </div>
+
+              <div className="ent-form-group">
+                <div className="ent-form-label-row">
+                  <label className="ent-form-label" htmlFor="password-input">
+                    Mật khẩu
+                  </label>
+                </div>
+                <div className="ent-input-wrapper ent-input-wrapper--password">
+                  <input
+                    id="password-input"
+                    type={showPassword ? 'text' : 'password'}
+                    className="ent-input"
+                    placeholder="Nhập mật khẩu an toàn"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    required
+                    disabled={isLoading || (lockoutSeconds !== null && lockoutSeconds > 0)}
+                  />
+                  <button
+                    type="button"
+                    className="ent-input-addon-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="ent-btn ent-btn--primary ent-btn--lg ent-btn--block mt-4"
+                disabled={isLoading || (lockoutSeconds !== null && lockoutSeconds > 0)}
+                id="login-submit-btn"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin mr-2" />
+                    <span>Đang xác thực bảo mật...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Đăng nhập hệ thống</span>
+                    <ArrowRight size={18} className="ml-2" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="ent-login-card__footer">
+              <a
+                href="/verify"
+                className="ent-login-card__verify-link"
+                title="Giám định tính toàn vẹn của tệp tài liệu số mà không cần đăng nhập"
+              >
+                <ShieldCheck size={16} />
+                <span>Cổng giám định chứng thư công khai</span>
+                <ExternalLink size={13} />
+              </a>
             </div>
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn-primary"
-            style={{ width: '100%', padding: '0.75rem' }}
-            disabled={isLoading}
-            id="login-submit-btn"
-          >
-            <span>{isLoading ? 'Đang xác thực...' : 'Đăng nhập (US-01)'}</span>
-            <ArrowRight size={18} />
-          </button>
-        </form>
-
-        <div className="demo-accounts">
-          <p>Tài khoản thử nghiệm nhóm (Seed data):</p>
-          <div className="demo-buttons">
-            <button
-              type="button"
-              className="btn-demo"
-              onClick={() => fillQuickAccount('hieu', 'password123')}
-              id="demo-hieu-btn"
-            >
-              <User size={13} style={{ display: 'inline', marginRight: 4 }} />
-              <strong>hieu</strong> (Team Lead)
-            </button>
-            <button
-              type="button"
-              className="btn-demo"
-              onClick={() => fillQuickAccount('tin', 'password123')}
-              id="demo-tin-btn"
-            >
-              <User size={13} style={{ display: 'inline', marginRight: 4 }} />
-              <strong>tin</strong> (Developer)
-            </button>
           </div>
         </div>
       </div>

@@ -11,19 +11,71 @@ import {
   Archive,
   Bell,
   ListTodo,
-  Activity
+  Activity,
+  Menu,
+  X,
+  Sun,
+  Moon,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { notificationApi } from '../api/notificationApi';
 import { NotificationPanel } from './NotificationPanel';
+import { webSocketService } from '../services/websocket';
 
-export type AppView = 'dashboard' | 'documents' | 'users' | 'audit' | 'review-queue' | 'disposition-queue' | 'tasks' | 'system-status';
+export type AppView =
+  | 'dashboard'
+  | 'documents'
+  | 'users'
+  | 'audit'
+  | 'review-queue'
+  | 'disposition-queue'
+  | 'tasks'
+  | 'system-status';
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const [activeView, setActiveView] = useState<AppView>('documents');
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    return localStorage.getItem('edms_sidebar_collapsed') === 'true';
+  });
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    return localStorage.getItem('edms_theme') === 'dark';
+  });
   const notifRef = useRef<HTMLDivElement>(null);
+
+  // Sync theme
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('edms_theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('edms_theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  // Sync sidebar collapse state to <html> attribute for CSS grid layout
+  useEffect(() => {
+    if (isSidebarCollapsed) {
+      document.documentElement.setAttribute('data-sidebar-collapsed', 'true');
+      localStorage.setItem('edms_sidebar_collapsed', 'true');
+    } else {
+      document.documentElement.removeAttribute('data-sidebar-collapsed');
+      localStorage.setItem('edms_sidebar_collapsed', 'false');
+    }
+  }, [isSidebarCollapsed]);
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed((prev) => !prev);
+  };
+
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => !prev);
+  };
 
   useEffect(() => {
     const handleNav = (e: any) => {
@@ -37,6 +89,7 @@ export const Navbar: React.FC = () => {
 
   const navigateTo = (view: AppView) => {
     setActiveView(view);
+    setIsMobileDrawerOpen(false);
     window.dispatchEvent(new CustomEvent('app-navigate', { detail: view }));
   };
 
@@ -50,16 +103,22 @@ export const Navbar: React.FC = () => {
     }
   }, [user]);
 
+  // Connect WebSocket STOMP push channel
   useEffect(() => {
-    fetchUnread();
-    const interval = setInterval(fetchUnread, 30000);
+    if (user) {
+      webSocketService.connect(user.username, user.role);
+      fetchUnread();
+    } else {
+      webSocketService.disconnect();
+      setUnreadCount(0);
+    }
+
     const handleUpdate = () => fetchUnread();
     window.addEventListener('notifications-updated', handleUpdate);
     return () => {
-      clearInterval(interval);
       window.removeEventListener('notifications-updated', handleUpdate);
     };
-  }, [fetchUnread]);
+  }, [user, fetchUnread]);
 
   // Click outside to close notification panel
   useEffect(() => {
@@ -95,189 +154,321 @@ export const Navbar: React.FC = () => {
     }
   };
 
+  const getViewTitle = () => {
+    switch (activeView) {
+      case 'dashboard':
+        return { name: 'Bảng Điều Khiển Doanh Nghiệp', icon: <LayoutDashboard size={18} /> };
+      case 'users':
+        return { name: 'Quản Lý Người Dùng & Phân Quyền', icon: <Users size={18} /> };
+      case 'review-queue':
+        return { name: 'Hàng Đợi Phê Duyệt Tài Liệu', icon: <CheckSquare size={18} /> };
+      case 'disposition-queue':
+        return { name: 'Hàng Đợi Tiêu Hủy Tài Liệu', icon: <Archive size={18} /> };
+      case 'tasks':
+        return { name: 'Trung Tâm Công Việc Của Tôi', icon: <ListTodo size={18} /> };
+      case 'audit':
+        return { name: 'Nhật Ký & Kiểm Toán An Ninh', icon: <ShieldAlert size={18} /> };
+      case 'system-status':
+        return { name: 'Trạng Thái Hạ Tầng Hệ Thống', icon: <Activity size={18} /> };
+      case 'documents':
+      default:
+        return { name: 'Quản Trị Lưu Trữ Tài Liệu Điện Tử', icon: <FileText size={18} /> };
+    }
+  };
+
+  const currentView = getViewTitle();
+
   return (
-    <header className="navbar">
-      <div className="navbar-inner">
-        <div className="navbar-brand">
-          <div className="navbar-logo-icon">
-            <FileText size={22} />
+    <>
+      {/* Mobile Backdrop */}
+      {isMobileDrawerOpen && (
+        <div
+          className="ent-mobile-backdrop"
+          onClick={() => setIsMobileDrawerOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Modern Collapsible Enterprise Sidebar */}
+      <aside
+        className={`ent-sidebar ${isSidebarCollapsed ? 'ent-sidebar--collapsed' : ''} ${
+          isMobileDrawerOpen ? 'ent-sidebar--mobile-open' : ''
+        }`}
+        id="ent-main-sidebar"
+        aria-label="Thanh điều hướng chính"
+      >
+        {/* Brand Header */}
+        <div className="ent-sidebar__brand-row">
+          <div className="ent-sidebar__brand" onClick={() => navigateTo('documents')}>
+            <div className="ent-sidebar__logo-badge">
+              <FileText size={20} className="text-white" />
+            </div>
+            {!isSidebarCollapsed && (
+              <div className="ent-sidebar__brand-info">
+                <span className="ent-sidebar__brand-title">EDMS Enterprise</span>
+                <span className="ent-sidebar__brand-subtitle">Quản Trị Lưu Trữ SaaS</span>
+              </div>
+            )}
           </div>
-          <div className="navbar-title-wrap">
-            <h1>EDMS Hệ Thống Lưu Trữ Điện Tử</h1>
-            <p>Phase 14 — Notifications & User Task Center</p>
-          </div>
+
+          <button
+            type="button"
+            className="ent-sidebar__mobile-close"
+            onClick={() => setIsMobileDrawerOpen(false)}
+            aria-label="Đóng thanh điều hướng"
+          >
+            <X size={20} />
+          </button>
         </div>
 
-        {user && (
-          <nav className="navbar-nav-links">
+        {/* Sidebar Nav Items */}
+        <div className="ent-sidebar__nav-scroll">
+          {/* Section: Kho Lưu Trữ */}
+          <div className="ent-sidebar__section">
+            {!isSidebarCollapsed && <div className="ent-sidebar__section-title">Kho Lưu Trữ</div>}
             <button
               type="button"
-              className={`nav-link-btn ${activeView === 'documents' ? 'active' : ''}`}
+              className={`ent-sidebar__link ${activeView === 'documents' ? 'active' : ''}`}
               onClick={() => navigateTo('documents')}
               id="nav-docs-btn"
+              title="Quản lý tài liệu điện tử"
             >
-              <FileText size={16} />
-              <span>Tài liệu</span>
+              <FileText size={18} className="ent-sidebar__link-icon" />
+              {!isSidebarCollapsed && <span className="ent-sidebar__link-text">Tài liệu</span>}
             </button>
+          </div>
 
+          {/* Section: Quy Trình & Tác Vụ */}
+          <div className="ent-sidebar__section">
+            {!isSidebarCollapsed && (
+              <div className="ent-sidebar__section-title">Quy Trình & Tác Vụ</div>
+            )}
             <button
               type="button"
-              className={`nav-link-btn ${activeView === 'tasks' ? 'active' : ''}`}
+              className={`ent-sidebar__link ${activeView === 'tasks' ? 'active' : ''}`}
               onClick={() => navigateTo('tasks')}
               id="nav-tasks-btn"
+              title="Trung tâm công việc cần xử lý"
             >
-              <ListTodo size={16} />
-              <span>Công việc</span>
+              <ListTodo size={18} className="ent-sidebar__link-icon" />
+              {!isSidebarCollapsed && <span className="ent-sidebar__link-text">Công việc</span>}
+              {unreadCount > 0 && (
+                <span className="ent-sidebar__badge">{unreadCount}</span>
+              )}
             </button>
 
             {user?.role === 'ROLE_ADMIN' && (
               <>
                 <button
                   type="button"
-                  className={`nav-link-btn ${activeView === 'users' ? 'active' : ''}`}
-                  onClick={() => navigateTo('users')}
-                  id="nav-users-btn"
-                >
-                  <Users size={16} />
-                  <span>Quản lý người dùng</span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`nav-link-btn ${activeView === 'review-queue' ? 'active' : ''}`}
+                  className={`ent-sidebar__link ${activeView === 'review-queue' ? 'active' : ''}`}
                   onClick={() => navigateTo('review-queue')}
                   id="nav-review-queue-btn"
+                  title="Hàng đợi xét duyệt tài liệu"
                 >
-                  <CheckSquare size={16} />
-                  <span>Hàng đợi duyệt</span>
+                  <CheckSquare size={18} className="ent-sidebar__link-icon" />
+                  {!isSidebarCollapsed && (
+                    <span className="ent-sidebar__link-text">Hàng đợi duyệt</span>
+                  )}
                 </button>
 
                 <button
                   type="button"
-                  className={`nav-link-btn ${activeView === 'disposition-queue' ? 'active' : ''}`}
+                  className={`ent-sidebar__link ${
+                    activeView === 'disposition-queue' ? 'active' : ''
+                  }`}
                   onClick={() => navigateTo('disposition-queue')}
                   id="nav-disposition-queue-btn"
+                  title="Hàng đợi tiêu hủy tài liệu hết hạn"
                 >
-                  <Archive size={16} />
-                  <span>Hàng đợi tiêu hủy</span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`nav-link-btn ${activeView === 'dashboard' ? 'active' : ''}`}
-                  onClick={() => navigateTo('dashboard')}
-                  id="nav-dashboard-btn"
-                >
-                  <LayoutDashboard size={16} />
-                  <span>Bảng điều khiển</span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`nav-link-btn ${activeView === 'audit' ? 'active' : ''}`}
-                  onClick={() => navigateTo('audit')}
-                  id="nav-audit-btn"
-                >
-                  <ShieldAlert size={16} />
-                  <span>Nhật ký & Kiểm toán</span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`nav-link-btn ${activeView === 'system-status' ? 'active' : ''}`}
-                  onClick={() => navigateTo('system-status')}
-                  id="nav-system-status-btn"
-                  data-route="/system-status"
-                >
-                  <Activity size={16} />
-                  <span>Trạng thái hệ thống</span>
+                  <Archive size={18} className="ent-sidebar__link-icon" />
+                  {!isSidebarCollapsed && (
+                    <span className="ent-sidebar__link-text">Hàng đợi tiêu hủy</span>
+                  )}
                 </button>
               </>
             )}
-          </nav>
-        )}
+          </div>
 
-        {user && (
-          <div className="navbar-user-section" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {/* Notification Bell */}
-            <div ref={notifRef} style={{ position: 'relative' }}>
+          {/* Section: Quản Trị Hệ Thống (ROLE_ADMIN) */}
+          {user?.role === 'ROLE_ADMIN' && (
+            <div className="ent-sidebar__section">
+              {!isSidebarCollapsed && (
+                <div className="ent-sidebar__section-title">Quản Trị Hệ Thống</div>
+              )}
               <button
                 type="button"
-                className="btn-icon"
-                onClick={() => setShowNotifications(prev => !prev)}
-                title="Thông báo"
-                id="nav-notification-bell-btn"
-                style={{
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  background: showNotifications ? 'var(--color-bg-hover, #e2e8f0)' : 'transparent',
-                  border: '1px solid #cbd5e1',
-                  cursor: 'pointer',
-                  color: '#334155'
-                }}
+                className={`ent-sidebar__link ${activeView === 'dashboard' ? 'active' : ''}`}
+                onClick={() => navigateTo('dashboard')}
+                id="nav-dashboard-btn"
+                title="Bảng điều khiển số liệu"
               >
-                <Bell size={18} />
+                <LayoutDashboard size={18} className="ent-sidebar__link-icon" />
+                {!isSidebarCollapsed && (
+                  <span className="ent-sidebar__link-text">Bảng điều khiển</span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className={`ent-sidebar__link ${activeView === 'users' ? 'active' : ''}`}
+                onClick={() => navigateTo('users')}
+                id="nav-users-btn"
+                title="Quản lý tài khoản và phân quyền"
+              >
+                <Users size={18} className="ent-sidebar__link-icon" />
+                {!isSidebarCollapsed && (
+                  <span className="ent-sidebar__link-text">Người dùng & Quyền</span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className={`ent-sidebar__link ${activeView === 'audit' ? 'active' : ''}`}
+                onClick={() => navigateTo('audit')}
+                id="nav-audit-btn"
+                title="Nhật ký kiểm toán an ninh hệ thống"
+              >
+                <ShieldAlert size={18} className="ent-sidebar__link-icon" />
+                {!isSidebarCollapsed && (
+                  <span className="ent-sidebar__link-text">Nhật ký kiểm toán</span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className={`ent-sidebar__link ${activeView === 'system-status' ? 'active' : ''}`}
+                onClick={() => navigateTo('system-status')}
+                id="nav-system-status-btn"
+                data-route="/system-status"
+                title="Trạng thái hạ tầng và dịch vụ"
+              >
+                <Activity size={18} className="ent-sidebar__link-icon" />
+                {!isSidebarCollapsed && (
+                  <span className="ent-sidebar__link-text">Trạng thái hệ thống</span>
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Sidebar Footer: User Card & Collapse Action */}
+        <div className="ent-sidebar__footer">
+          <div className="ent-sidebar__user-card">
+            <div className="ent-sidebar__avatar">
+              <UserIcon size={16} />
+            </div>
+            {!isSidebarCollapsed && (
+              <div className="ent-sidebar__user-meta">
+                <span className="ent-sidebar__username">{user?.username}</span>
+                <span className="ent-sidebar__user-badge">
+                  {user?.role === 'ROLE_ADMIN' ? 'Quản trị viên' : 'Nhân viên'}
+                </span>
+              </div>
+            )}
+            <button
+              type="button"
+              className="ent-sidebar__logout-action"
+              onClick={logout}
+              title="Đăng xuất khỏi hệ thống"
+              aria-label="Đăng xuất"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+
+          <button
+            type="button"
+            className="ent-sidebar__collapse-toggle"
+            onClick={toggleSidebar}
+            aria-label={isSidebarCollapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng'}
+            title={isSidebarCollapsed ? 'Mở rộng' : 'Thu gọn'}
+            id="sidebar-collapse-btn"
+          >
+            {isSidebarCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
+          </button>
+        </div>
+      </aside>
+
+      {/* Modern Sticky Enterprise Topbar */}
+      <header className="ent-topbar">
+        <div className="ent-topbar__inner">
+          <div className="ent-topbar__left">
+            <button
+              type="button"
+              className="ent-topbar__hamburger"
+              onClick={() => setIsMobileDrawerOpen(true)}
+              aria-label="Mở menu điều hướng"
+              id="mobile-menu-toggle-btn"
+            >
+              <Menu size={20} />
+            </button>
+
+            <div className="ent-topbar__breadcrumb">
+              <span className="ent-topbar__breadcrumb-icon">{currentView.icon}</span>
+              <h2 className="ent-topbar__breadcrumb-title">{currentView.name}</h2>
+            </div>
+          </div>
+
+          <div className="ent-topbar__right">
+            {/* Live STOMP Indicator */}
+            <div className="ent-topbar__live-indicator" title="Kết nối thời gian thực WebSocket STOMP sẵn sàng">
+              <span className="ent-topbar__live-dot" />
+              <span className="ent-topbar__live-label">Thời gian thực</span>
+            </div>
+
+            {/* Dark/Light Theme Switcher */}
+            <button
+              type="button"
+              className="ent-topbar__action-btn"
+              onClick={toggleTheme}
+              aria-label={isDarkMode ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối'}
+              title={isDarkMode ? 'Giao diện Sáng' : 'Giao diện Tối'}
+              id="theme-toggle-btn"
+            >
+              {isDarkMode ? <Sun size={17} className="text-warning" /> : <Moon size={17} />}
+            </button>
+
+            {/* Notification Bell Dropdown */}
+            <div className="ent-topbar__notif-box" ref={notifRef}>
+              <button
+                type="button"
+                className="ent-topbar__action-btn ent-topbar__bell-btn"
+                onClick={() => setShowNotifications((prev) => !prev)}
+                aria-label={`Thông báo (${unreadCount} chưa đọc)`}
+                title="Thông báo hệ thống"
+                id="nav-notifications-btn"
+              >
+                <Bell size={17} />
                 {unreadCount > 0 && (
-                  <span
-                    id="notification-unread-badge"
-                    style={{
-                      position: 'absolute',
-                      top: '-4px',
-                      right: '-4px',
-                      backgroundColor: '#ef4444',
-                      color: '#ffffff',
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
-                      minWidth: '18px',
-                      height: '18px',
-                      borderRadius: '9px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '0 4px',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
-                    }}
-                  >
-                    {unreadCount >= 100 ? '99+' : unreadCount}
+                  <span className="ent-topbar__bell-count">
+                    {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
               </button>
 
               {showNotifications && (
-                <NotificationPanel
-                  isOpen={showNotifications}
-                  onClose={() => setShowNotifications(false)}
-                  onCountChange={setUnreadCount}
-                  onNavigate={handleActionNavigation}
-                />
+                <div className="ent-topbar__notif-popover">
+                  <NotificationPanel
+                    isOpen={showNotifications}
+                    onClose={() => setShowNotifications(false)}
+                    onNavigate={handleActionNavigation}
+                    onCountChange={setUnreadCount}
+                  />
+                </div>
               )}
             </div>
 
-            <div className="user-badge">
-              <UserIcon size={16} className="text-muted" />
-              <span><strong>{user.fullName || user.username}</strong> ({user.username})</span>
-              <span className={`role-pill ${user.role === 'ROLE_ADMIN' ? 'role-admin' : 'role-staff'}`}>
-                {user.role}
-              </span>
+            {/* Profile Avatar Capsule */}
+            <div className="ent-topbar__profile-capsule">
+              <div className="ent-topbar__profile-avatar">
+                <UserIcon size={14} />
+              </div>
+              <span className="ent-topbar__profile-username">{user?.username}</span>
             </div>
-
-            <button
-              onClick={logout}
-              className="btn btn-outline-danger btn-sm"
-              title="Đăng xuất khỏi hệ thống"
-              id="logout-btn"
-            >
-              <LogOut size={16} />
-              <span>Đăng xuất</span>
-            </button>
           </div>
-        )}
-      </div>
-    </header>
+        </div>
+      </header>
+    </>
   );
 };

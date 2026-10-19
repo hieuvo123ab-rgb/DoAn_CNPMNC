@@ -78,7 +78,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h3>Tải Lên Tài Liệu Mới (US-10 / US-12)</h3>
+          <h3>Tải Lên Tài Liệu Mới</h3>
           <button className="modal-close" onClick={onClose} type="button">
             <X size={20} />
           </button>
@@ -101,7 +101,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
                 id="doc-title"
                 type="text"
                 className="form-input"
-                placeholder="VD: Kế hoạch triển khai Sprint 1"
+                placeholder="Nhập tên tài liệu..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
@@ -199,7 +199,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
                     <Upload size={32} color="var(--color-primary)" />
                     <p style={{ fontWeight: 500 }}>Nhấp để chọn tệp tài liệu từ máy tính</p>
                     <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-                      Hỗ trợ PDF, DOCX, XLSX, TXT, Hình ảnh... (Tối đa 50MB)
+                      Hỗ trợ PDF, DOCX, XLSX, TXT, Hình ảnh... (Tối đa 20MB)
                     </span>
                   </div>
                 )}

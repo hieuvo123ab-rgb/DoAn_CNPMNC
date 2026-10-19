@@ -186,7 +186,7 @@ export const VerifyPage: React.FC = () => {
             border: '1px solid rgba(59, 130, 246, 0.25)',
             marginBottom: '0.75rem'
           }}>
-            PHASE 14 ENTERPRISE INTEGRITY OVERLAY
+            ENTERPRISE INTEGRITY VERIFICATION
           </span>
           <h2 style={{ fontSize: '1.85rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#f8fafc' }}>
             Tra cứu & Giám định Chứng thực Toàn vẹn
