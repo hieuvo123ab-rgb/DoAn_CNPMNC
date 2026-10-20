@@ -154,46 +154,30 @@ export const ReviewQueuePage: React.FC = () => {
     switch (status) {
       case 'APPROVED':
         return (
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
-            padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600,
-            backgroundColor: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0'
-          }}>
+          <span className="ent-badge ent-badge--success">
             <CheckCircle size={12} /> Đã duyệt
           </span>
         );
       case 'REJECTED':
         return (
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
-            padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600,
-            backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca'
-          }}>
+          <span className="ent-badge ent-badge--danger">
             <AlertTriangle size={12} /> Bị từ chối
           </span>
         );
       case 'PENDING':
         return (
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
-            padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600,
-            backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a'
-          }}>
+          <span className="ent-badge ent-badge--warning">
             <Clock size={12} /> Chờ duyệt
           </span>
         );
       case 'SUPERSEDED':
         return (
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
-            padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600,
-            backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0'
-          }}>
+          <span className="ent-badge ent-badge--neutral">
             Đã thay thế
           </span>
         );
       default:
-        return <span>{status}</span>;
+        return <span className="ent-badge ent-badge--neutral">{status}</span>;
     }
   };
 

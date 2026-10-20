@@ -148,20 +148,20 @@ export const AuditLogPage: React.FC = () => {
                   onChange={(e) => { setFilterAction(e.target.value); setPage(0); }}
                 >
                   <option value="">Tất cả loại hành động</option>
-                  <option value="LOGIN_SUCCESS">LOGIN_SUCCESS (Đăng nhập thành công)</option>
-                  <option value="LOGIN_FAILED">LOGIN_FAILED (Đăng nhập thất bại)</option>
-                  <option value="LOGOUT">LOGOUT (Đăng xuất)</option>
-                  <option value="DOCUMENT_UPLOAD">DOCUMENT_UPLOAD (Tải lên tài liệu)</option>
-                  <option value="DOCUMENT_PREVIEW">DOCUMENT_PREVIEW (Xem trước tài liệu)</option>
-                  <option value="DOCUMENT_DOWNLOAD">DOCUMENT_DOWNLOAD (Tải xuống tài liệu)</option>
-                  <option value="DOCUMENT_UPDATE">DOCUMENT_UPDATE (Cập nhật tài liệu)</option>
-                  <option value="SAVED_SEARCH_CREATE">SAVED_SEARCH_CREATE (Tạo bộ lọc)</option>
-                  <option value="SAVED_SEARCH_DELETE">SAVED_SEARCH_DELETE (Xóa bộ lọc)</option>
-                  <option value="USER_CREATE">USER_CREATE (Tạo tài khoản)</option>
-                  <option value="USER_UPDATE">USER_UPDATE (Sửa tài khoản)</option>
-                  <option value="USER_ROLE_CHANGE">USER_ROLE_CHANGE (Đổi vai trò)</option>
-                  <option value="USER_ENABLE">USER_ENABLE (Kích hoạt tài khoản)</option>
-                  <option value="USER_DISABLE">USER_DISABLE (Vô hiệu hóa tài khoản)</option>
+                  <option value="LOGIN_SUCCESS">Đăng nhập thành công</option>
+                  <option value="LOGIN_FAILED">Đăng nhập thất bại</option>
+                  <option value="LOGOUT">Đăng xuất</option>
+                  <option value="DOCUMENT_UPLOAD">Tải lên tài liệu</option>
+                  <option value="DOCUMENT_PREVIEW">Xem trước tài liệu</option>
+                  <option value="DOCUMENT_DOWNLOAD">Tải xuống tài liệu</option>
+                  <option value="DOCUMENT_UPDATE">Cập nhật tài liệu</option>
+                  <option value="SAVED_SEARCH_CREATE">Tạo bộ lọc</option>
+                  <option value="SAVED_SEARCH_DELETE">Xóa bộ lọc</option>
+                  <option value="USER_CREATE">Tạo tài khoản</option>
+                  <option value="USER_UPDATE">Cập nhật người dùng</option>
+                  <option value="USER_ROLE_CHANGE">Đổi quyền vai trò</option>
+                  <option value="USER_ENABLE">Kích hoạt tài khoản</option>
+                  <option value="USER_DISABLE">Khóa tài khoản</option>
                 </select>
               </div>
             </div>

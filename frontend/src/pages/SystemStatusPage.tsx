@@ -84,34 +84,14 @@ export const SystemStatusPage: React.FC = () => {
       case 'READY':
       case 'AVAILABLE':
         return (
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            padding: '0.2rem 0.65rem',
-            borderRadius: '9999px',
-            backgroundColor: '#ecfdf5',
-            color: '#059669',
-            fontWeight: 600,
-            fontSize: '0.8rem'
-          }}>
+          <span className="ent-badge ent-badge--success">
             <CheckCircle2 size={13} /> {st}
           </span>
         );
       case 'DEGRADED':
       case 'EXPIRING_SOON':
         return (
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            padding: '0.2rem 0.65rem',
-            borderRadius: '9999px',
-            backgroundColor: '#fffbeb',
-            color: '#d97706',
-            fontWeight: 600,
-            fontSize: '0.8rem'
-          }}>
+          <span className="ent-badge ent-badge--warning">
             <AlertTriangle size={13} /> {st}
           </span>
         );
@@ -121,17 +101,7 @@ export const SystemStatusPage: React.FC = () => {
       case 'EXPIRED':
       default:
         return (
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            padding: '0.2rem 0.65rem',
-            borderRadius: '9999px',
-            backgroundColor: '#fef2f2',
-            color: '#dc2626',
-            fontWeight: 600,
-            fontSize: '0.8rem'
-          }}>
+          <span className="ent-badge ent-badge--danger">
             <XCircle size={13} /> {st}
           </span>
         );
