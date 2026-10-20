@@ -21,7 +21,18 @@ public class JwtTokenProvider {
 
     public JwtTokenProvider(
             @Value("${edms.jwt.secret}") String secret,
-            @Value("${edms.jwt.expiration-ms:86400000}") long expirationMs) {
+            @Value("${edms.jwt.expiration-ms:86400000}") long expirationMs,
+            org.springframework.core.env.Environment environment) {
+        if (secret == null || secret.trim().length() < 32) {
+            throw new IllegalArgumentException("EDMS JWT secret key must be at least 256 bits (32 characters) for HMAC-SHA algorithms.");
+        }
+        if (environment != null) {
+            java.util.List<String> activeProfiles = java.util.Arrays.asList(environment.getActiveProfiles());
+            if ((activeProfiles.contains("prod") || activeProfiles.contains("production"))
+                    && "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970".equals(secret)) {
+                throw new IllegalStateException("Production environment MUST configure a secure, unique EDMS_JWT_SECRET instead of the default development placeholder.");
+            }
+        }
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationMs = expirationMs;
     }

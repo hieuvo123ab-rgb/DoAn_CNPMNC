@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar } from '../components/Navbar';
 import { CreateUserModal } from '../components/CreateUserModal';
 import { EditUserModal } from '../components/EditUserModal';
+import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { adminUserApi, UserItem, RolePermissionMatrix } from '../api/adminUserApi';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -35,6 +36,7 @@ export const UsersPage: React.FC = () => {
   const [editingUser, setEditingUser] = useState<UserItem | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [togglingId, setTogglingId] = useState<number | null>(null);
+  const [confirmUser, setConfirmUser] = useState<UserItem | null>(null);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -64,12 +66,12 @@ export const UsersPage: React.FC = () => {
     fetchMatrix();
   }, [fetchUsers, fetchMatrix]);
 
-  const handleToggleStatus = async (targetUser: UserItem) => {
-    const actionName = targetUser.enabled ? 'vô hiệu hóa (khóa)' : 'kích hoạt';
-    if (!window.confirm(`Bạn có chắc chắn muốn ${actionName} tài khoản '${targetUser.username}'?`)) {
-      return;
-    }
+  const handleToggleStatus = (targetUser: UserItem) => {
+    setConfirmUser(targetUser);
+  };
 
+  const executeToggleStatus = async (targetUser: UserItem) => {
+    const actionName = targetUser.enabled ? 'vô hiệu hóa' : 'kích hoạt';
     try {
       setTogglingId(targetUser.id);
       setError(null);
@@ -131,7 +133,7 @@ export const UsersPage: React.FC = () => {
       <main className="main-content">
         <div className="page-header">
           <div className="page-title">
-            <h2>Quản Lý Người Dùng & Phân Quyền (US-21 to US-26)</h2>
+            <h2>Quản Lý Người Dùng & Phân Quyền</h2>
             <p>Kiểm soát truy cập, phân định quyền hạn vai trò và bảo vệ an toàn tài nguyên hệ thống</p>
           </div>
           <div className="page-actions">
@@ -151,7 +153,7 @@ export const UsersPage: React.FC = () => {
               id="open-create-user-btn"
             >
               <UserPlus size={18} />
-              <span>Thêm người dùng (US-22)</span>
+              <span>Thêm người dùng</span>
             </button>
           </div>
         </div>
@@ -164,7 +166,7 @@ export const UsersPage: React.FC = () => {
             id="tab-users-list"
           >
             <Users size={16} style={{ display: 'inline', marginRight: 6 }} />
-            Danh sách tài khoản (US-21)
+            Danh sách tài khoản
           </button>
           <button
             className={`tab-btn ${activeTab === 'matrix' ? 'active' : ''}`}
@@ -172,7 +174,7 @@ export const UsersPage: React.FC = () => {
             id="tab-roles-matrix"
           >
             <ShieldCheck size={16} style={{ display: 'inline', marginRight: 6 }} />
-            Ma trận phân quyền (US-26)
+            Ma trận phân quyền
           </button>
         </div>
 
@@ -234,8 +236,8 @@ export const UsersPage: React.FC = () => {
                       <th>Tên đăng nhập</th>
                       <th>Họ và tên</th>
                       <th>Email</th>
-                      <th>Vai trò (US-25)</th>
-                      <th>Trạng thái (US-24)</th>
+                      <th>Vai trò</th>
+                      <th>Trạng thái</th>
                       <th>Ngày tạo</th>
                       <th style={{ textAlign: 'center', width: '160px' }}>Thao tác</th>
                     </tr>
@@ -299,7 +301,7 @@ export const UsersPage: React.FC = () => {
                                   setEditingUser(u);
                                   setIsEditOpen(true);
                                 }}
-                                title="Chỉnh sửa & Gán vai trò (US-23 / US-25)"
+                                title="Chỉnh sửa & Gán vai trò"
                                 id={`edit-user-btn-${u.id}`}
                               >
                                 <Edit3 size={15} />
@@ -312,8 +314,8 @@ export const UsersPage: React.FC = () => {
                                 disabled={togglingId === u.id}
                                 title={
                                   u.enabled
-                                    ? 'Khóa tài khoản (US-24)'
-                                    : 'Kích hoạt lại tài khoản (US-24)'
+                                    ? 'Khóa tài khoản'
+                                    : 'Kích hoạt lại tài khoản'
                                 }
                                 id={`toggle-user-btn-${u.id}`}
                               >
@@ -342,7 +344,7 @@ export const UsersPage: React.FC = () => {
               <div className="matrix-title-wrap">
                 <Sliders size={20} className="text-primary" />
                 <div>
-                  <h3>Ma trận phân quyền vai trò (US-26 Manage Roles & Permissions)</h3>
+                  <h3>Ma trận phân quyền vai trò</h3>
                   <p className="text-muted">
                     Bảng đối chiếu quyền hạn chi tiết giữa các vai trò trong hệ thống EDMS
                   </p>
@@ -425,6 +427,26 @@ export const UsersPage: React.FC = () => {
             setEditingUser(null);
           }}
           onUserUpdated={handleUserUpdated}
+        />
+
+        <ConfirmationModal
+          isOpen={!!confirmUser}
+          onClose={() => setConfirmUser(null)}
+          onConfirm={async () => {
+            if (!confirmUser) return;
+            const target = confirmUser;
+            setConfirmUser(null);
+            await executeToggleStatus(target);
+          }}
+          title={confirmUser?.enabled ? 'Khóa tài khoản người dùng' : 'Kích hoạt tài khoản'}
+          message={
+            confirmUser?.enabled
+              ? `Bạn có chắc chắn muốn vô hiệu hóa tài khoản '${confirmUser?.username}'? Người dùng này sẽ không thể đăng nhập vào hệ thống.`
+              : `Bạn có chắc chắn muốn kích hoạt lại tài khoản '${confirmUser?.username}'?`
+          }
+          confirmLabel={confirmUser?.enabled ? 'Khóa tài khoản' : 'Kích hoạt'}
+          variant={confirmUser?.enabled ? 'danger' : 'primary'}
+          isLoading={togglingId === confirmUser?.id}
         />
       </main>
     </div>

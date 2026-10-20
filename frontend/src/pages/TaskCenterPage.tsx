@@ -38,6 +38,13 @@ export const TaskCenterPage: React.FC = () => {
 
   useEffect(() => {
     fetchTasks();
+    const handleUpdate = () => {
+      fetchTasks();
+    };
+    window.addEventListener('notifications-updated', handleUpdate);
+    return () => {
+      window.removeEventListener('notifications-updated', handleUpdate);
+    };
   }, [fetchTasks]);
 
   const handleAction = (task: TaskDto) => {
@@ -71,25 +78,25 @@ export const TaskCenterPage: React.FC = () => {
     switch (taskType) {
       case 'REVIEW_PENDING':
         return (
-          <span className="badge" style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '4px 10px', borderRadius: '6px', fontWeight: 600, fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-            <Clock size={14} /> Chờ duyệt tài liệu
+          <span className="ent-badge ent-badge--info">
+            <Clock size={13} /> Chờ duyệt tài liệu
           </span>
         );
       case 'DISPOSITION_PENDING':
         return (
-          <span className="badge" style={{ backgroundColor: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa', padding: '4px 10px', borderRadius: '6px', fontWeight: 600, fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-            <Archive size={14} /> Chờ duyệt tiêu hủy
+          <span className="ent-badge ent-badge--warning">
+            <Archive size={13} /> Chờ duyệt tiêu hủy
           </span>
         );
       case 'REVISION_REQUIRED':
         return (
-          <span className="badge" style={{ backgroundColor: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', padding: '4px 10px', borderRadius: '6px', fontWeight: 600, fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-            <AlertCircle size={14} /> Cần hiệu chỉnh lại
+          <span className="ent-badge ent-badge--danger">
+            <AlertCircle size={13} /> Cần hiệu chỉnh lại
           </span>
         );
       default:
         return (
-          <span className="badge" style={{ backgroundColor: '#f3f4f6', color: '#374151', padding: '4px 10px', borderRadius: '6px', fontWeight: 600, fontSize: '0.82rem' }}>
+          <span className="ent-badge ent-badge--neutral">
             {taskType}
           </span>
         );

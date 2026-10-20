@@ -62,7 +62,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
         <div className="modal-header">
           <div className="modal-title-group">
             <Edit3 size={20} className="text-primary" />
-            <h3 id="edit-user-modal-title">Cập nhật tài khoản (US-23 & US-25)</h3>
+            <h3 id="edit-user-modal-title">Cập nhật tài khoản</h3>
           </div>
           <button
             type="button"
@@ -123,7 +123,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
 
             <div className="form-group">
               <label htmlFor="edit-role-select">
-                Gán vai trò (US-25 Assign Role) <span className="text-danger">*</span>
+                Gán vai trò <span className="text-danger">*</span>
               </label>
               <div className="select-with-icon">
                 <Shield size={16} className="text-muted" />
@@ -140,7 +140,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
             </div>
 
             <div className="form-group">
-              <label>Trạng thái hoạt động (US-24)</label>
+              <label>Trạng thái hoạt động</label>
               <label className="checkbox-toggle-row">
                 <input
                   type="checkbox"

@@ -156,7 +156,7 @@ export const DispositionQueuePage: React.FC = () => {
           <div>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
               <Archive size={24} color="#dc2626" />
-              <span>Hàng Đợi Tiêu Hủy Tài Liệu (Phase 9)</span>
+              <span>Hàng Đợi Tiêu Hủy Tài Liệu</span>
             </h2>
             <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
               Quy trình tiêu hủy có kiểm soát (Controlled Disposition Workflow). Tài liệu được xử lý logic sang trạng thái DISPOSED, toàn bộ file và lịch sử vẫn được bảo toàn.
@@ -306,36 +306,36 @@ export const DispositionQueuePage: React.FC = () => {
                         </td>
                         <td style={{ padding: '0.85rem 1rem', whiteSpace: 'nowrap' }}>
                           {item.legalHold ? (
-                            <span style={{ padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }}>
+                            <span className="ent-badge ent-badge--danger">
                               Legal Hold
                             </span>
                           ) : item.eligibleForDisposition ? (
-                            <span style={{ padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0' }}>
+                            <span className="ent-badge ent-badge--success">
                               Đủ điều kiện
                             </span>
                           ) : (
-                            <span style={{ padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}>
+                            <span className="ent-badge ent-badge--warning">
                               Chưa đủ ĐK
                             </span>
                           )}
                         </td>
                         <td style={{ padding: '0.85rem 1rem', whiteSpace: 'nowrap' }}>
                           <span
-                            style={{
-                              padding: '0.25rem 0.6rem',
-                              borderRadius: '4px',
-                              fontSize: '0.78rem',
-                              fontWeight: 600,
-                              backgroundColor:
-                                item.status === 'APPROVED' ? '#fee2e2' : item.status === 'REJECTED' ? '#f1f5f9' : item.status === 'CANCELLED' ? '#e2e8f0' : '#fef3c7',
-                              color:
-                                item.status === 'APPROVED' ? '#991b1b' : item.status === 'REJECTED' ? '#475569' : item.status === 'CANCELLED' ? '#64748b' : '#92400e',
-                              border: `1px solid ${
-                                item.status === 'APPROVED' ? '#fecaca' : item.status === 'REJECTED' ? '#cbd5e1' : item.status === 'CANCELLED' ? '#cbd5e1' : '#fde68a'
-                              }`,
-                            }}
+                            className={
+                              item.status === 'APPROVED'
+                                ? 'ent-badge ent-badge--danger'
+                                : item.status === 'REJECTED' || item.status === 'CANCELLED'
+                                ? 'ent-badge ent-badge--neutral'
+                                : 'ent-badge ent-badge--warning'
+                            }
                           >
-                            {item.status === 'PENDING' ? 'Chờ duyệt' : item.status === 'APPROVED' ? 'Đã tiêu hủy (DISPOSED)' : item.status === 'REJECTED' ? 'Đã từ chối' : 'Đã hủy'}
+                            {item.status === 'PENDING'
+                              ? 'Chờ duyệt'
+                              : item.status === 'APPROVED'
+                              ? 'Đã tiêu hủy'
+                              : item.status === 'REJECTED'
+                              ? 'Đã từ chối'
+                              : 'Đã hủy'}
                           </span>
                         </td>
                         <td style={{ padding: '0.85rem 1rem', textAlign: 'right', whiteSpace: 'nowrap' }}>
@@ -433,7 +433,7 @@ export const DispositionQueuePage: React.FC = () => {
                   lineHeight: '1.4',
                 }}
               >
-                <strong>Lưu ý quan trọng:</strong> Phê duyệt sẽ chuyển tài liệu sang trạng thái <strong>DISPOSED</strong>. File vật lý và lịch sử vẫn được bảo toàn trong Phase 9.
+                <strong>Lưu ý quan trọng:</strong> Phê duyệt sẽ chuyển tài liệu sang trạng thái <strong>DISPOSED</strong>. Tệp vật lý và lịch sử kiểm toán được lưu trữ theo quy định bảo lưu.
               </div>
 
               <div style={{ marginBottom: '1rem', fontSize: '0.88rem' }}>

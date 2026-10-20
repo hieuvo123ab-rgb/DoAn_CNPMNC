@@ -78,7 +78,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h3>Tải Lên Tài Liệu Mới (US-10 / US-12)</h3>
+          <h3>Tải Lên Tài Liệu Mới</h3>
           <button className="modal-close" onClick={onClose} type="button">
             <X size={20} />
           </button>
@@ -95,13 +95,13 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
 
             <div className="form-group">
               <label className="form-label" htmlFor="doc-title">
-                Tên tài liệu (Title) <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Tên tài liệu <span style={{ color: 'var(--color-danger)' }}>*</span>
               </label>
               <input
                 id="doc-title"
                 type="text"
                 className="form-input"
-                placeholder="VD: Kế hoạch triển khai Sprint 1"
+                placeholder="Nhập tên tài liệu..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
@@ -110,7 +110,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
 
             <div className="form-group">
               <label className="form-label" htmlFor="doc-type">
-                Loại tài liệu (Document Type) <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Loại tài liệu <span style={{ color: 'var(--color-danger)' }}>*</span>
               </label>
               <select
                 id="doc-type"
@@ -119,18 +119,18 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
                 onChange={(e) => setDocumentType(e.target.value)}
                 required
               >
-                <option value="Báo cáo">Báo cáo (Report)</option>
-                <option value="Hợp đồng">Hợp đồng (Contract)</option>
-                <option value="Hóa đơn">Hóa đơn (Invoice)</option>
-                <option value="Quyết định">Quyết định (Decision)</option>
-                <option value="Tài liệu kỹ thuật">Tài liệu kỹ thuật (Technical Spec)</option>
+                <option value="Báo cáo">Báo cáo</option>
+                <option value="Hợp đồng">Hợp đồng</option>
+                <option value="Hóa đơn">Hóa đơn</option>
+                <option value="Quyết định">Quyết định</option>
+                <option value="Tài liệu kỹ thuật">Tài liệu kỹ thuật</option>
                 <option value="Khác">Tài liệu chung / Khác</option>
               </select>
             </div>
 
             <div className="form-group">
               <label className="form-label">
-                Chế độ truy cập (Access Mode) <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Chế độ truy cập <span style={{ color: 'var(--color-danger)' }}>*</span>
               </label>
               <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.35rem' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.875rem' }}>
@@ -141,7 +141,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
                     checked={accessMode === 'INTERNAL'}
                     onChange={() => setAccessMode('INTERNAL')}
                   />
-                  <span>Nội bộ (INTERNAL - Mọi người dùng xem được)</span>
+                  <span>Nội bộ (Toàn bộ nhân sự được xem)</span>
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.875rem' }}>
                   <input
@@ -151,14 +151,14 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
                     checked={accessMode === 'PRIVATE'}
                     onChange={() => setAccessMode('PRIVATE')}
                   />
-                  <span>Riêng tư (PRIVATE - Chỉ người được chia sẻ)</span>
+                  <span>Riêng tư (Chỉ người được cấp quyền)</span>
                 </label>
               </div>
             </div>
 
             <div className="form-group">
               <label className="form-label" htmlFor="doc-desc">
-                Mô tả (Description)
+                Mô tả tóm tắt
               </label>
               <textarea
                 id="doc-desc"
@@ -172,7 +172,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
 
             <div className="form-group">
               <label className="form-label">
-                Tệp đính kèm (File) <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Tệp đính kèm <span style={{ color: 'var(--color-danger)' }}>*</span>
               </label>
               <input
                 type="file"
@@ -199,7 +199,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSuc
                     <Upload size={32} color="var(--color-primary)" />
                     <p style={{ fontWeight: 500 }}>Nhấp để chọn tệp tài liệu từ máy tính</p>
                     <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-                      Hỗ trợ PDF, DOCX, XLSX, TXT, Hình ảnh... (Tối đa 50MB)
+                      Hỗ trợ PDF, DOCX, XLSX, TXT, Hình ảnh... (Tối đa 20MB)
                     </span>
                   </div>
                 )}

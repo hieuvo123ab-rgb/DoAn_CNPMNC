@@ -221,7 +221,7 @@ export const DocumentLifecycleModal: React.FC<DocumentLifecycleModalProps> = ({
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <Archive size={20} color="var(--color-primary)" />
-            <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Quản Lý Vòng Đời & Tiêu Hủy (Phase 9)</h3>
+            <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Quản Lý Vòng Đời & Tiêu Hủy</h3>
           </div>
           <button type="button" className="btn-icon" onClick={onClose} id="close-lifecycle-modal-btn">
             <X size={18} />
@@ -413,7 +413,7 @@ export const DocumentLifecycleModal: React.FC<DocumentLifecycleModalProps> = ({
             >
               <h4 style={{ margin: '0 0 0.6rem 0', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <Send size={16} color="#dc2626" />
-                <span>Quy trình tiêu hủy có kiểm soát (Phase 9 Workflow)</span>
+                <span>Quy trình tiêu hủy có kiểm soát</span>
               </h4>
 
               {pendingDisposition ? (

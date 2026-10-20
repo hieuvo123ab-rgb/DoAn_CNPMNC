@@ -339,7 +339,7 @@ export const DocumentsPage: React.FC = () => {
               id="open-upload-modal-btn"
             >
               <Plus size={18} />
-              <span>Tải lên tài liệu (US-10)</span>
+              <span>Tải lên tài liệu</span>
             </button>
           </div>
         </div>
@@ -362,21 +362,21 @@ export const DocumentsPage: React.FC = () => {
           </div>
         )}
 
-        {/* Tab switcher: US-03 vs US-15 vs Phase 5 Shared */}
+        {/* Tab switcher: All vs Mine vs Shared */}
         <div className="tabs-nav">
           <button
             className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
             onClick={() => setActiveTab('all')}
             id="tab-all-docs"
           >
-            Tất cả tài liệu (US-03)
+            Tất cả tài liệu
           </button>
           <button
             className={`tab-btn ${activeTab === 'mine' ? 'active' : ''}`}
             onClick={() => setActiveTab('mine')}
             id="tab-mine-docs"
           >
-            Tài liệu của tôi (US-15)
+            Tài liệu của tôi
           </button>
           <button
             className={`tab-btn ${activeTab === 'shared' ? 'active' : ''}`}
@@ -420,48 +420,43 @@ export const DocumentsPage: React.FC = () => {
               onClick={() => setSearchQuery(searchInput)}
               id="submit-search-btn"
             >
-              Tìm kiếm (US-04)
+              Tìm kiếm
             </button>
 
-            {/* Phase 10: Search Scope Selector */}
+            {/* Search Scope Selector */}
             <select
               className="filter-select-field"
               value={searchScope}
               onChange={(e) => setSearchScope(e.target.value as any)}
               id="search-scope-select"
-              title="Phạm vi tìm kiếm (Phase 10)"
+              title="Phạm vi tìm kiếm"
             >
               <option value="METADATA">Tìm trong: Thông tin tài liệu</option>
               <option value="CONTENT">Tìm trong: Nội dung tài liệu</option>
               <option value="ALL">Tìm trong: Tất cả (Thông tin &amp; Nội dung)</option>
             </select>
 
-            {/* Phase 12: Search Mode Selector */}
+            {/* Search Mode Selector */}
             <select
               className="filter-select-field"
               value={searchMode}
               onChange={(e) => setSearchMode(e.target.value as any)}
               id="search-mode-select"
-              title="Kiểu tìm kiếm: Chính xác (từ khóa), Ngữ nghĩa (AI cục bộ), hoặc Kết hợp"
-              style={{
-                borderColor: searchMode === 'SEMANTIC' ? '#7c3aed' : searchMode === 'HYBRID' ? '#0891b2' : undefined,
-                color: searchMode === 'SEMANTIC' ? '#7c3aed' : searchMode === 'HYBRID' ? '#0891b2' : undefined,
-                fontWeight: searchMode !== 'LEXICAL' ? 600 : undefined,
-              }}
+              title="Phương thức tìm kiếm"
             >
-              <option value="LEXICAL">🔤 Chính xác (từ khóa)</option>
-              <option value="SEMANTIC">🧠 Ngữ nghĩa (AI cục bộ)</option>
-              <option value="HYBRID">⚡ Kết hợp (Lai)</option>
+              <option value="LEXICAL">Tìm chính xác (Từ khóa)</option>
+              <option value="SEMANTIC">Tìm theo ngữ nghĩa (AI)</option>
+              <option value="HYBRID">Tìm kết hợp (Lai ghép)</option>
             </select>
 
-            {/* US-05: Filter by Document Type */}
+            {/* Filter by Document Type */}
             <select
               className="filter-select-field"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               id="doc-type-filter"
             >
-              <option value="">-- Tất cả loại tài liệu (US-05) --</option>
+              <option value="">-- Tất cả loại tài liệu --</option>
               {DOCUMENT_TYPES.map((type) => (
                 <option key={type} value={type}>
                   {type}
@@ -495,31 +490,31 @@ export const DocumentsPage: React.FC = () => {
               </button>
             )}
 
-            {/* US-07: Save current search button */}
+            {/* Save current search button */}
             <button
               type="button"
               className="btn btn-outline-primary btn-sm"
               onClick={() => setIsSaveModalOpen(true)}
-              title="Lưu điều kiện tìm kiếm hiện tại (US-07)"
+              title="Lưu điều kiện tìm kiếm hiện tại"
               id="open-save-search-btn"
             >
               <BookmarkPlus size={14} />
-              <span>Lưu bộ lọc (US-07)</span>
+              <span>Lưu bộ lọc</span>
             </button>
           </div>
 
           <div className="filter-right-group">
-            {/* US-07: Saved Searches Dropdown */}
+            {/* Saved Searches Dropdown */}
             <div className="saved-searches-container">
               <button
                 type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={() => setIsSavedSearchesOpen(!isSavedSearchesOpen)}
                 id="saved-searches-dropdown-btn"
-                title="Xem và tái sử dụng các bộ lọc đã lưu (US-07)"
+                title="Xem và tái sử dụng các bộ lọc đã lưu"
               >
                 <Bookmark size={14} />
-                <span>Tìm kiếm đã lưu ({savedSearches.length}) (US-07)</span>
+                <span>Tìm kiếm đã lưu ({savedSearches.length})</span>
               </button>
 
               {isSavedSearchesOpen && (
@@ -590,7 +585,7 @@ export const DocumentsPage: React.FC = () => {
 
               {isColSelectOpen && (
                 <div className="column-dropdown-card">
-                  <div className="column-dropdown-title">Tùy chọn hiển thị (US-06)</div>
+                  <div className="column-dropdown-title">Tùy chọn hiển thị</div>
                   <label className="column-checkbox-row">
                     <input
                       type="checkbox"
@@ -662,8 +657,8 @@ export const DocumentsPage: React.FC = () => {
           </div>
         )}
 
-        {/* Document Table Card */}
-        <div className="card-table">
+        {/* Document Table Card (Desktop / Tablet View) */}
+        <div className="card-table desktop-table-view">
           <div className="table-responsive">
             <table className="custom-table" id="documents-table">
               <thead>
@@ -728,70 +723,34 @@ export const DocumentsPage: React.FC = () => {
                             <span>{doc.title}</span>
                             {doc.accessMode === 'PRIVATE' ? (
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#fee2e2',
-                                  color: '#991b1b',
-                                  fontWeight: 600,
-                                }}
+                                className="ent-badge ent-badge--danger"
                                 title="Chế độ riêng tư: Chỉ người được chia sẻ mới truy cập được"
                               >
                                 <Lock size={10} /> Riêng tư
                               </span>
                             ) : (
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#e0e7ff',
-                                  color: '#3730a3',
-                                  fontWeight: 600,
-                                }}
+                                className="ent-badge ent-badge--primary"
                                 title="Chế độ nội bộ: Mọi người dùng đã đăng nhập đều xem được"
                               >
                                 <Globe size={10} /> Nội bộ
                               </span>
                             )}
-                            {/* Phase 6: Current Version Badge */}
+                            {/* Current Version Badge */}
                             <span
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.2rem',
-                                fontSize: '0.68rem',
-                                padding: '0.12rem 0.45rem',
-                                borderRadius: '4px',
-                                backgroundColor: '#f0f9ff',
-                                color: '#0369a1',
-                                border: '1px solid #bae6fd',
-                                fontWeight: 700,
-                              }}
+                              className="ent-badge ent-badge--info"
                               title={`Phiên bản hiện tại: v${doc.currentVersionNumber || 1}`}
                             >
                               v{doc.currentVersionNumber || 1}
                             </span>
 
-                            {/* Phase 7: Current Version Review Status Badge */}
+                            {/* Current Version Review Status Badge */}
                             {(() => {
                               const rStatus = doc.currentReviewStatus || doc.reviewStatus || 'DRAFT';
                               if (rStatus === 'APPROVED') {
                                 return (
                                   <span
-                                    style={{
-                                      display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
-                                      fontSize: '0.68rem', padding: '0.12rem 0.45rem', borderRadius: '4px',
-                                      backgroundColor: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0',
-                                      fontWeight: 600,
-                                    }}
+                                    className="ent-badge ent-badge--success"
                                     title="Phiên bản này đã được phê duyệt"
                                   >
                                     <CheckCircle2 size={10} /> Đã duyệt
@@ -801,12 +760,7 @@ export const DocumentsPage: React.FC = () => {
                               if (rStatus === 'PENDING') {
                                 return (
                                   <span
-                                    style={{
-                                      display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
-                                      fontSize: '0.68rem', padding: '0.12rem 0.45rem', borderRadius: '4px',
-                                      backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a',
-                                      fontWeight: 600,
-                                    }}
+                                    className="ent-badge ent-badge--warning"
                                     title="Phiên bản này đang chờ quản trị viên xét duyệt"
                                   >
                                     <Clock size={10} /> Chờ duyệt
@@ -816,12 +770,7 @@ export const DocumentsPage: React.FC = () => {
                               if (rStatus === 'REJECTED') {
                                 return (
                                   <span
-                                    style={{
-                                      display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
-                                      fontSize: '0.68rem', padding: '0.12rem 0.45rem', borderRadius: '4px',
-                                      backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca',
-                                      fontWeight: 600,
-                                    }}
+                                    className="ent-badge ent-badge--danger"
                                     title="Phiên bản này đã bị từ chối. Vui lòng tải lên phiên bản mới để gửi duyệt lại."
                                   >
                                     <AlertTriangle size={10} /> Bị từ chối
@@ -830,12 +779,7 @@ export const DocumentsPage: React.FC = () => {
                               }
                               return (
                                 <span
-                                  style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
-                                    fontSize: '0.68rem', padding: '0.12rem 0.45rem', borderRadius: '4px',
-                                    backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0',
-                                    fontWeight: 600,
-                                  }}
+                                  className="ent-badge ent-badge--neutral"
                                   title="Bản nháp — Chưa gửi xét duyệt"
                                 >
                                   Nháp
@@ -843,119 +787,54 @@ export const DocumentsPage: React.FC = () => {
                               );
                             })()}
 
-                            {/* Phase 8: Lifecycle Status Badge */}
+                            {/* Lifecycle Status Badge */}
                             {doc.lifecycleStatus === 'ARCHIVED' ? (
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#f1f5f9',
-                                  color: '#475569',
-                                  border: '1px solid #cbd5e1',
-                                  fontWeight: 600,
-                                }}
+                                className="ent-badge ent-badge--neutral"
                                 title={`Đã lưu trữ (Archived) bởi ${doc.archivedBy || 'User'}`}
                               >
                                 <Archive size={10} /> Đã lưu trữ
                               </span>
                             ) : (
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#f0fdf4',
-                                  color: '#166534',
-                                  border: '1px solid #bbf7d0',
-                                  fontWeight: 600,
-                                }}
+                                className="ent-badge ent-badge--success"
                                 title="Đang hoạt động (Active)"
                               >
                                 <CheckCircle2 size={10} /> Đang hoạt động
                               </span>
                             )}
 
-                            {/* Phase 8: Legal Hold Badge */}
+                            {/* Legal Hold Badge */}
                             {doc.legalHold && (
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#fee2e2',
-                                  color: '#991b1b',
-                                  border: '1px solid #fecaca',
-                                  fontWeight: 700,
-                                }}
+                                className="ent-badge ent-badge--danger"
                                 title={`Legal Hold đang bật: ${doc.legalHoldReason || 'Bảo lưu pháp lý'}`}
                               >
                                 <ShieldAlert size={10} /> Legal Hold
                               </span>
                             )}
 
-                            {/* Phase 8: Retention Date */}
+                            {/* Retention Date */}
                             {doc.retentionUntil && (
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#f8fafc',
-                                  color: '#64748b',
-                                  border: '1px solid #e2e8f0',
-                                  fontWeight: 500,
-                                }}
+                                className="ent-badge ent-badge--neutral"
                                 title={`Thời hạn lưu trữ tối thiểu: ${doc.retentionUntil}`}
                               >
                                 <Calendar size={10} /> Giữ đến {doc.retentionUntil}
                               </span>
                             )}
 
-                            {/* Phase 8: Disposition Eligibility */}
+                            {/* Disposition Eligibility */}
                             {doc.eligibleForDisposition && (
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#fef3c7',
-                                  color: '#92400e',
-                                  border: '1px solid #fde68a',
-                                  fontWeight: 700,
-                                }}
+                                className="ent-badge ent-badge--warning"
                                 title="Tài liệu đã hết hạn lưu trữ và đủ điều kiện tiêu hủy / thanh lý"
                               >
                                 Đủ ĐK tiêu hủy
                               </span>
                             )}
                             {doc.userPermission && doc.userPermission !== 'OWNER' && doc.userPermission !== 'ADMIN' && (
-                              <span
-                                style={{
-                                  display: 'inline-flex',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.4rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#fef3c7',
-                                  color: '#92400e',
-                                  fontWeight: 600,
-                                }}
-                              >
+                              <span className="ent-badge ent-badge--warning">
                                 {doc.userPermission === 'EDIT' ? 'Quyền: Xem & Sửa' : 'Quyền: Chỉ xem'}
                               </span>
                             )}
@@ -964,36 +843,14 @@ export const DocumentsPage: React.FC = () => {
                           {doc.contentMatched && (
                             <div style={{ marginTop: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#ecfdf5',
-                                  color: '#065f46',
-                                  border: '1px solid #a7f3d0',
-                                  fontWeight: 600,
-                                }}
+                                className="ent-badge ent-badge--success"
                                 title="Khớp với nội dung bên trong tệp tin của phiên bản hiện tại"
                               >
                                 Khớp nội dung
                               </span>
                               {doc.contentSource === 'OCR' && (
                                 <span
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '0.2rem',
-                                    fontSize: '0.68rem',
-                                    padding: '0.12rem 0.45rem',
-                                    borderRadius: '4px',
-                                    backgroundColor: '#eff6ff',
-                                    color: '#1d4ed8',
-                                    border: '1px solid #bfdbfe',
-                                    fontWeight: 700,
-                                  }}
+                                  className="ent-badge ent-badge--info"
                                   title="Khớp từ nội dung nhận dạng quang học (OCR)"
                                 >
                                   [OCR]
@@ -1103,7 +960,7 @@ export const DocumentsPage: React.FC = () => {
                                 doc.lifecycleStatus === 'ARCHIVED'
                                   ? 'Tài liệu đã lưu trữ ở chế độ chỉ đọc, không thể chỉnh sửa'
                                   : canEdit
-                                  ? 'Chỉnh sửa thông tin & phân loại tài liệu (US-13, US-14)'
+                                  ? 'Chỉnh sửa thông tin & phân loại tài liệu'
                                   : 'Bạn không có quyền chỉnh sửa tài liệu này'
                               }
                               disabled={!canEdit || doc.lifecycleStatus === 'ARCHIVED'}
@@ -1128,7 +985,7 @@ export const DocumentsPage: React.FC = () => {
                                 title={
                                   doc.lifecycleStatus === 'ARCHIVED'
                                     ? 'Tài liệu đã lưu trữ không thể thay đổi phân quyền'
-                                    : 'Phân quyền & Chia sẻ tài liệu (Phase 5)'
+                                    : 'Phân quyền & Chia sẻ tài liệu'
                                 }
                                 disabled={doc.lifecycleStatus === 'ARCHIVED'}
                                 onClick={() => {
@@ -1149,10 +1006,10 @@ export const DocumentsPage: React.FC = () => {
                               </button>
                             )}
 
-                            {/* Phase 6: Document Versions */}
+                             {/* Document Versions */}
                             <button
                               className="action-btn version-btn"
-                              title="Lịch sử phiên bản tài liệu (Phase 6)"
+                              title="Lịch sử phiên bản tài liệu"
                               onClick={() => {
                                 setVersionDoc(doc);
                                 setIsVersionOpen(true);
@@ -1172,7 +1029,7 @@ export const DocumentsPage: React.FC = () => {
                                   doc.lifecycleStatus === 'ARCHIVED'
                                     ? 'Tài liệu đã lưu trữ không thể gửi xét duyệt'
                                     : (doc.currentReviewStatus || doc.reviewStatus || 'DRAFT') === 'DRAFT'
-                                    ? 'Gửi phiên bản hiện tại để quản trị viên xét duyệt (Phase 7)'
+                                    ? 'Gửi phiên bản hiện tại để quản trị viên xét duyệt'
                                     : (doc.currentReviewStatus || doc.reviewStatus) === 'PENDING'
                                     ? 'Phiên bản này đang chờ xét duyệt'
                                     : (doc.currentReviewStatus || doc.reviewStatus) === 'APPROVED'
@@ -1210,10 +1067,10 @@ export const DocumentsPage: React.FC = () => {
                               </button>
                             )}
 
-                            {/* Phase 8: Lifecycle Management (Archive / Unarchive / Retention / Hold) */}
+                            {/* Lifecycle Management (Archive / Unarchive / Retention / Hold) */}
                             <button
                               className="action-btn"
-                              title="Quản lý vòng đời, lưu trữ & thời hạn retention (Phase 8)"
+                              title="Quản lý vòng đời, lưu trữ & thời hạn retention"
                               onClick={() => {
                                 setLifecycleDoc(doc);
                                 setIsLifecycleOpen(true);
@@ -1230,10 +1087,10 @@ export const DocumentsPage: React.FC = () => {
                               </span>
                             </button>
 
-                            {/* Phase 7: Review History */}
+                            {/* Review History */}
                             <button
                               className="action-btn"
-                              title="Xem lịch sử xét duyệt của tài liệu này (Phase 7)"
+                              title="Xem lịch sử xét duyệt của tài liệu này"
                               onClick={() => {
                                 setHistoryModalDoc(doc);
                                 setIsHistoryModalOpen(true);
@@ -1267,6 +1124,200 @@ export const DocumentsPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Mobile Card View (Viewport <= 480px) */}
+        <div className="mobile-card-feed" id="documents-mobile-card-feed">
+          {isLoading ? (
+            <div className="mobile-loading-card">
+              <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', padding: '1.5rem' }}>
+                Đang tải danh sách tài liệu...
+              </p>
+            </div>
+          ) : documents.length === 0 ? (
+            <div className="mobile-empty-card">
+              <div className="empty-state">
+                <div className="empty-state-icon">
+                  <Inbox size={36} color="var(--color-text-muted)" />
+                </div>
+                <p style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--color-text-main)' }}>
+                  {isFiltered
+                    ? 'Không tìm thấy tài liệu phù hợp'
+                    : 'Chưa có tài liệu nào trong danh mục'}
+                </p>
+              </div>
+            </div>
+          ) : (
+            documents.map((doc) => {
+              const canEdit =
+                user?.role === 'ROLE_ADMIN' ||
+                user?.username === doc.createdBy ||
+                doc.userPermission === 'EDIT';
+              const canShare =
+                user?.role === 'ROLE_ADMIN' || user?.username === doc.createdBy;
+
+              return (
+                <div key={`mobile-${doc.id}`} className="mobile-doc-card" data-mobile-id={doc.id}>
+                  <div className="mobile-card-header">
+                    <div className="mobile-card-title-group">
+                      <span className="mobile-card-title">{doc.title}</span>
+                      <div className="mobile-badge-row">
+                        {doc.accessMode === 'PRIVATE' ? (
+                          <span className="mobile-badge badge-private">
+                            <Lock size={10} /> Riêng tư
+                          </span>
+                        ) : (
+                          <span className="mobile-badge badge-public">
+                            <Globe size={10} /> Công khai
+                          </span>
+                        )}
+                        <span className="mobile-badge badge-type">
+                          {doc.documentType}
+                        </span>
+                        {doc.currentVersionNumber && (
+                          <span className="mobile-badge badge-version">
+                            v{doc.currentVersionNumber}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {doc.description && (
+                    <p className="mobile-card-description">{doc.description}</p>
+                  )}
+
+                  <div className="mobile-card-details">
+                    <div className="mobile-detail-row">
+                      <FileText size={13} color="var(--color-primary)" />
+                      <span className="mobile-file-name" title={doc.originalFileName}>
+                        {doc.originalFileName}
+                      </span>
+                      <span className="mobile-file-size">
+                        ({formatFileSize(doc.fileSize)})
+                      </span>
+                    </div>
+
+                    <div className="mobile-detail-meta">
+                      <span>Người tạo: <strong>{doc.createdBy}</strong></span>
+                      <span>•</span>
+                      <span>{formatDate(doc.createdAt)}</span>
+                    </div>
+
+                    <div className="mobile-status-badges">
+                      {doc.lifecycleStatus === 'ARCHIVED' ? (
+                        <span className="mobile-status-pill pill-archived">
+                          <Archive size={10} /> Đã lưu trữ
+                        </span>
+                      ) : (
+                        <span className="mobile-status-pill pill-active">
+                          <CheckCircle2 size={10} /> Đang hoạt động
+                        </span>
+                      )}
+
+                      {doc.legalHold && (
+                        <span className="mobile-status-pill pill-hold">
+                          <ShieldAlert size={10} /> Legal Hold
+                        </span>
+                      )}
+
+                      {doc.currentReviewStatus && (
+                        <span className={`mobile-status-pill pill-review-${doc.currentReviewStatus.toLowerCase()}`}>
+                          Duyệt: {doc.currentReviewStatus}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mobile-card-actions">
+                    <button
+                      type="button"
+                      className="mobile-action-btn btn-view"
+                      onClick={() => {
+                        setPreviewDoc(doc);
+                        setIsPreviewOpen(true);
+                      }}
+                      id={`mobile-preview-btn-${doc.id}`}
+                    >
+                      <Eye size={13} />
+                      <span>Xem</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="mobile-action-btn btn-download"
+                      disabled={downloadingId === doc.id}
+                      onClick={() => handleDownload(doc)}
+                      id={`mobile-download-btn-${doc.id}`}
+                    >
+                      {downloadingId === doc.id ? (
+                        <Loader2 size={13} className="animate-spin" />
+                      ) : (
+                        <Download size={13} />
+                      )}
+                      <span>Tải về</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="mobile-action-btn btn-edit"
+                      disabled={!canEdit || doc.lifecycleStatus === 'ARCHIVED'}
+                      onClick={() => {
+                        setEditingDoc(doc);
+                        setIsEditOpen(true);
+                      }}
+                      id={`mobile-edit-btn-${doc.id}`}
+                    >
+                      <Edit3 size={13} />
+                      <span>Sửa</span>
+                    </button>
+
+                    {canShare && (
+                      <button
+                        type="button"
+                        className="mobile-action-btn btn-share"
+                        disabled={doc.lifecycleStatus === 'ARCHIVED'}
+                        onClick={() => {
+                          setAccessDoc(doc);
+                          setIsAccessOpen(true);
+                        }}
+                        id={`mobile-share-btn-${doc.id}`}
+                      >
+                        <Shield size={13} />
+                        <span>Chia sẻ</span>
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      className="mobile-action-btn btn-version"
+                      onClick={() => {
+                        setVersionDoc(doc);
+                        setIsVersionOpen(true);
+                      }}
+                      id={`mobile-version-btn-${doc.id}`}
+                    >
+                      <History size={13} />
+                      <span>Phiên bản</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="mobile-action-btn btn-lifecycle"
+                      onClick={() => {
+                        setLifecycleDoc(doc);
+                        setIsLifecycleOpen(true);
+                      }}
+                      id={`mobile-lifecycle-btn-${doc.id}`}
+                    >
+                      <Archive size={13} />
+                      <span>Vòng đời</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </main>
 

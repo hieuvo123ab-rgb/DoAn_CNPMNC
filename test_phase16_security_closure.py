@@ -79,7 +79,7 @@ def test_451_production_ignores_simulation_header():
     
     # Wait for recovery backend to become ready
     ready = False
-    for _ in range(40):
+    for _ in range(120):
         try:
             st, b, _ = api_get('/health', base_url=BASE_URL_RECOVERY)
             if st == 200 and b.get('status') == 'UP':
