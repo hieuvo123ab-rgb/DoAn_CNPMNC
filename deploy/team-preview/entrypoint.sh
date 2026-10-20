@@ -25,7 +25,11 @@ chown edms:edms /app/persist /app/persist/uploads /app/persist/keys
 echo "Starting isolated EDMS Team Preview; no production data will be imported."
 runuser -u edms -- java -Xms128m -Xmx768m -jar /app/app.jar --server.port=8081 &
 JAVA_PID=$!
-runuser -u edms -- nginx -c /etc/nginx/nginx.conf -g 'daemon off;' &
+# Run the Nginx master as root; workers run as edms.
+mkdir -p /tmp/edms-nginx-client /tmp/edms-nginx-proxy
+chown -R edms:edms /tmp/edms-nginx-client /tmp/edms-nginx-proxy
+nginx -c /etc/nginx/nginx.conf -t
+nginx -c /etc/nginx/nginx.conf -g 'daemon off;' &
 NGINX_PID=$!
 
 cleanup() {
