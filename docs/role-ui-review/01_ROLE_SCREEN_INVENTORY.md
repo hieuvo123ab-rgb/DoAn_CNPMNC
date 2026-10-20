@@ -9,6 +9,8 @@
 
 ---
 
+> **Bằng chứng cần phân biệt (20/10/2026):** Ma trận này mô tả thiết kế/quy tắc dự kiến dựa trên mã nguồn. 22 screenshot của đợt này được chụp với **mocked API/JWT**, chưa xác minh RBAC runtime hoặc HTTP 403 trên Backend thật. Giao diện chuyển bằng `activeView` / custom event, không phải một URL router đầy đủ. Xem `04_FUNCTIONAL_REGRESSION.md` và `05_FINAL_UI_ACCEPTANCE.md` đã hiệu chỉnh trước khi trích dẫn nghiệm thu.
+
 ## 1. TỔNG QUAN HỆ THỐNG VAI TRÒ (RBAC OVERVIEW)
 
 Hệ thống EDMS phân định 3 vai trò người dùng nội bộ và 1 đối tượng truy cập công khai:
