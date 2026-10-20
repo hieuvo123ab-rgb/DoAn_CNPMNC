@@ -80,8 +80,8 @@ export const LoginPage: React.FC = () => {
               <FileCheck size={28} className="text-white" />
             </div>
             <div>
-              <h1 className="ent-login-hero__title">EDMS Enterprise</h1>
-              <p className="ent-login-hero__subtitle">Electronic Document Management System</p>
+              <h1 className="ent-login-hero__title">EDMS — Quản lý tài liệu</h1>
+              <p className="ent-login-hero__subtitle">Lưu trữ và xử lý tài liệu điện tử</p>
             </div>
           </div>
 
@@ -91,9 +91,9 @@ export const LoginPage: React.FC = () => {
                 <ShieldCheck size={20} />
               </div>
               <div>
-                <h4 className="ent-login-feature-item__title">Chữ Ký Số & Toàn Vẹn Dữ Liệu</h4>
+                <h4 className="ent-login-feature-item__title">Lưu trữ tài liệu tập trung</h4>
                 <p className="ent-login-feature-item__desc">
-                  Niêm phong tài liệu bằng chuẩn RSA-2048, xác thực tức thời qua mã băm SHA-256.
+                  Quản lý tài liệu và phiên bản trong cùng một hệ thống.
                 </p>
               </div>
             </div>
@@ -103,9 +103,9 @@ export const LoginPage: React.FC = () => {
                 <Cpu size={20} />
               </div>
               <div>
-                <h4 className="ent-login-feature-item__title">Tìm Kiếm Ngữ Nghĩa AI & OCR</h4>
+                <h4 className="ent-login-feature-item__title">Tra cứu tài liệu</h4>
                 <p className="ent-login-feature-item__desc">
-                  Mô hình nhúng cục bộ Multilingual E5 kết hợp trích xuất Tesseract OCR tiếng Việt.
+                  Tìm kiếm, theo dõi và truy cập tài liệu theo quyền được cấp.
                 </p>
               </div>
             </div>
@@ -115,9 +115,9 @@ export const LoginPage: React.FC = () => {
                 <Radio size={20} />
               </div>
               <div>
-                <h4 className="ent-login-feature-item__title">Thời Gian Thực STOMP Broker</h4>
+                <h4 className="ent-login-feature-item__title">Theo dõi công việc</h4>
                 <p className="ent-login-feature-item__desc">
-                  Đồng bộ tác vụ, thông báo phê duyệt và vòng đời tài liệu với độ trễ dưới 150ms.
+                  Xem công việc được giao và các thông báo liên quan.
                 </p>
               </div>
             </div>
@@ -125,7 +125,7 @@ export const LoginPage: React.FC = () => {
 
           <div className="ent-login-hero__footer">
             <span className="ent-login-hero__status-indicator" />
-            <span>Hệ thống đạt chuẩn an toàn thông tin doanh nghiệp</span>
+            <span>Truy cập dành cho người dùng được cấp tài khoản</span>
           </div>
         </div>
       </div>
@@ -138,7 +138,7 @@ export const LoginPage: React.FC = () => {
               <div className="ent-login-card__badge">
                 <Lock size={22} />
               </div>
-              <h2 className="ent-login-card__title">Đăng Nhập Hệ Thống</h2>
+              <h2 className="ent-login-card__title">Đăng nhập</h2>
               <p className="ent-login-card__desc">
                 Nhập thông tin xác thực để truy cập kho lưu trữ điện tử
               </p>
@@ -168,7 +168,7 @@ export const LoginPage: React.FC = () => {
                     id="username-input"
                     type="text"
                     className="ent-input"
-                    placeholder="ví dụ: hieu hoặc tin"
+                    placeholder="Nhập tên tài khoản"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     autoComplete="username"
@@ -217,7 +217,7 @@ export const LoginPage: React.FC = () => {
                 {isLoading ? (
                   <>
                     <Loader2 size={18} className="animate-spin mr-2" />
-                    <span>Đang xác thực bảo mật...</span>
+                    <span>Đang đăng nhập...</span>
                   </>
                 ) : (
                   <>
@@ -232,10 +232,10 @@ export const LoginPage: React.FC = () => {
               <a
                 href="/verify"
                 className="ent-login-card__verify-link"
-                title="Giám định tính toàn vẹn của tệp tài liệu số mà không cần đăng nhập"
+                title="Kiểm tra thông tin xác thực của tài liệu mà không cần đăng nhập"
               >
                 <ShieldCheck size={16} />
-                <span>Cổng giám định chứng thư công khai</span>
+                <span>Kiểm tra tính xác thực tài liệu</span>
                 <ExternalLink size={13} />
               </a>
             </div>
