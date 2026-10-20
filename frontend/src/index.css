@@ -610,6 +610,29 @@ html[data-sidebar-collapsed="true"] .page-layout {
   animation: pulseDot 2s infinite;
 }
 
+.ent-topbar__live-indicator--offline {
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.ent-topbar__live-indicator--offline .ent-topbar__live-dot {
+  background-color: var(--color-text-muted);
+  box-shadow: none;
+  animation: none;
+}
+
+.ent-topbar__ws-badge--offline {
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+
+.ent-topbar__ws-badge--offline .ent-topbar__ws-dot {
+  background-color: var(--color-text-muted);
+  box-shadow: none;
+  animation: none;
+}
+
 @keyframes pulseDot {
   0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
   70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
