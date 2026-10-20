@@ -141,10 +141,10 @@ export const VerifyPage: React.FC = () => {
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#fff' }}>
-              EDMS Trust & Verification
+              Xác thực tài liệu
             </h1>
             <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8' }}>
-              Trung tâm Giám định & Chứng thực Toàn vẹn Điện tử
+              Kiểm tra thông tin xác thực và tính toàn vẹn
             </p>
           </div>
         </div>
@@ -163,7 +163,7 @@ export const VerifyPage: React.FC = () => {
             transition: 'all 0.2s'
           }}
         >
-          ← Truy cập Hệ thống EDMS
+          ← Quay lại đăng nhập
         </a>
       </div>
 
@@ -186,14 +186,14 @@ export const VerifyPage: React.FC = () => {
             border: '1px solid rgba(59, 130, 246, 0.25)',
             marginBottom: '0.75rem'
           }}>
-            ENTERPRISE INTEGRITY VERIFICATION
+            TRA CỨU TÀI LIỆU
           </span>
           <h2 style={{ fontSize: '1.85rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#f8fafc' }}>
-            Tra cứu & Giám định Chứng thực Toàn vẹn
+            Kiểm tra tính xác thực tài liệu
           </h2>
           <p style={{ color: '#94a3b8', fontSize: '0.92rem', maxWidth: '620px', margin: '0 auto', lineHeight: 1.5 }}>
-            Kiểm tra tức thời tính nguyên bản của văn bản thông qua mã QR được đóng dấu động,
-            đối soát mã băm mật mã SHA-256 và chữ ký điện tử máy chủ RSA-2048.
+            Tra cứu thông tin tài liệu qua mã QR, mã băm SHA-256 hoặc mã tài liệu;
+            kiểm tra chữ ký số khi tài liệu có thông tin chữ ký.
           </p>
         </div>
 
@@ -364,7 +364,7 @@ export const VerifyPage: React.FC = () => {
                   boxShadow: '0 2px 8px rgba(37, 99, 235, 0.4)'
                 }}
               >
-                {loading ? 'Đang thẩm định...' : 'Kiểm tra Giám định'}
+                {loading ? 'Đang thẩm định...' : 'Kiểm tra tài liệu'}
               </button>
             </form>
           </div>
@@ -400,7 +400,7 @@ export const VerifyPage: React.FC = () => {
               margin: '0 auto 1rem auto',
               animation: 'spin 1s linear infinite'
             }} />
-            Đang thực hiện giải mã mật mã và đối soát dữ liệu trên sổ cái EDMS...
+            Đang kiểm tra thông tin tài liệu...
           </div>
         )}
 
