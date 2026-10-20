@@ -1,3 +1,7 @@
+// VISUAL MOCK CAPTURE ONLY — NOT AN AUTHENTICATED E2E OR RBAC SECURITY TEST.
+// This script intentionally intercepts HTTP API requests and supplies fixture data.
+// Screenshots verify layouts, not real Spring Boot responses or user permissions.
+// For real API/RBAC checks see scripts/test_team_preview_live.py on Preview branch.
 const puppeteer = require('puppeteer-core');
 const path = require('path');
 const fs = require('fs');
@@ -376,7 +380,7 @@ async function setupRouteMocking(page, currentUser) {
 }
 
 async function run() {
-  console.log('🚀 Running EDMS Role-Based UI Refinement Verification Suite...');
+  console.log('VISUAL MOCK CAPTURE — fixtures only; no real JWT/API/E2E verification');
   console.log(`📸 Output directory: ${OUT_DIR}`);
 
   const browser = await puppeteer.launch({
