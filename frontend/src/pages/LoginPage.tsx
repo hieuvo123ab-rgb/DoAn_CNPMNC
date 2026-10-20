@@ -71,7 +71,7 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="ent-login-layout">
-      {/* Left Column: Enterprise Hero Showcase */}
+      {/* Giới thiệu ngắn gọn các chức năng chính */}
       <div className="ent-login-hero">
         <div className="ent-login-hero__overlay" />
         <div className="ent-login-hero__content">
@@ -130,7 +130,7 @@ export const LoginPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Right Column: Clean Enterprise Login Form */}
+      {/* Biểu mẫu đăng nhập */}
       <div className="ent-login-form-pane">
         <div className="ent-login-form-container">
           <div className="ent-login-card">
@@ -221,7 +221,7 @@ export const LoginPage: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <span>Đăng nhập hệ thống</span>
+                    <span>Đăng nhập</span>
                     <ArrowRight size={18} className="ml-2" />
                   </>
                 )}
