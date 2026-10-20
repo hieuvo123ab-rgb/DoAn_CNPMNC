@@ -253,7 +253,7 @@ export const VerifyPage: React.FC = () => {
               Kéo thả tệp tin để đối soát
             </h3>
             <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}>
-              Hỗ trợ PDF, DOCX, Hình ảnh (PNG, JPG)... Tự động tính toán SHA-256 ngay lập tức
+              Hỗ trợ PDF, DOCX, PNG và JPG. Tệp được kiểm tra bằng mã băm SHA-256.
             </p>
             {uploadedFileName && (
               <span style={{
@@ -619,7 +619,7 @@ export const VerifyPage: React.FC = () => {
 
         {/* Footer info */}
         <div style={{ textAlign: 'center', marginTop: '3rem', fontSize: '0.75rem', color: '#64748b' }}>
-          Hệ thống Quản lý Tài liệu Điện tử Doanh nghiệp (EDMS) — Bảo vệ toàn vẹn bằng SHA-256 & Chữ ký số nội bộ RSA-2048.
+          EDMS — Kiểm tra tính xác thực của tài liệu.
         </div>
       </div>
     </div>
