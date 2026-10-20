@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { AppView } from '../Navbar';
 import { NotificationPanel } from '../NotificationPanel';
+import { useWebSocketStatus } from '../../hooks/useWebSocketStatus';
 
 interface TopbarProps {
   activeView: AppView;
@@ -34,6 +35,7 @@ export const Topbar: React.FC<TopbarProps> = ({
   onRefreshNotifications
 }) => {
   const { user } = useAuth();
+  const websocketConnected = useWebSocketStatus();
   const [showNotifications, setShowNotifications] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('edms_theme') === 'dark';
@@ -115,10 +117,13 @@ export const Topbar: React.FC<TopbarProps> = ({
       </div>
 
       <div className="ent-topbar__right">
-        {/* WebSocket Real-time Status Badge */}
-        <div className="ent-topbar__ws-badge" title="Kết nối thời gian thực WebSocket STOMP đang hoạt động">
+        <div
+          className={`ent-topbar__ws-badge ${websocketConnected ? '' : 'ent-topbar__ws-badge--offline'}`}
+          title={websocketConnected ? 'Thông báo đang được cập nhật trực tiếp' : 'Kênh thông báo đang kết nối lại'}
+          aria-live="polite"
+        >
           <span className="ent-topbar__ws-dot" />
-          <span className="ent-topbar__ws-text">Trực tuyến</span>
+          <span className="ent-topbar__ws-text">{websocketConnected ? 'Trực tuyến' : 'Đang kết nối'}</span>
         </div>
 
         {/* Theme Toggle Button */}
