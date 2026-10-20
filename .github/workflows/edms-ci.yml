@@ -6,6 +6,7 @@ on:
       - main
       - "completion/**"
       - "deploy/**"
+      - "fix/**"
   pull_request:
     branches:
       - main
