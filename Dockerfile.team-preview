@@ -26,6 +26,28 @@ WORKDIR /app
 COPY --from=backend-builder --chown=edms:edms /build/backend/target/edms-backend-*.jar /app/app.jar
 COPY --from=frontend-builder --chown=edms:edms /build/frontend/dist/ /usr/share/nginx/html/
 COPY --chown=edms:edms backend/models/multilingual-e5-small-onnx-int8/ /app/models/multilingual-e5-small-onnx-int8/
+# The GitHub source archive contains a 134-byte Git LFS pointer, not the ONNX weights.
+# Fetch the pinned object from the repository's own Git LFS storage and verify the
+# exact original LFS OID. Never run inference with a pointer or unverified model.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+RUN set -eu; \
+    file=/app/models/multilingual-e5-small-onnx-int8/model.onnx; \
+    if grep -q '^version https://git-lfs.github.com/spec/v1' "$file"; then \
+      echo 'Resolving pinned EDMS ONNX model from public Git LFS'; \
+      curl --fail --location --silent --show-error --retry 4 --retry-delay 3 \
+        --connect-timeout 20 --max-time 360 \
+        'https://media.githubusercontent.com/media/hieuvo123ab-rgb/DoAn_CNPMNC/11596e4bb8a9b3b7e7836dc68062584d020ff160/backend/models/multilingual-e5-small-onnx-int8/model.onnx' \
+        --output /tmp/edms-preview-model.onnx; \
+      test "$(wc -c < /tmp/edms-preview-model.onnx)" -eq 118308185; \
+      echo 'f80102d3f2a1229f387d3c81909990d8945513e347b0eab049f7de3c6f98c193  /tmp/edms-preview-model.onnx' | sha256sum --check --status; \
+      mv /tmp/edms-preview-model.onnx "$file"; \
+    fi; \
+    test "$(wc -c < "$file")" -eq 118308185; \
+    echo 'f80102d3f2a1229f387d3c81909990d8945513e347b0eab049f7de3c6f98c193  /app/models/multilingual-e5-small-onnx-int8/model.onnx' | sha256sum --check --status; \
+    chown edms:edms "$file"
+
 COPY deploy/team-preview/nginx.conf /etc/nginx/nginx.conf
 COPY deploy/team-preview/entrypoint.sh /app/team-preview-entrypoint.sh
 RUN chmod 755 /app/team-preview-entrypoint.sh
