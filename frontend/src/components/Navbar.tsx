@@ -22,6 +22,7 @@ import {
 import { notificationApi } from '../api/notificationApi';
 import { NotificationPanel } from './NotificationPanel';
 import { webSocketService } from '../services/websocket';
+import { useWebSocketStatus } from '../hooks/useWebSocketStatus';
 
 export type AppView =
   | 'dashboard'
@@ -35,6 +36,7 @@ export type AppView =
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
+  const websocketConnected = useWebSocketStatus();
   const [activeView, setActiveView] = useState<AppView>('documents');
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
@@ -415,10 +417,13 @@ export const Navbar: React.FC = () => {
           </div>
 
           <div className="ent-topbar__right">
-            {/* Live STOMP Indicator */}
-            <div className="ent-topbar__live-indicator" title="Kết nối thời gian thực WebSocket STOMP đang hoạt động">
+            <div
+              className={`ent-topbar__live-indicator ${websocketConnected ? '' : 'ent-topbar__live-indicator--offline'}`}
+              title={websocketConnected ? 'Thông báo đang được cập nhật trực tiếp' : 'Kênh thông báo đang kết nối lại'}
+              aria-live="polite"
+            >
               <span className="ent-topbar__live-dot" />
-              <span className="ent-topbar__live-label">Trực tuyến</span>
+              <span className="ent-topbar__live-label">{websocketConnected ? 'Trực tuyến' : 'Đang kết nối'}</span>
             </div>
 
             {/* Dark/Light Theme Switcher */}
