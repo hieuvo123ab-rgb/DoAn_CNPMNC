@@ -132,10 +132,10 @@ export const SystemStatusPage: React.FC = () => {
               gap: '0.6rem'
             }}>
               <Activity style={{ color: 'var(--color-primary)' }} size={24} />
-              Trạng thái & Giám sát vận hành hệ thống
+              Trạng thái hệ thống
             </h1>
             <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
-              Production Readiness, Health Probes & Operational Observability
+              Theo dõi tình trạng dịch vụ và tài nguyên
             </p>
           </div>
 
