@@ -1,0 +1,36 @@
+# Isolated EDMS Team Preview — one public HTTP endpoint for UI, API and WebSocket.
+# Deploy ONLY against a new, dedicated Railway PostgreSQL instance and preview volume.
+FROM maven:3.9.6-eclipse-temurin-21 AS backend-builder
+WORKDIR /build/backend
+COPY backend/pom.xml ./
+COPY backend/src ./src
+RUN mvn --batch-mode --no-transfer-progress -DskipTests package
+
+FROM node:20-alpine AS frontend-builder
+WORKDIR /build/frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
+FROM eclipse-temurin:21-jre-jammy
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nginx tesseract-ocr tesseract-ocr-eng tesseract-ocr-vie util-linux \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --gid 10001 edms \
+    && useradd --uid 10001 --gid edms --home-dir /app --shell /bin/sh edms \
+    && mkdir -p /app/persist /usr/share/nginx/html \
+    && chown -R edms:edms /app /usr/share/nginx/html
+
+WORKDIR /app
+COPY --from=backend-builder --chown=edms:edms /build/backend/target/edms-backend-*.jar /app/app.jar
+COPY --from=frontend-builder --chown=edms:edms /build/frontend/dist/ /usr/share/nginx/html/
+COPY --chown=edms:edms backend/models/multilingual-e5-small-onnx-int8/ /app/models/multilingual-e5-small-onnx-int8/
+COPY deploy/team-preview/nginx.conf /etc/nginx/nginx.conf
+COPY deploy/team-preview/entrypoint.sh /app/team-preview-entrypoint.sh
+RUN chmod 755 /app/team-preview-entrypoint.sh
+
+# Railway routes public HTTPS to port 8080. Java listens only inside the container on 8081.
+ENV SPRING_PROFILES_ACTIVE=prod,team-preview
+EXPOSE 8080
+ENTRYPOINT ["/app/team-preview-entrypoint.sh"]
