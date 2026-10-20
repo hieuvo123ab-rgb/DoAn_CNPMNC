@@ -52,17 +52,23 @@ export const LoginPage: React.FC = () => {
       setError(null);
       await login({ username: username.trim(), password });
     } catch (err: any) {
-      console.error('Login error:', err);
       const resData = err.response?.data;
       const status = err.response?.status;
 
       if (status === 429) {
         const secs = resData?.retryAfterSeconds || resData?.lockoutSeconds || 60;
         setLockoutSeconds(secs);
-        setError(`Tài khoản tạm thời bị giới hạn do quá nhiều lần thử sai. Vui lòng thử lại sau ${secs} giây.`);
+        setError(`Bạn đã thử quá số lần cho phép. Thử lại sau ${secs} giây.`);
+      } else if (!err.response) {
+        setError('Không thể kết nối máy chủ. Vui lòng kiểm tra mạng và thử lại.');
+      } else if (status === 401) {
+        setError('Tên đăng nhập hoặc mật khẩu không đúng.');
+      } else if (status === 403) {
+        setError('Yêu cầu đăng nhập bị từ chối. Vui lòng tải lại trang và thử lại.');
+      } else if (status >= 500) {
+        setError('Hệ thống đang gặp sự cố. Vui lòng thử lại sau.');
       } else {
-        const msg = resData?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin xác thực.';
-        setError(msg);
+        setError(resData?.message || 'Đăng nhập không thành công. Vui lòng thử lại.');
       }
     } finally {
       setIsLoading(false);
