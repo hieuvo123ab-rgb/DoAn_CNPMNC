@@ -73,7 +73,7 @@ export const DocumentsPage: React.FC = () => {
   const [ocrRebuildMsg, setOcrRebuildMsg] = useState<string | null>(null);
 
   const handleRebuildOcr = async () => {
-    if (!window.confirm('Bạn có chắc muốn chạy Rebuild OCR Index cho các tài liệu đủ điều kiện?')) {
+    if (!window.confirm('Bạn có chắc muốn chạy Quét lại OCR Index cho các tài liệu đủ điều kiện?')) {
       return;
     }
     try {
@@ -307,8 +307,8 @@ export const DocumentsPage: React.FC = () => {
       <main className="main-content">
         <div className="page-header">
           <div className="page-title">
-            <h2>Quản Lý Tài Liệu Điện Tử</h2>
-            <p>Lưu trữ tập trung, tìm kiếm thông minh, bảo mật và phân quyền hồ sơ dữ liệu</p>
+            <h2>Quản lý tài liệu</h2>
+            <p>Tra cứu và quản lý tài liệu theo quyền truy cập</p>
           </div>
           <div className="page-actions">
             {user?.role === 'ROLE_ADMIN' && (
@@ -316,11 +316,11 @@ export const DocumentsPage: React.FC = () => {
                 className="btn btn-secondary"
                 onClick={handleRebuildOcr}
                 disabled={isRebuildingOcr || isLoading}
-                title="Quét lại chỉ mục OCR cho hình ảnh và scanned PDF"
+                title="Quét lại nội dung nhận dạng của hình ảnh và PDF"
                 id="rebuild-ocr-btn"
               >
                 <Cpu size={16} className={isRebuildingOcr ? 'animate-spin' : ''} />
-                <span>{isRebuildingOcr ? 'Đang OCR...' : 'Rebuild OCR'}</span>
+                <span>{isRebuildingOcr ? 'Đang quét...' : 'Rebuild OCR'}</span>
               </button>
             )}
             <button
@@ -445,7 +445,7 @@ export const DocumentsPage: React.FC = () => {
               title="Phương thức tìm kiếm"
             >
               <option value="LEXICAL">Tìm chính xác (Từ khóa)</option>
-              <option value="SEMANTIC">Tìm theo ngữ nghĩa (AI)</option>
+              <option value="SEMANTIC">Tìm theo ngữ nghĩa</option>
               <option value="HYBRID">Tìm kết hợp (Lai ghép)</option>
             </select>
 
