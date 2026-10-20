@@ -13,8 +13,7 @@ fail() {
 [ -n "${SPRING_DATASOURCE_PASSWORD:-}" ] || fail "SPRING_DATASOURCE_PASSWORD is required"
 [ ${#EDMS_JWT_SECRET} -ge 40 ] 2>/dev/null || fail "EDMS_JWT_SECRET must be a unique random secret of at least 40 characters"
 [ ${#EDMS_KEYSTORE_PASSWORD} -ge 16 ] 2>/dev/null || fail "EDMS_KEYSTORE_PASSWORD must be at least 16 characters"
-[ ${#EDMS_PREVIEW_ADMIN_PASSWORD} -ge 16 ] 2>/dev/null || fail "EDMS_PREVIEW_ADMIN_PASSWORD must be at least 16 characters"
-[ ${#EDMS_PREVIEW_STAFF_PASSWORD} -ge 16 ] 2>/dev/null || fail "EDMS_PREVIEW_STAFF_PASSWORD must be at least 16 characters"
+[ ${#EDMS_PREVIEW_SHARED_PASSWORD} -ge 16 ] 2>/dev/null || fail "EDMS_PREVIEW_SHARED_PASSWORD must have at least 16 characters"
 
 # Always use the single, independent Railway preview volume.
 [ "${EDMS_STORAGE_DIR:-}" = "/app/persist/uploads" ] || fail "EDMS_STORAGE_DIR must be /app/persist/uploads"
