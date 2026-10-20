@@ -436,22 +436,17 @@ export const DocumentsPage: React.FC = () => {
               <option value="ALL">Tìm trong: Tất cả (Thông tin &amp; Nội dung)</option>
             </select>
 
-            {/* Phase 12: Search Mode Selector */}
+            {/* Search Mode Selector */}
             <select
               className="filter-select-field"
               value={searchMode}
               onChange={(e) => setSearchMode(e.target.value as any)}
               id="search-mode-select"
-              title="Kiểu tìm kiếm: Chính xác (từ khóa), Ngữ nghĩa (AI cục bộ), hoặc Kết hợp"
-              style={{
-                borderColor: searchMode === 'SEMANTIC' ? '#7c3aed' : searchMode === 'HYBRID' ? '#0891b2' : undefined,
-                color: searchMode === 'SEMANTIC' ? '#7c3aed' : searchMode === 'HYBRID' ? '#0891b2' : undefined,
-                fontWeight: searchMode !== 'LEXICAL' ? 600 : undefined,
-              }}
+              title="Phương thức tìm kiếm"
             >
-              <option value="LEXICAL">🔤 Chính xác (từ khóa)</option>
-              <option value="SEMANTIC">🧠 Ngữ nghĩa (AI cục bộ)</option>
-              <option value="HYBRID">⚡ Kết hợp (Lai)</option>
+              <option value="LEXICAL">Tìm chính xác (Từ khóa)</option>
+              <option value="SEMANTIC">Tìm theo ngữ nghĩa (AI)</option>
+              <option value="HYBRID">Tìm kết hợp (Lai ghép)</option>
             </select>
 
             {/* Filter by Document Type */}
@@ -728,70 +723,34 @@ export const DocumentsPage: React.FC = () => {
                             <span>{doc.title}</span>
                             {doc.accessMode === 'PRIVATE' ? (
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#fee2e2',
-                                  color: '#991b1b',
-                                  fontWeight: 600,
-                                }}
+                                className="ent-badge ent-badge--danger"
                                 title="Chế độ riêng tư: Chỉ người được chia sẻ mới truy cập được"
                               >
                                 <Lock size={10} /> Riêng tư
                               </span>
                             ) : (
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#e0e7ff',
-                                  color: '#3730a3',
-                                  fontWeight: 600,
-                                }}
+                                className="ent-badge ent-badge--primary"
                                 title="Chế độ nội bộ: Mọi người dùng đã đăng nhập đều xem được"
                               >
                                 <Globe size={10} /> Nội bộ
                               </span>
                             )}
-                            {/* Phase 6: Current Version Badge */}
+                            {/* Current Version Badge */}
                             <span
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.2rem',
-                                fontSize: '0.68rem',
-                                padding: '0.12rem 0.45rem',
-                                borderRadius: '4px',
-                                backgroundColor: '#f0f9ff',
-                                color: '#0369a1',
-                                border: '1px solid #bae6fd',
-                                fontWeight: 700,
-                              }}
+                              className="ent-badge ent-badge--info"
                               title={`Phiên bản hiện tại: v${doc.currentVersionNumber || 1}`}
                             >
                               v{doc.currentVersionNumber || 1}
                             </span>
 
-                            {/* Phase 7: Current Version Review Status Badge */}
+                            {/* Current Version Review Status Badge */}
                             {(() => {
                               const rStatus = doc.currentReviewStatus || doc.reviewStatus || 'DRAFT';
                               if (rStatus === 'APPROVED') {
                                 return (
                                   <span
-                                    style={{
-                                      display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
-                                      fontSize: '0.68rem', padding: '0.12rem 0.45rem', borderRadius: '4px',
-                                      backgroundColor: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0',
-                                      fontWeight: 600,
-                                    }}
+                                    className="ent-badge ent-badge--success"
                                     title="Phiên bản này đã được phê duyệt"
                                   >
                                     <CheckCircle2 size={10} /> Đã duyệt
@@ -801,12 +760,7 @@ export const DocumentsPage: React.FC = () => {
                               if (rStatus === 'PENDING') {
                                 return (
                                   <span
-                                    style={{
-                                      display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
-                                      fontSize: '0.68rem', padding: '0.12rem 0.45rem', borderRadius: '4px',
-                                      backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a',
-                                      fontWeight: 600,
-                                    }}
+                                    className="ent-badge ent-badge--warning"
                                     title="Phiên bản này đang chờ quản trị viên xét duyệt"
                                   >
                                     <Clock size={10} /> Chờ duyệt
@@ -816,12 +770,7 @@ export const DocumentsPage: React.FC = () => {
                               if (rStatus === 'REJECTED') {
                                 return (
                                   <span
-                                    style={{
-                                      display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
-                                      fontSize: '0.68rem', padding: '0.12rem 0.45rem', borderRadius: '4px',
-                                      backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca',
-                                      fontWeight: 600,
-                                    }}
+                                    className="ent-badge ent-badge--danger"
                                     title="Phiên bản này đã bị từ chối. Vui lòng tải lên phiên bản mới để gửi duyệt lại."
                                   >
                                     <AlertTriangle size={10} /> Bị từ chối
@@ -830,12 +779,7 @@ export const DocumentsPage: React.FC = () => {
                               }
                               return (
                                 <span
-                                  style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
-                                    fontSize: '0.68rem', padding: '0.12rem 0.45rem', borderRadius: '4px',
-                                    backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0',
-                                    fontWeight: 600,
-                                  }}
+                                  className="ent-badge ent-badge--neutral"
                                   title="Bản nháp — Chưa gửi xét duyệt"
                                 >
                                   Nháp
@@ -843,119 +787,54 @@ export const DocumentsPage: React.FC = () => {
                               );
                             })()}
 
-                            {/* Phase 8: Lifecycle Status Badge */}
+                            {/* Lifecycle Status Badge */}
                             {doc.lifecycleStatus === 'ARCHIVED' ? (
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#f1f5f9',
-                                  color: '#475569',
-                                  border: '1px solid #cbd5e1',
-                                  fontWeight: 600,
-                                }}
+                                className="ent-badge ent-badge--neutral"
                                 title={`Đã lưu trữ (Archived) bởi ${doc.archivedBy || 'User'}`}
                               >
                                 <Archive size={10} /> Đã lưu trữ
                               </span>
                             ) : (
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#f0fdf4',
-                                  color: '#166534',
-                                  border: '1px solid #bbf7d0',
-                                  fontWeight: 600,
-                                }}
+                                className="ent-badge ent-badge--success"
                                 title="Đang hoạt động (Active)"
                               >
                                 <CheckCircle2 size={10} /> Đang hoạt động
                               </span>
                             )}
 
-                            {/* Phase 8: Legal Hold Badge */}
+                            {/* Legal Hold Badge */}
                             {doc.legalHold && (
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#fee2e2',
-                                  color: '#991b1b',
-                                  border: '1px solid #fecaca',
-                                  fontWeight: 700,
-                                }}
+                                className="ent-badge ent-badge--danger"
                                 title={`Legal Hold đang bật: ${doc.legalHoldReason || 'Bảo lưu pháp lý'}`}
                               >
                                 <ShieldAlert size={10} /> Legal Hold
                               </span>
                             )}
 
-                            {/* Phase 8: Retention Date */}
+                            {/* Retention Date */}
                             {doc.retentionUntil && (
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#f8fafc',
-                                  color: '#64748b',
-                                  border: '1px solid #e2e8f0',
-                                  fontWeight: 500,
-                                }}
+                                className="ent-badge ent-badge--neutral"
                                 title={`Thời hạn lưu trữ tối thiểu: ${doc.retentionUntil}`}
                               >
                                 <Calendar size={10} /> Giữ đến {doc.retentionUntil}
                               </span>
                             )}
 
-                            {/* Phase 8: Disposition Eligibility */}
+                            {/* Disposition Eligibility */}
                             {doc.eligibleForDisposition && (
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#fef3c7',
-                                  color: '#92400e',
-                                  border: '1px solid #fde68a',
-                                  fontWeight: 700,
-                                }}
+                                className="ent-badge ent-badge--warning"
                                 title="Tài liệu đã hết hạn lưu trữ và đủ điều kiện tiêu hủy / thanh lý"
                               >
                                 Đủ ĐK tiêu hủy
                               </span>
                             )}
                             {doc.userPermission && doc.userPermission !== 'OWNER' && doc.userPermission !== 'ADMIN' && (
-                              <span
-                                style={{
-                                  display: 'inline-flex',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.4rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#fef3c7',
-                                  color: '#92400e',
-                                  fontWeight: 600,
-                                }}
-                              >
+                              <span className="ent-badge ent-badge--warning">
                                 {doc.userPermission === 'EDIT' ? 'Quyền: Xem & Sửa' : 'Quyền: Chỉ xem'}
                               </span>
                             )}
@@ -964,36 +843,14 @@ export const DocumentsPage: React.FC = () => {
                           {doc.contentMatched && (
                             <div style={{ marginTop: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                               <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  fontSize: '0.68rem',
-                                  padding: '0.12rem 0.45rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#ecfdf5',
-                                  color: '#065f46',
-                                  border: '1px solid #a7f3d0',
-                                  fontWeight: 600,
-                                }}
+                                className="ent-badge ent-badge--success"
                                 title="Khớp với nội dung bên trong tệp tin của phiên bản hiện tại"
                               >
                                 Khớp nội dung
                               </span>
                               {doc.contentSource === 'OCR' && (
                                 <span
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '0.2rem',
-                                    fontSize: '0.68rem',
-                                    padding: '0.12rem 0.45rem',
-                                    borderRadius: '4px',
-                                    backgroundColor: '#eff6ff',
-                                    color: '#1d4ed8',
-                                    border: '1px solid #bfdbfe',
-                                    fontWeight: 700,
-                                  }}
+                                  className="ent-badge ent-badge--info"
                                   title="Khớp từ nội dung nhận dạng quang học (OCR)"
                                 >
                                   [OCR]

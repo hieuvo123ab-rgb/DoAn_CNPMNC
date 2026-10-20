@@ -91,9 +91,9 @@ export const LoginPage: React.FC = () => {
                 <ShieldCheck size={20} />
               </div>
               <div>
-                <h4 className="ent-login-feature-item__title">Chữ Ký Số & Toàn Vẹn Dữ Liệu</h4>
+                <h4 className="ent-login-feature-item__title">Chữ Ký Số & Toàn Vẹn</h4>
                 <p className="ent-login-feature-item__desc">
-                  Niêm phong tài liệu bằng chuẩn RSA-2048, xác thực tức thời qua mã băm SHA-256.
+                  Niêm phong bảo mật và xác thực nguồn gốc chứng thư tài liệu số.
                 </p>
               </div>
             </div>
@@ -103,9 +103,9 @@ export const LoginPage: React.FC = () => {
                 <Cpu size={20} />
               </div>
               <div>
-                <h4 className="ent-login-feature-item__title">Tìm Kiếm Ngữ Nghĩa AI & OCR</h4>
+                <h4 className="ent-login-feature-item__title">Tìm Kiếm & Trích Xuất</h4>
                 <p className="ent-login-feature-item__desc">
-                  Mô hình nhúng cục bộ Multilingual E5 kết hợp trích xuất Tesseract OCR tiếng Việt.
+                  Tìm kiếm toàn văn kết hợp nhận dạng ký tự quang học (OCR) thông minh.
                 </p>
               </div>
             </div>
@@ -115,9 +115,9 @@ export const LoginPage: React.FC = () => {
                 <Radio size={20} />
               </div>
               <div>
-                <h4 className="ent-login-feature-item__title">Thời Gian Thực STOMP Broker</h4>
+                <h4 className="ent-login-feature-item__title">Thông Báo Trực Tuyến</h4>
                 <p className="ent-login-feature-item__desc">
-                  Đồng bộ tác vụ, thông báo phê duyệt và vòng đời tài liệu với độ trễ dưới 150ms.
+                  Cập nhật luồng xét duyệt và phản hồi tác vụ theo thời gian thực.
                 </p>
               </div>
             </div>
@@ -168,7 +168,7 @@ export const LoginPage: React.FC = () => {
                     id="username-input"
                     type="text"
                     className="ent-input"
-                    placeholder="ví dụ: hieu hoặc tin"
+                    placeholder="Tên đăng nhập"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     autoComplete="username"
@@ -189,7 +189,7 @@ export const LoginPage: React.FC = () => {
                     id="password-input"
                     type={showPassword ? 'text' : 'password'}
                     className="ent-input"
-                    placeholder="Nhập mật khẩu an toàn"
+                    placeholder="Mật khẩu"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="current-password"
@@ -217,11 +217,11 @@ export const LoginPage: React.FC = () => {
                 {isLoading ? (
                   <>
                     <Loader2 size={18} className="animate-spin mr-2" />
-                    <span>Đang xác thực bảo mật...</span>
+                    <span>Đang đăng nhập...</span>
                   </>
                 ) : (
                   <>
-                    <span>Đăng nhập hệ thống</span>
+                    <span>Đăng nhập</span>
                     <ArrowRight size={18} className="ml-2" />
                   </>
                 )}

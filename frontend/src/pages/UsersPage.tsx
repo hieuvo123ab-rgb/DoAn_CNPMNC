@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar } from '../components/Navbar';
 import { CreateUserModal } from '../components/CreateUserModal';
 import { EditUserModal } from '../components/EditUserModal';
+import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { adminUserApi, UserItem, RolePermissionMatrix } from '../api/adminUserApi';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -35,6 +36,7 @@ export const UsersPage: React.FC = () => {
   const [editingUser, setEditingUser] = useState<UserItem | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [togglingId, setTogglingId] = useState<number | null>(null);
+  const [confirmUser, setConfirmUser] = useState<UserItem | null>(null);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -64,12 +66,12 @@ export const UsersPage: React.FC = () => {
     fetchMatrix();
   }, [fetchUsers, fetchMatrix]);
 
-  const handleToggleStatus = async (targetUser: UserItem) => {
-    const actionName = targetUser.enabled ? 'vô hiệu hóa (khóa)' : 'kích hoạt';
-    if (!window.confirm(`Bạn có chắc chắn muốn ${actionName} tài khoản '${targetUser.username}'?`)) {
-      return;
-    }
+  const handleToggleStatus = (targetUser: UserItem) => {
+    setConfirmUser(targetUser);
+  };
 
+  const executeToggleStatus = async (targetUser: UserItem) => {
+    const actionName = targetUser.enabled ? 'vô hiệu hóa' : 'kích hoạt';
     try {
       setTogglingId(targetUser.id);
       setError(null);
@@ -425,6 +427,26 @@ export const UsersPage: React.FC = () => {
             setEditingUser(null);
           }}
           onUserUpdated={handleUserUpdated}
+        />
+
+        <ConfirmationModal
+          isOpen={!!confirmUser}
+          onClose={() => setConfirmUser(null)}
+          onConfirm={async () => {
+            if (!confirmUser) return;
+            const target = confirmUser;
+            setConfirmUser(null);
+            await executeToggleStatus(target);
+          }}
+          title={confirmUser?.enabled ? 'Khóa tài khoản người dùng' : 'Kích hoạt tài khoản'}
+          message={
+            confirmUser?.enabled
+              ? `Bạn có chắc chắn muốn vô hiệu hóa tài khoản '${confirmUser?.username}'? Người dùng này sẽ không thể đăng nhập vào hệ thống.`
+              : `Bạn có chắc chắn muốn kích hoạt lại tài khoản '${confirmUser?.username}'?`
+          }
+          confirmLabel={confirmUser?.enabled ? 'Khóa tài khoản' : 'Kích hoạt'}
+          variant={confirmUser?.enabled ? 'danger' : 'primary'}
+          isLoading={togglingId === confirmUser?.id}
         />
       </main>
     </div>

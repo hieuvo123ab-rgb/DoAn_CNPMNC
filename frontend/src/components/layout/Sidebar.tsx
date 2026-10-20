@@ -69,8 +69,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
             {!isCollapsed && (
               <div className="ent-sidebar__brand-text">
-                <span className="ent-sidebar__brand-title">EDMS Enterprise</span>
-                <span className="ent-sidebar__brand-badge">SaaS v2.0</span>
+                <span className="ent-sidebar__brand-title">EDMS</span>
+                <span className="ent-sidebar__brand-desc">Lưu trữ & Quản lý tài liệu</span>
               </div>
             )}
           </div>
@@ -90,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="ent-sidebar__nav-container">
           {/* Group 1: Kho Tài Liệu */}
           <div className="ent-sidebar__group">
-            {!isCollapsed && <div className="ent-sidebar__group-title">Kho Lưu Trữ</div>}
+            {!isCollapsed && <div className="ent-sidebar__group-title">Kho tài liệu</div>}
             <button
               type="button"
               className={`ent-sidebar__nav-item ${activeView === 'documents' ? 'active' : ''}`}
@@ -105,7 +105,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Group 2: Quy Trình & Tác Vụ */}
           <div className="ent-sidebar__group">
-            {!isCollapsed && <div className="ent-sidebar__group-title">Quy Trình & Tác Vụ</div>}
+            {!isCollapsed && <div className="ent-sidebar__group-title">Quy trình & Tác vụ</div>}
             <button
               type="button"
               className={`ent-sidebar__nav-item ${activeView === 'tasks' ? 'active' : ''}`}
@@ -150,13 +150,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Group 3: Quản Trị Hệ Thống (Admin Only) */}
           {isAdmin && (
             <div className="ent-sidebar__group">
-              {!isCollapsed && <div className="ent-sidebar__group-title">Quản Trị Hệ Thống</div>}
+              {!isCollapsed && <div className="ent-sidebar__group-title">Quản trị hệ thống</div>}
               <button
                 type="button"
                 className={`ent-sidebar__nav-item ${activeView === 'dashboard' ? 'active' : ''}`}
                 onClick={() => handleNav('dashboard')}
                 id="nav-dashboard-btn"
-                title="Bảng điều khiển số liệu"
+                title="Bảng điều khiển"
               >
                 <LayoutDashboard size={18} className="ent-sidebar__nav-icon" />
                 {!isCollapsed && <span className="ent-sidebar__nav-label">Bảng điều khiển</span>}
@@ -170,7 +170,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 title="Quản lý người dùng"
               >
                 <Users size={18} className="ent-sidebar__nav-icon" />
-                {!isCollapsed && <span className="ent-sidebar__nav-label">Người dùng & Phân quyền</span>}
+                {!isCollapsed && <span className="ent-sidebar__nav-label">Người dùng</span>}
               </button>
 
               <button
@@ -178,10 +178,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className={`ent-sidebar__nav-item ${activeView === 'audit' ? 'active' : ''}`}
                 onClick={() => handleNav('audit')}
                 id="nav-audit-btn"
-                title="Nhật ký kiểm toán an ninh"
+                title="Nhật ký kiểm toán"
               >
                 <ShieldAlert size={18} className="ent-sidebar__nav-icon" />
-                {!isCollapsed && <span className="ent-sidebar__nav-label">Nhật ký & Kiểm toán</span>}
+                {!isCollapsed && <span className="ent-sidebar__nav-label">Nhật ký kiểm toán</span>}
               </button>
 
               <button
@@ -190,7 +190,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => handleNav('system-status')}
                 id="nav-system-status-btn"
                 data-route="/system-status"
-                title="Trạng thái hạ tầng hệ thống"
+                title="Trạng thái hệ thống"
               >
                 <Activity size={18} className="ent-sidebar__nav-icon" />
                 {!isCollapsed && <span className="ent-sidebar__nav-label">Trạng thái hệ thống</span>}
@@ -209,7 +209,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="ent-sidebar__user-info">
                 <span className="ent-sidebar__user-name">{user?.username}</span>
                 <span className="ent-sidebar__user-role">
-                  {isAdmin ? 'Quản trị viên' : 'Nhân viên'}
+                  {user?.role === 'ROLE_ADMIN'
+                    ? 'Quản trị viên'
+                    : user?.role === 'ROLE_STAFF'
+                    ? 'Chuyên viên'
+                    : 'Người dùng'}
                 </span>
               </div>
             )}
