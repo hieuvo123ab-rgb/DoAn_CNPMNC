@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { DocumentReviewHistoryModal } from '../components/DocumentReviewHistoryModal';
 import { DocumentLifecycleModal } from '../components/DocumentLifecycleModal';
+import { ConfirmationModal } from '../components/common/ConfirmationModal';
 
 const DOCUMENT_TYPES = [
   'Báo cáo',
@@ -71,18 +72,18 @@ export const DocumentsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isRebuildingOcr, setIsRebuildingOcr] = useState<boolean>(false);
   const [ocrRebuildMsg, setOcrRebuildMsg] = useState<string | null>(null);
+  const [showOcrConfirm, setShowOcrConfirm] = useState<boolean>(false);
+  const [deleteSavedSearchTarget, setDeleteSavedSearchTarget] = useState<number | null>(null);
 
-  const handleRebuildOcr = async () => {
-    if (!window.confirm('Bạn có chắc muốn chạy Rebuild OCR Index cho các tài liệu đủ điều kiện?')) {
-      return;
-    }
+  const handleRebuildOcrExecute = async () => {
+    setShowOcrConfirm(false);
     try {
       setIsRebuildingOcr(true);
       const res = await documentApi.rebuildOcrIndex(false);
       setOcrRebuildMsg(`Rebuild OCR hoàn tất: Tổng=${res.total}, Đủ ĐK=${res.eligible}, Sẵn sàng=${res.ready}, Bỏ qua=${res.skipped}`);
       await fetchDocuments();
     } catch (err: any) {
-      alert('Lỗi Rebuild OCR: ' + (err.response?.data?.message || err.message));
+      setError('Lỗi Rebuild OCR: ' + (err.response?.data?.message || err.message));
     } finally {
       setIsRebuildingOcr(false);
     }
@@ -148,7 +149,7 @@ export const DocumentsPage: React.FC = () => {
       await documentApi.downloadDocument(doc.id, doc.originalFileName);
     } catch (err) {
       console.error('Download error:', err);
-      alert('Không thể tải xuống tệp tin. Vui lòng thử lại sau.');
+      setError('Không thể tải xuống tệp tin. Vui lòng thử lại sau.');
     } finally {
       setDownloadingId(null);
     }
@@ -160,7 +161,7 @@ export const DocumentsPage: React.FC = () => {
       await documentApi.submitDocumentReview(doc.id);
       fetchDocuments();
     } catch (err: any) {
-      alert(err?.response?.data?.message || 'Không thể gửi yêu cầu xét duyệt.');
+      setError(err?.response?.data?.message || 'Không thể gửi yêu cầu xét duyệt.');
     } finally {
       setSubmittingReviewId(null);
     }
@@ -235,14 +236,22 @@ export const DocumentsPage: React.FC = () => {
     setIsSavedSearchesOpen(false);
   };
 
-  const handleDeleteSavedSearch = async (e: React.MouseEvent, id: number) => {
+  const handleDeleteSavedSearch = (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
-    if (!window.confirm('Bạn có chắc chắn muốn xóa bộ lọc tìm kiếm đã lưu này?')) return;
+    setDeleteSavedSearchTarget(id);
+  };
+
+  const handleDeleteSavedSearchConfirm = async () => {
+    if (deleteSavedSearchTarget === null) return;
+    const id = deleteSavedSearchTarget;
     try {
       await savedSearchApi.deleteSavedSearch(id);
       setSavedSearches((prev) => prev.filter((s) => s.id !== id));
+      setDeleteSavedSearchTarget(null);
     } catch (err) {
       console.error('Delete saved search error:', err);
+      setError('Không thể xóa bộ lọc tìm kiếm đã lưu.');
+      setDeleteSavedSearchTarget(null);
     }
   };
 
@@ -302,7 +311,7 @@ export const DocumentsPage: React.FC = () => {
 
   return (
     <div className="app-container">
-      <Navbar />
+      <Navbar currentView="documents" />
 
       <main className="main-content">
         <div className="page-header">
@@ -314,7 +323,7 @@ export const DocumentsPage: React.FC = () => {
             {user?.role === 'ROLE_ADMIN' && (
               <button
                 className="btn btn-secondary"
-                onClick={handleRebuildOcr}
+                onClick={() => setShowOcrConfirm(true)}
                 disabled={isRebuildingOcr || isLoading}
                 title="Quét lại chỉ mục OCR cho hình ảnh và scanned PDF"
                 id="rebuild-ocr-btn"
@@ -1414,6 +1423,32 @@ export const DocumentsPage: React.FC = () => {
           fetchDocuments();
         }}
       />
+
+      {showOcrConfirm && (
+        <ConfirmationModal
+          isOpen={showOcrConfirm}
+          onClose={() => setShowOcrConfirm(false)}
+          onConfirm={handleRebuildOcrExecute}
+          title="Xác nhận Rebuild OCR Index"
+          message="Bạn có chắc muốn chạy Rebuild OCR Index cho các tài liệu đủ điều kiện? Quá trình này sẽ quét trích xuất lại văn bản OCR cho các tệp hình ảnh và scanned PDF."
+          confirmLabel="Bắt đầu Rebuild"
+          cancelLabel="Hủy"
+          variant="primary"
+        />
+      )}
+
+      {deleteSavedSearchTarget !== null && (
+        <ConfirmationModal
+          isOpen={deleteSavedSearchTarget !== null}
+          onClose={() => setDeleteSavedSearchTarget(null)}
+          onConfirm={handleDeleteSavedSearchConfirm}
+          title="Xóa bộ lọc tìm kiếm"
+          message="Bạn có chắc chắn muốn xóa bộ lọc tìm kiếm đã lưu này không?"
+          confirmLabel="Xóa bộ lọc"
+          cancelLabel="Hủy"
+          variant="danger"
+        />
+      )}
     </div>
   );
 };

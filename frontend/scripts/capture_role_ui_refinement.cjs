@@ -195,38 +195,97 @@ const MOCK_AUDIT = {
       action: 'LOGIN_SUCCESS',
       resourceType: 'AUTH',
       resourceId: 'hieu',
-      description: 'Đăng nhập thành công từ IP 192.168.1.50'
+      description: 'Đăng nhập thành công từ địa chỉ IP 192.168.1.50 qua xác thực JWT'
     },
     {
       id: 902,
       timestamp: '2026-10-20T10:45:00Z',
       username: 'thanh',
-      action: 'DOCUMENT_UPDATE',
+      action: 'DOCUMENT_UPLOAD',
       resourceType: 'DOCUMENT',
       resourceId: '102',
-      description: 'Cập nhật phân loại tài liệu sang Hợp đồng'
+      description: 'Tải lên tài liệu mới "Hợp đồng Cung cấp Dịch vụ Viễn thông", kích thước 4.2 MB'
+    },
+    {
+      id: 903,
+      timestamp: '2026-10-20T10:30:00Z',
+      username: 'hieu',
+      action: 'DOCUMENT_REVIEW_APPROVE',
+      resourceType: 'REVIEW',
+      resourceId: '78',
+      description: 'Phê duyệt phiên bản v3 của tài liệu #101 và tự động kích hoạt chữ ký số điện tử'
+    },
+    {
+      id: 904,
+      timestamp: '2026-10-20T09:15:00Z',
+      username: 'thanh',
+      action: 'DOCUMENT_SHARE',
+      resourceType: 'ACL',
+      resourceId: '102',
+      description: 'Chia sẻ quyền xem tài liệu cho chuyên viên mai với vai trò READ'
+    },
+    {
+      id: 905,
+      timestamp: '2026-10-20T08:00:00Z',
+      username: 'system',
+      action: 'SYSTEM_OCR_REINDEX',
+      resourceType: 'SYSTEM',
+      resourceId: 'ocr',
+      description: 'Hoàn tất quét lại chỉ mục OCR quang học cho 14 tài liệu dạng ảnh và quét'
     }
   ],
   totalPages: 1,
-  totalElements: 2
+  totalElements: 5
 };
 
 const MOCK_SYSTEM_STATUS = {
   status: 'UP',
+  readiness: 'READY',
   uptimeSeconds: 864200,
-  services: {
-    database: { status: 'UP', message: 'PostgreSQL 16 Enterprise connection pool healthy' },
-    storage: { status: 'UP', message: 'Encrypted object storage active' },
-    cryptoEngine: { status: 'READY', message: 'RSA-2048 Digital Signature & SHA-256 Engine online' },
-    stompBroker: { status: 'AVAILABLE', message: 'In-memory real-time message broker running' }
+  timestamp: '2026-10-21T10:00:00Z',
+  components: {
+    database: { status: 'UP', database: 'PostgreSQL 16.4 Enterprise', latencyMs: 2.8, message: 'Kết nối hồ chứa connection pool hoạt động hoàn hảo' },
+    storage: { status: 'UP', readable: true, writable: true, message: 'Phân vùng lưu trữ tệp tin đọc/ghi bình thường' },
+    signing: {
+      status: 'UP',
+      subject: 'CN=EDMS Internal Document Signing Authority, O=EDMS Enterprise, C=VN',
+      serial: '4A:7F:9B:12:34:56:78:90',
+      validFrom: '2026-01-01T00:00:00Z',
+      validUntil: '2028-01-01T00:00:00Z',
+      expirationStatus: 'VALID',
+      message: 'Khóa RSA-2048 & SHA-256 nội bộ sẵn sàng đóng dấu điện tử'
+    },
+    ocr: { status: 'AVAILABLE', version: 'Tesseract OCR 5.3.4 (vie+eng)', message: 'Động cơ trích xuất văn bản quang học sẵn sàng' },
+    notifications: { status: 'AVAILABLE', message: 'WebSocket STOMP Broker hoạt động ổn định' }
   }
+};
+
+const MOCK_SYSTEM_METRICS = {
+  uptimeSeconds: 864200,
+  timestamp: '2026-10-21T10:00:00Z',
+  memory: { usedMb: 348, totalMb: 1024, maxMb: 2048 },
+  requests: { totalCount: 48920, averageResponseTimeMs: 42.5 },
+  businessCounts: { documents: 142, versions: 289, pendingReviews: 3 }
 };
 
 async function setupRouteMocking(page, currentUser) {
   await page.setRequestInterception(true);
   page.on('request', (request) => {
+    if (request.resourceType() !== 'xhr' && request.resourceType() !== 'fetch') {
+      request.continue();
+      return;
+    }
     const url = request.url();
     const method = request.method();
+
+    if (url.includes('/ws-edms')) {
+      request.respond({
+        status: 200,
+        contentType: 'text/plain',
+        body: 'ok'
+      });
+      return;
+    }
 
     if (url.includes('/api/auth/login')) {
       request.respond({
@@ -320,11 +379,29 @@ async function setupRouteMocking(page, currentUser) {
       return;
     }
 
-    if (url.includes('/api/admin/system-status')) {
+    if (url.includes('/api/admin/system/status') || url.includes('/api/admin/system-status')) {
       request.respond({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(MOCK_SYSTEM_STATUS)
+      });
+      return;
+    }
+
+    if (url.includes('/api/admin/system/metrics')) {
+      request.respond({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(MOCK_SYSTEM_METRICS)
+      });
+      return;
+    }
+
+    if (url.includes('/api/admin/system/liveness') || url.includes('/api/admin/system/readiness')) {
+      request.respond({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'UP', message: 'Hệ thống vận hành bình thường' })
       });
       return;
     }
@@ -397,19 +474,19 @@ async function run() {
     // -------------------------------------------------------------
     console.log('\n[1/6] Capturing Public Unauthenticated Screens...');
     await page.setViewport({ width: 1440, height: 900 });
-    await page.goto('http://localhost:5173/', { waitUntil: 'networkidle2' });
+    await page.goto('http://localhost:5173/', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
     });
-    await page.goto('http://localhost:5173/', { waitUntil: 'networkidle2' });
+    await page.goto('http://localhost:5173/', { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 1200));
 
     await page.screenshot({ path: path.join(OUT_DIR, 'public_01_login_desktop_1440.png') });
     console.log('  ✓ Saved public_01_login_desktop_1440.png');
 
     // Public Verification Page
-    await page.goto('http://localhost:5173/verify', { waitUntil: 'networkidle2' });
+    await page.goto('http://localhost:5173/verify', { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 1200));
     await page.screenshot({ path: path.join(OUT_DIR, 'public_02_verify_portal_1440.png') });
     console.log('  ✓ Saved public_02_verify_portal_1440.png');
@@ -427,12 +504,23 @@ async function run() {
       localStorage.setItem('edms_user', JSON.stringify(user));
     }, adminUser);
 
-    await page.goto('http://localhost:5173/', { waitUntil: 'networkidle2' });
+    await page.goto('http://localhost:5173/', { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 1500));
 
     // Admin Documents - Light Mode
     await page.screenshot({ path: path.join(OUT_DIR, 'admin_01_desktop_1440_documents_light.png') });
     console.log('  ✓ Saved admin_01_desktop_1440_documents_light.png');
+
+    // Admin Upload Modal (Modernized 760px responsive dialog)
+    const uploadBtn = await page.$('#open-upload-modal-btn');
+    if (uploadBtn) {
+      await uploadBtn.click();
+      await new Promise(r => setTimeout(r, 600));
+      await page.screenshot({ path: path.join(OUT_DIR, 'admin_01b_upload_modal.png') });
+      console.log('  ✓ Saved admin_01b_upload_modal.png');
+      await page.keyboard.press('Escape');
+      await new Promise(r => setTimeout(r, 400));
+    }
 
     // Admin Documents - Dark Mode
     const themeBtn = await page.$('#theme-toggle-btn');
@@ -521,7 +609,7 @@ async function run() {
       window.dispatchEvent(new CustomEvent('app-navigate', { detail: 'documents' }));
     }, staffUser);
 
-    await page.goto('http://localhost:5173/', { waitUntil: 'networkidle2' });
+    await page.goto('http://localhost:5173/', { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 1200));
     await page.screenshot({ path: path.join(OUT_DIR, 'staff_01_desktop_1440_documents.png') });
     console.log('  ✓ Saved staff_01_desktop_1440_documents.png');
@@ -542,7 +630,7 @@ async function run() {
       window.dispatchEvent(new CustomEvent('app-navigate', { detail: 'documents' }));
     }, standardUser);
 
-    await page.goto('http://localhost:5173/', { waitUntil: 'networkidle2' });
+    await page.goto('http://localhost:5173/', { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 1200));
     await page.screenshot({ path: path.join(OUT_DIR, 'user_01_desktop_1440_documents.png') });
     console.log('  ✓ Saved user_01_desktop_1440_documents.png');
@@ -559,7 +647,7 @@ async function run() {
       window.dispatchEvent(new CustomEvent('app-navigate', { detail: 'documents' }));
     }, adminUser);
 
-    await page.goto('http://localhost:5173/', { waitUntil: 'networkidle2' });
+    await page.goto('http://localhost:5173/', { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 1000));
 
     // -------------------------------------------------------------

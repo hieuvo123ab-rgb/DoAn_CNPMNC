@@ -33,11 +33,16 @@ export type AppView =
   | 'tasks'
   | 'system-status';
 
-export const Navbar: React.FC = () => {
+export interface NavbarProps {
+  currentView?: AppView;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ currentView: initialView }) => {
   const { user, logout } = useAuth();
-  const [activeView, setActiveView] = useState<AppView>('documents');
+  const [activeView, setActiveView] = useState<AppView>(initialView || 'documents');
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
+  const [isWsConnected, setIsWsConnected] = useState<boolean>(() => webSocketService.isConnected());
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
     return localStorage.getItem('edms_sidebar_collapsed') === 'true';
   });
@@ -46,6 +51,22 @@ export const Navbar: React.FC = () => {
     return localStorage.getItem('edms_theme') === 'dark';
   });
   const notifRef = useRef<HTMLDivElement>(null);
+
+  // Sync propView if passed or updated
+  useEffect(() => {
+    if (initialView && initialView !== activeView) {
+      setActiveView(initialView);
+    }
+  }, [initialView]);
+
+  // Sync real WebSocket connection status
+  useEffect(() => {
+    const handleWs = (e: any) => {
+      setIsWsConnected(Boolean(e.detail?.connected));
+    };
+    window.addEventListener('websocket-status', handleWs);
+    return () => window.removeEventListener('websocket-status', handleWs);
+  }, []);
 
   // Sync theme
   useEffect(() => {
@@ -416,9 +437,28 @@ export const Navbar: React.FC = () => {
 
           <div className="ent-topbar__right">
             {/* Live STOMP Indicator */}
-            <div className="ent-topbar__live-indicator" title="Kết nối thời gian thực WebSocket STOMP đang hoạt động">
-              <span className="ent-topbar__live-dot" />
-              <span className="ent-topbar__live-label">Trực tuyến</span>
+            <div
+              className={`ent-topbar__live-indicator ${
+                isWsConnected
+                  ? 'ent-topbar__live-indicator--online'
+                  : 'ent-topbar__live-indicator--offline'
+              }`}
+              title={
+                isWsConnected
+                  ? 'Kết nối thời gian thực WebSocket STOMP đang hoạt động'
+                  : 'Mất kết nối thời gian thực WebSocket (Đang tự động kết nối lại...)'
+              }
+            >
+              <span
+                className={`ent-topbar__live-dot ${
+                  isWsConnected
+                    ? 'ent-topbar__live-dot--online'
+                    : 'ent-topbar__live-dot--offline'
+                }`}
+              />
+              <span className="ent-topbar__live-label">
+                {isWsConnected ? 'Trực tuyến' : 'Ngoại tuyến'}
+              </span>
             </div>
 
             {/* Dark/Light Theme Switcher */}

@@ -128,7 +128,7 @@ export const UsersPage: React.FC = () => {
 
   return (
     <div className="app-container">
-      <Navbar />
+      <Navbar currentView="users" />
 
       <main className="main-content">
         <div className="page-header">

@@ -96,9 +96,12 @@ export const VerifyPage: React.FC = () => {
     }
   };
 
+  const [copiedHash, setCopiedHash] = useState(false);
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    alert('Đã sao chép mã băm vào bộ nhớ tạm!');
+    setCopiedHash(true);
+    setTimeout(() => setCopiedHash(false), 2000);
   };
 
   return (
@@ -521,14 +524,17 @@ export const VerifyPage: React.FC = () => {
                           style={{
                             background: 'none',
                             border: 'none',
-                            color: '#94a3b8',
+                            color: copiedHash ? '#4ade80' : '#94a3b8',
                             cursor: 'pointer',
                             fontSize: '0.85rem',
-                            padding: '0 0.25rem'
+                            padding: '0 0.25rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
                           }}
                           title="Sao chép"
                         >
-                          📋
+                          {copiedHash ? '✓ Đã chép' : '📋'}
                         </button>
                       </div>
                     </div>
