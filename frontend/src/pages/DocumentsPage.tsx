@@ -80,10 +80,10 @@ export const DocumentsPage: React.FC = () => {
     try {
       setIsRebuildingOcr(true);
       const res = await documentApi.rebuildOcrIndex(false);
-      setOcrRebuildMsg(`Rebuild OCR hoàn tất: Tổng=${res.total}, Đủ ĐK=${res.eligible}, Sẵn sàng=${res.ready}, Bỏ qua=${res.skipped}`);
+      setOcrRebuildMsg(`Quét lại OCR hoàn tất: Tổng=${res.total}, Đủ ĐK=${res.eligible}, Sẵn sàng=${res.ready}, Bỏ qua=${res.skipped}`);
       await fetchDocuments();
     } catch (err: any) {
-      setError('Lỗi Rebuild OCR: ' + (err.response?.data?.message || err.message));
+      setError('Lỗi quét lại OCR: ' + (err.response?.data?.message || err.message));
     } finally {
       setIsRebuildingOcr(false);
     }
@@ -316,8 +316,8 @@ export const DocumentsPage: React.FC = () => {
       <main className="main-content">
         <div className="page-header">
           <div className="page-title">
-            <h2>Quản Lý Tài Liệu Điện Tử</h2>
-            <p>Lưu trữ tập trung, tìm kiếm thông minh, bảo mật và phân quyền hồ sơ dữ liệu</p>
+            <h2>Quản lý tài liệu</h2>
+            <p>Tra cứu và quản lý tài liệu theo quyền truy cập</p>
           </div>
           <div className="page-actions">
             {user?.role === 'ROLE_ADMIN' && (
@@ -329,7 +329,7 @@ export const DocumentsPage: React.FC = () => {
                 id="rebuild-ocr-btn"
               >
                 <Cpu size={16} className={isRebuildingOcr ? 'animate-spin' : ''} />
-                <span>{isRebuildingOcr ? 'Đang OCR...' : 'Rebuild OCR'}</span>
+                <span>{isRebuildingOcr ? 'Đang quét...' : 'Quét lại OCR'}</span>
               </button>
             )}
             <button
@@ -454,7 +454,7 @@ export const DocumentsPage: React.FC = () => {
               title="Phương thức tìm kiếm"
             >
               <option value="LEXICAL">Tìm chính xác (Từ khóa)</option>
-              <option value="SEMANTIC">Tìm theo ngữ nghĩa (AI)</option>
+              <option value="SEMANTIC">Tìm theo ngữ nghĩa</option>
               <option value="HYBRID">Tìm kết hợp (Lai ghép)</option>
             </select>
 
@@ -1429,8 +1429,8 @@ export const DocumentsPage: React.FC = () => {
           isOpen={showOcrConfirm}
           onClose={() => setShowOcrConfirm(false)}
           onConfirm={handleRebuildOcrExecute}
-          title="Xác nhận Rebuild OCR Index"
-          message="Bạn có chắc muốn chạy Rebuild OCR Index cho các tài liệu đủ điều kiện? Quá trình này sẽ quét trích xuất lại văn bản OCR cho các tệp hình ảnh và scanned PDF."
+          title="Xác nhận quét lại OCR"
+          message="Bạn muốn quét lại nội dung nhận dạng của các tài liệu đủ điều kiện? Thao tác có thể mất vài phút."
           confirmLabel="Bắt đầu Rebuild"
           cancelLabel="Hủy"
           variant="primary"
