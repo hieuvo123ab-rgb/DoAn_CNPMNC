@@ -144,10 +144,10 @@ export const VerifyPage: React.FC = () => {
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#fff' }}>
-              EDMS Trust & Verification
+              EDMS — Xác thực tài liệu
             </h1>
             <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8' }}>
-              Trung tâm Giám định & Chứng thực Toàn vẹn Điện tử
+              Kiểm tra tính xác thực của tài liệu
             </p>
           </div>
         </div>
@@ -189,14 +189,14 @@ export const VerifyPage: React.FC = () => {
             border: '1px solid rgba(59, 130, 246, 0.25)',
             marginBottom: '0.75rem'
           }}>
-            ENTERPRISE INTEGRITY VERIFICATION
+            KIỂM TRA TÀI LIỆU
           </span>
           <h2 style={{ fontSize: '1.85rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#f8fafc' }}>
-            Tra cứu & Giám định Chứng thực Toàn vẹn
+            Kiểm tra tính xác thực tài liệu
           </h2>
           <p style={{ color: '#94a3b8', fontSize: '0.92rem', maxWidth: '620px', margin: '0 auto', lineHeight: 1.5 }}>
-            Kiểm tra tức thời tính nguyên bản của văn bản thông qua mã QR được đóng dấu động,
-            đối soát mã băm mật mã SHA-256 và chữ ký điện tử máy chủ RSA-2048.
+            Đối chiếu mã QR, mã băm và thông tin ký số của tài liệu,
+            để phát hiện thay đổi so với bản lưu trữ.
           </p>
         </div>
 
@@ -256,7 +256,7 @@ export const VerifyPage: React.FC = () => {
               Kéo thả tệp tin để đối soát
             </h3>
             <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}>
-              Hỗ trợ PDF, DOCX, Hình ảnh (PNG, JPG)... Tự động tính toán SHA-256 ngay lập tức
+              Hỗ trợ PDF, DOCX, PNG và JPG. Hệ thống kiểm tra mã băm SHA-256.
             </p>
             {uploadedFileName && (
               <span style={{
@@ -367,7 +367,7 @@ export const VerifyPage: React.FC = () => {
                   boxShadow: '0 2px 8px rgba(37, 99, 235, 0.4)'
                 }}
               >
-                {loading ? 'Đang thẩm định...' : 'Kiểm tra Giám định'}
+                {loading ? 'Đang kiểm tra...' : 'Kiểm tra tài liệu'}
               </button>
             </form>
           </div>
@@ -625,7 +625,7 @@ export const VerifyPage: React.FC = () => {
 
         {/* Footer info */}
         <div style={{ textAlign: 'center', marginTop: '3rem', fontSize: '0.75rem', color: '#64748b' }}>
-          Hệ thống Quản lý Tài liệu Điện tử Doanh nghiệp (EDMS) — Bảo vệ toàn vẹn bằng SHA-256 & Chữ ký số nội bộ RSA-2048.
+          EDMS — Kiểm tra tính toàn vẹn và chữ ký số nội bộ của tài liệu.
         </div>
       </div>
     </div>
