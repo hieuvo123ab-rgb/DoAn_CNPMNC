@@ -149,7 +149,7 @@ export const DispositionQueuePage: React.FC = () => {
 
   return (
     <div className="layout-root">
-      <Navbar />
+      <Navbar currentView="disposition-queue" />
 
       <main className="main-content" style={{ padding: '1.5rem', maxWidth: '1280px', margin: '0 auto' }}>
         <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>

@@ -183,7 +183,7 @@ export const ReviewQueuePage: React.FC = () => {
 
   return (
     <div className="layout-root">
-      <Navbar />
+      <Navbar currentView="review-queue" />
 
       <main className="main-content" style={{ padding: '1.75rem 2rem' }}>
         {/* Page Header */}

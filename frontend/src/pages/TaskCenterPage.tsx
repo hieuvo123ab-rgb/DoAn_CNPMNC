@@ -118,7 +118,7 @@ export const TaskCenterPage: React.FC = () => {
 
   return (
     <div className="page-layout">
-      <Navbar />
+      <Navbar currentView="tasks" />
       <main className="container" style={{ padding: '24px 0', maxWidth: '1200px', margin: '0 auto' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
