@@ -64,14 +64,14 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="dashboard-page">
-      <Navbar />
+      <Navbar currentView="dashboard" />
       <main className="dashboard-container">
         {/* Header */}
         <div className="dashboard-header d-flex justify-content-between align-items-center mb-4">
           <div>
-            <h2 className="dashboard-title">Bảng điều khiển & Giám sát</h2>
+            <h2 className="dashboard-title">Bảng điều khiển</h2>
             <p className="dashboard-subtitle text-secondary mb-0">
-              Dữ liệu giám sát hoạt động và thống kê tài nguyên hệ thống EDMS thời gian thực
+              Tổng hợp tình hình sử dụng và hoạt động của hệ thống
             </p>
           </div>
           <button className="btn btn-outline-primary d-flex align-items-center gap-2" onClick={fetchDashboard} disabled={loading}>

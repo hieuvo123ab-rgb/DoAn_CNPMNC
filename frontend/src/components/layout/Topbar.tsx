@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { AppView } from '../Navbar';
 import { NotificationPanel } from '../NotificationPanel';
+import { useWebSocketStatus } from '../../hooks/useWebSocketStatus';
 
 interface TopbarProps {
   activeView: AppView;
@@ -34,6 +35,7 @@ export const Topbar: React.FC<TopbarProps> = ({
   onRefreshNotifications
 }) => {
   const { user } = useAuth();
+  const websocketConnected = useWebSocketStatus();
   const [showNotifications, setShowNotifications] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('edms_theme') === 'dark';
@@ -73,22 +75,22 @@ export const Topbar: React.FC<TopbarProps> = ({
   const getViewDetails = () => {
     switch (activeView) {
       case 'dashboard':
-        return { title: 'Bảng Điều Khiển', icon: <LayoutDashboard size={18} /> };
+        return { title: 'Bảng điều khiển', icon: <LayoutDashboard size={18} /> };
       case 'users':
-        return { title: 'Quản Lý Người Dùng & Phân Quyền', icon: <Users size={18} /> };
+        return { title: 'Quản lý người dùng', icon: <Users size={18} /> };
       case 'review-queue':
-        return { title: 'Hàng Đợi Duyệt Tài Liệu', icon: <CheckSquare size={18} /> };
+        return { title: 'Hàng đợi duyệt', icon: <CheckSquare size={18} /> };
       case 'disposition-queue':
-        return { title: 'Hàng Đợi Tiêu Hủy Tài Liệu', icon: <Archive size={18} /> };
+        return { title: 'Hàng đợi tiêu hủy', icon: <Archive size={18} /> };
       case 'tasks':
-        return { title: 'Trung Tâm Tác Vụ', icon: <ListTodo size={18} /> };
+        return { title: 'Trung tâm công việc', icon: <ListTodo size={18} /> };
       case 'audit':
-        return { title: 'Nhật Ký & Kiểm Toán An Ninh', icon: <ShieldAlert size={18} /> };
+        return { title: 'Nhật ký kiểm toán', icon: <ShieldAlert size={18} /> };
       case 'system-status':
-        return { title: 'Trạng Thái Hạ Tầng Hệ Thống', icon: <Activity size={18} /> };
+        return { title: 'Trạng thái hệ thống', icon: <Activity size={18} /> };
       case 'documents':
       default:
-        return { title: 'Quản Trị Tài Liệu Doanh Nghiệp', icon: <FileText size={18} /> };
+        return { title: 'Quản lý tài liệu', icon: <FileText size={18} /> };
     }
   };
 
@@ -115,10 +117,13 @@ export const Topbar: React.FC<TopbarProps> = ({
       </div>
 
       <div className="ent-topbar__right">
-        {/* WebSocket Real-time Status Badge */}
-        <div className="ent-topbar__ws-badge" title="Kênh truyền thông thời gian thực WebSocket STOMP">
+        <div
+          className={`ent-topbar__ws-badge ${websocketConnected ? '' : 'ent-topbar__ws-badge--offline'}`}
+          title={websocketConnected ? 'Thông báo đang được cập nhật trực tiếp' : 'Kênh thông báo đang kết nối lại'}
+          aria-live="polite"
+        >
           <span className="ent-topbar__ws-dot" />
-          <span className="ent-topbar__ws-text">Live STOMP</span>
+          <span className="ent-topbar__ws-text">{websocketConnected ? 'Trực tuyến' : 'Đang kết nối'}</span>
         </div>
 
         {/* Theme Toggle Button */}

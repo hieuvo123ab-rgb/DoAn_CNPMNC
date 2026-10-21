@@ -5,6 +5,9 @@ on:
     branches:
       - main
       - "completion/**"
+      - "deploy/**"
+      - "fix/**"
+      - "refactor/**"
   pull_request:
     branches:
       - main

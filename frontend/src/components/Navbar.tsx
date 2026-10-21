@@ -33,11 +33,16 @@ export type AppView =
   | 'tasks'
   | 'system-status';
 
-export const Navbar: React.FC = () => {
+export interface NavbarProps {
+  currentView?: AppView;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ currentView: initialView }) => {
   const { user, logout } = useAuth();
-  const [activeView, setActiveView] = useState<AppView>('documents');
+  const [activeView, setActiveView] = useState<AppView>(initialView || 'documents');
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
+  const [isWsConnected, setIsWsConnected] = useState<boolean>(() => webSocketService.isConnected());
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
     return localStorage.getItem('edms_sidebar_collapsed') === 'true';
   });
@@ -46,6 +51,22 @@ export const Navbar: React.FC = () => {
     return localStorage.getItem('edms_theme') === 'dark';
   });
   const notifRef = useRef<HTMLDivElement>(null);
+
+  // Sync propView if passed or updated
+  useEffect(() => {
+    if (initialView && initialView !== activeView) {
+      setActiveView(initialView);
+    }
+  }, [initialView]);
+
+  // Sync real WebSocket connection status
+  useEffect(() => {
+    const handleWs = (e: any) => {
+      setIsWsConnected(Boolean(e.detail?.connected));
+    };
+    window.addEventListener('websocket-status', handleWs);
+    return () => window.removeEventListener('websocket-status', handleWs);
+  }, []);
 
   // Sync theme
   useEffect(() => {
@@ -157,22 +178,22 @@ export const Navbar: React.FC = () => {
   const getViewTitle = () => {
     switch (activeView) {
       case 'dashboard':
-        return { name: 'Bảng Điều Khiển Doanh Nghiệp', icon: <LayoutDashboard size={18} /> };
+        return { name: 'Bảng điều khiển', icon: <LayoutDashboard size={18} /> };
       case 'users':
-        return { name: 'Quản Lý Người Dùng & Phân Quyền', icon: <Users size={18} /> };
+        return { name: 'Quản lý người dùng', icon: <Users size={18} /> };
       case 'review-queue':
-        return { name: 'Hàng Đợi Phê Duyệt Tài Liệu', icon: <CheckSquare size={18} /> };
+        return { name: 'Hàng đợi duyệt', icon: <CheckSquare size={18} /> };
       case 'disposition-queue':
-        return { name: 'Hàng Đợi Tiêu Hủy Tài Liệu', icon: <Archive size={18} /> };
+        return { name: 'Hàng đợi tiêu hủy', icon: <Archive size={18} /> };
       case 'tasks':
-        return { name: 'Trung Tâm Công Việc Của Tôi', icon: <ListTodo size={18} /> };
+        return { name: 'Trung tâm công việc', icon: <ListTodo size={18} /> };
       case 'audit':
-        return { name: 'Nhật Ký & Kiểm Toán An Ninh', icon: <ShieldAlert size={18} /> };
+        return { name: 'Nhật ký kiểm toán', icon: <ShieldAlert size={18} /> };
       case 'system-status':
-        return { name: 'Trạng Thái Hạ Tầng Hệ Thống', icon: <Activity size={18} /> };
+        return { name: 'Trạng thái hệ thống', icon: <Activity size={18} /> };
       case 'documents':
       default:
-        return { name: 'Quản Trị Lưu Trữ Tài Liệu Điện Tử', icon: <FileText size={18} /> };
+        return { name: 'Quản lý tài liệu', icon: <FileText size={18} /> };
     }
   };
 
@@ -205,8 +226,8 @@ export const Navbar: React.FC = () => {
             </div>
             {!isSidebarCollapsed && (
               <div className="ent-sidebar__brand-info">
-                <span className="ent-sidebar__brand-title">EDMS Enterprise</span>
-                <span className="ent-sidebar__brand-subtitle">Quản Trị Lưu Trữ SaaS</span>
+                <span className="ent-sidebar__brand-title">EDMS</span>
+                <span className="ent-sidebar__brand-subtitle">Quản lý tài liệu</span>
               </div>
             )}
           </div>
@@ -225,13 +246,13 @@ export const Navbar: React.FC = () => {
         <div className="ent-sidebar__nav-scroll">
           {/* Section: Kho Lưu Trữ */}
           <div className="ent-sidebar__section">
-            {!isSidebarCollapsed && <div className="ent-sidebar__section-title">Kho Lưu Trữ</div>}
+            {!isSidebarCollapsed && <div className="ent-sidebar__section-title">Kho tài liệu</div>}
             <button
               type="button"
               className={`ent-sidebar__link ${activeView === 'documents' ? 'active' : ''}`}
               onClick={() => navigateTo('documents')}
               id="nav-docs-btn"
-              title="Quản lý tài liệu điện tử"
+              title="Quản lý tài liệu"
             >
               <FileText size={18} className="ent-sidebar__link-icon" />
               {!isSidebarCollapsed && <span className="ent-sidebar__link-text">Tài liệu</span>}
@@ -241,7 +262,7 @@ export const Navbar: React.FC = () => {
           {/* Section: Quy Trình & Tác Vụ */}
           <div className="ent-sidebar__section">
             {!isSidebarCollapsed && (
-              <div className="ent-sidebar__section-title">Quy Trình & Tác Vụ</div>
+              <div className="ent-sidebar__section-title">Quy trình & Tác vụ</div>
             )}
             <button
               type="button"
@@ -294,14 +315,14 @@ export const Navbar: React.FC = () => {
           {user?.role === 'ROLE_ADMIN' && (
             <div className="ent-sidebar__section">
               {!isSidebarCollapsed && (
-                <div className="ent-sidebar__section-title">Quản Trị Hệ Thống</div>
+                <div className="ent-sidebar__section-title">Quản trị hệ thống</div>
               )}
               <button
                 type="button"
                 className={`ent-sidebar__link ${activeView === 'dashboard' ? 'active' : ''}`}
                 onClick={() => navigateTo('dashboard')}
                 id="nav-dashboard-btn"
-                title="Bảng điều khiển số liệu"
+                title="Bảng điều khiển"
               >
                 <LayoutDashboard size={18} className="ent-sidebar__link-icon" />
                 {!isSidebarCollapsed && (
@@ -314,11 +335,11 @@ export const Navbar: React.FC = () => {
                 className={`ent-sidebar__link ${activeView === 'users' ? 'active' : ''}`}
                 onClick={() => navigateTo('users')}
                 id="nav-users-btn"
-                title="Quản lý tài khoản và phân quyền"
+                title="Quản lý người dùng"
               >
                 <Users size={18} className="ent-sidebar__link-icon" />
                 {!isSidebarCollapsed && (
-                  <span className="ent-sidebar__link-text">Người dùng & Quyền</span>
+                  <span className="ent-sidebar__link-text">Người dùng</span>
                 )}
               </button>
 
@@ -327,7 +348,7 @@ export const Navbar: React.FC = () => {
                 className={`ent-sidebar__link ${activeView === 'audit' ? 'active' : ''}`}
                 onClick={() => navigateTo('audit')}
                 id="nav-audit-btn"
-                title="Nhật ký kiểm toán an ninh hệ thống"
+                title="Nhật ký kiểm toán"
               >
                 <ShieldAlert size={18} className="ent-sidebar__link-icon" />
                 {!isSidebarCollapsed && (
@@ -341,7 +362,7 @@ export const Navbar: React.FC = () => {
                 onClick={() => navigateTo('system-status')}
                 id="nav-system-status-btn"
                 data-route="/system-status"
-                title="Trạng thái hạ tầng và dịch vụ"
+                title="Trạng thái hệ thống"
               >
                 <Activity size={18} className="ent-sidebar__link-icon" />
                 {!isSidebarCollapsed && (
@@ -362,7 +383,11 @@ export const Navbar: React.FC = () => {
               <div className="ent-sidebar__user-meta">
                 <span className="ent-sidebar__username">{user?.username}</span>
                 <span className="ent-sidebar__user-badge">
-                  {user?.role === 'ROLE_ADMIN' ? 'Quản trị viên' : 'Nhân viên'}
+                  {user?.role === 'ROLE_ADMIN'
+                    ? 'Quản trị viên'
+                    : user?.role === 'ROLE_STAFF'
+                    ? 'Chuyên viên'
+                    : 'Người dùng'}
                 </span>
               </div>
             )}
@@ -412,9 +437,28 @@ export const Navbar: React.FC = () => {
 
           <div className="ent-topbar__right">
             {/* Live STOMP Indicator */}
-            <div className="ent-topbar__live-indicator" title="Kết nối thời gian thực WebSocket STOMP sẵn sàng">
-              <span className="ent-topbar__live-dot" />
-              <span className="ent-topbar__live-label">Thời gian thực</span>
+            <div
+              className={`ent-topbar__live-indicator ${
+                isWsConnected
+                  ? 'ent-topbar__live-indicator--online'
+                  : 'ent-topbar__live-indicator--offline'
+              }`}
+              title={
+                isWsConnected
+                  ? 'Kết nối thời gian thực WebSocket STOMP đang hoạt động'
+                  : 'Mất kết nối thời gian thực WebSocket (Đang tự động kết nối lại...)'
+              }
+            >
+              <span
+                className={`ent-topbar__live-dot ${
+                  isWsConnected
+                    ? 'ent-topbar__live-dot--online'
+                    : 'ent-topbar__live-dot--offline'
+                }`}
+              />
+              <span className="ent-topbar__live-label">
+                {isWsConnected ? 'Trực tuyến' : 'Ngoại tuyến'}
+              </span>
             </div>
 
             {/* Dark/Light Theme Switcher */}

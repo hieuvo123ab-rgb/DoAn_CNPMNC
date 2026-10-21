@@ -48,9 +48,8 @@ class WebSocketService {
           console.debug('[STOMP]', str);
         }
       },
-      onConnect: (frame) => {
+      onConnect: () => {
         this.isConnecting = false;
-        console.info('[WebSocket] Connected to EDMS STOMP Broker via SockJS transport:', frame.headers['server'] || 'EDMS-WS');
 
         // 1. Subscribe to User Private Notification Queue
         this.client?.subscribe('/user/queue/notifications', (message: IMessage) => {
@@ -62,7 +61,6 @@ class WebSocketService {
           this.client?.subscribe('/topic/admin/notifications', (message: IMessage) => {
             this.handleIncomingMessage(message);
           });
-          console.info('[WebSocket] Subscribed to admin security alert topic /topic/admin/notifications');
         }
 
         // Notify app that real-time push channel is connected
@@ -109,7 +107,6 @@ class WebSocketService {
         }
       }
 
-      console.info(`[WebSocket] Real-time notification received: #${notification.id} [${notification.type}] "${notification.title}"`);
 
       // Dispatch browser custom event for reactive UI components
       window.dispatchEvent(new CustomEvent('notification-received', { detail: notification }));
@@ -139,7 +136,6 @@ class WebSocketService {
     if (this.client) {
       try {
         this.client.deactivate();
-        console.info('[WebSocket] Disconnected from STOMP broker.');
       } catch (err) {
         console.warn('[WebSocket] Error during STOMP client deactivation:', err);
       }
@@ -147,6 +143,8 @@ class WebSocketService {
     }
     this.isConnecting = false;
     this.currentUsername = null;
+    // Do not reuse de-duplication state after switching accounts.
+    this.seenNotificationIds.clear();
     window.dispatchEvent(new CustomEvent('websocket-status', { detail: { connected: false } }));
   }
 

@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
+import { ConfirmationModal } from './common/ConfirmationModal';
 
 interface DocumentAccessModalProps {
   document: DocumentItem | null;
@@ -36,6 +37,7 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
   const [isSavingMode, setIsSavingMode] = useState<boolean>(false);
   const [isSharing, setIsSharing] = useState<boolean>(false);
   const [revokingUserId, setRevokingUserId] = useState<number | null>(null);
+  const [revokeTarget, setRevokeTarget] = useState<{ userId: number; username: string } | null>(null);
 
   const [targetUsername, setTargetUsername] = useState<string>('');
   const [targetPermission, setTargetPermission] = useState<'READ' | 'EDIT'>('READ');
@@ -117,16 +119,15 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
     }
   };
 
-  const handleRevoke = async (userId: number, username: string) => {
-    if (!confirm(`Bạn có chắc chắn muốn thu hồi quyền truy cập của người dùng "${username}"?`)) {
-      return;
-    }
-
+  const handleRevokeConfirm = async () => {
+    if (!revokeTarget) return;
+    const { userId, username } = revokeTarget;
     try {
       setRevokingUserId(userId);
       setMessage(null);
       await documentApi.revokePermission(document.id, userId);
       setMessage({ type: 'success', text: `Đã thu hồi quyền của người dùng ${username}.` });
+      setRevokeTarget(null);
       await loadPermissions();
       if (onSuccess) onSuccess();
     } catch (err: unknown) {
@@ -328,7 +329,7 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
                       </span>
                       <button
                         type="button"
-                        onClick={() => handleRevoke(p.userId, p.username)}
+                        onClick={() => setRevokeTarget({ userId: p.userId, username: p.username })}
                         disabled={revokingUserId === p.userId}
                         title="Thu hồi quyền"
                         className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
@@ -365,6 +366,20 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
           </button>
         </div>
       </div>
+
+      {revokeTarget && (
+        <ConfirmationModal
+          isOpen={Boolean(revokeTarget)}
+          onClose={() => setRevokeTarget(null)}
+          onConfirm={handleRevokeConfirm}
+          title="Xác nhận thu hồi quyền"
+          message={`Bạn có chắc chắn muốn thu hồi quyền truy cập tài liệu của người dùng "${revokeTarget.username}" không?`}
+          confirmLabel="Thu hồi quyền"
+          cancelLabel="Hủy"
+          variant="danger"
+          isLoading={revokingUserId === revokeTarget.userId}
+        />
+      )}
     </div>
   );
 };
