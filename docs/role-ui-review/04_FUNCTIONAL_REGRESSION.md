@@ -19,7 +19,7 @@ Script chụp ảnh có `page.setRequestInterception(true)`, tự trả dữ li�
 | 2 | Rate limit | HTTP 429 / thời gian chờ, chạy trên tài khoản test cách ly | LIVE_E2E_NOT_RUN |
 | 3 | Xác thực tài liệu công khai | Mã hash hoặc file demo, phản hồi API đúng | LIVE_E2E_NOT_RUN |
 | 4 | Danh sách tài liệu / bộ lọc | GET trả dữ liệu có thực, quyền ACL đúng | LIVE_E2E_NOT_RUN |
-| 5 | Tìm kiếm Lexical/Semantic/Hybrid | Dữ liệu đối chứng và mô hình ONNX khả dụng | LIVE_E2E_NOT_RUN |
+| 5 | Tìm kiếm Lexical/Semantic/Hybrid | Mô hình ONNX đã nạp khả dụng trên Railway (`semanticModel: AVAILABLE`); E2E query với JWT thật đang chờ chạy | LIVE_MODEL_VERIFIED / E2E_PENDING |
 | 6 | Upload tài liệu | Multipart, lưu DB, file và quyền | LIVE_E2E_NOT_RUN |
 | 7 | Xem trước tài liệu | PDF/ảnh/file demo, không lộ JWT | LIVE_E2E_NOT_RUN |
 | 8 | Download tệp gốc | Nội dung/filename/checksum đối chiếu | LIVE_E2E_NOT_RUN |

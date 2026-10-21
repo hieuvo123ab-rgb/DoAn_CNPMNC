@@ -19,7 +19,7 @@
 | RBAC Backend 401/403 theo JWT | NOT_RUN | Script intercept request, không đối chiếu response thật |
 | Upload, download, version, review, sign, disposition | NOT_RUN | Không có trace API và ảnh chụp sau thao tác thành công thật |
 | Realtime STOMP reconnect/delivery & cross-user isolation | NOT_RUN | Screenshot không đo message nhận thực |
-| Tìm kiếm ngữ nghĩa | BLOCKED_ON_PREVIEW | Railway log ghi ONNX Runtime nhận Git LFS pointer, không nạp được model |
+| Tìm kiếm ngữ nghĩa | UNBLOCKED_VERIFIED | Model `multilingual-e5-small-onnx-int8-v1` đã nạp thành công từ Git LFS có kiểm tra SHA-256; endpoint `/api/health` trả về `semanticModel: AVAILABLE`, `status: UP` trên Railway |
 | Responsive interaction / accessibility AA | PARTIALLY_CHECKED | Có ảnh viewport, chưa có đủ assertion và kết quả contrast/a11y |
 | 17/17 functional regression | NOT_RUN | Chưa có bằng chứng chạy E2E không mock cho cả 17 case |
 

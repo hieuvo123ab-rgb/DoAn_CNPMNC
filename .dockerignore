@@ -1,0 +1,22 @@
+.git
+.github
+docs
+phân công và báo cáo
+backups
+.env
+.env.*
+!.env.example
+**/node_modules
+**/target
+**/dist
+**/.DS_Store
+**/*.log
+**/__pycache__
+**/*.pyc
+**/*.p12
+**/*.pem
+**/*.key
+**/*.dump
+**/*.bak
+*.zip
+*.pdf
