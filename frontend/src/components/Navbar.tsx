@@ -180,13 +180,13 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView: initialView }) => {
       case 'dashboard':
         return { name: 'Bảng điều khiển', icon: <LayoutDashboard size={18} /> };
       case 'users':
-        return { name: 'Quản lý người dùng', icon: <Users size={18} /> };
+        return { name: 'Người dùng', icon: <Users size={18} /> };
       case 'review-queue':
         return { name: 'Hàng đợi duyệt', icon: <CheckSquare size={18} /> };
       case 'disposition-queue':
         return { name: 'Hàng đợi tiêu hủy', icon: <Archive size={18} /> };
       case 'tasks':
-        return { name: 'Trung tâm công việc', icon: <ListTodo size={18} /> };
+        return { name: 'Công việc', icon: <ListTodo size={18} /> };
       case 'audit':
         return { name: 'Nhật ký kiểm toán', icon: <ShieldAlert size={18} /> };
       case 'system-status':
@@ -210,7 +210,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView: initialView }) => {
         />
       )}
 
-      {/* Modern Collapsible Enterprise Sidebar */}
+      {/* Modern Collapsible Sidebar */}
       <aside
         className={`ent-sidebar ${isSidebarCollapsed ? 'ent-sidebar--collapsed' : ''} ${
           isMobileDrawerOpen ? 'ent-sidebar--mobile-open' : ''
@@ -255,7 +255,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView: initialView }) => {
               title="Quản lý tài liệu"
             >
               <FileText size={18} className="ent-sidebar__link-icon" />
-              {!isSidebarCollapsed && <span className="ent-sidebar__link-text">Tài liệu</span>}
+              {!isSidebarCollapsed && <span className="ent-sidebar__link-text">Quản lý tài liệu</span>}
             </button>
           </div>
 

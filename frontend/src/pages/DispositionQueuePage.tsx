@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { DispositionItem, documentApi } from '../api/documentApi';
 import { Navbar } from '../components/Navbar';
 import { PreviewModal } from '../components/PreviewModal';
+import { EnterpriseModal } from '../components/common/EnterpriseModal';
 import {
   CheckCircle,
   XCircle,
@@ -408,63 +409,15 @@ export const DispositionQueuePage: React.FC = () => {
 
       {/* Approve Modal */}
       {approveItem && (
-        <div className="modal-backdrop" style={{ zIndex: 1200 }}>
-          <div className="modal-card" style={{ maxWidth: '520px', width: '92%' }}>
-            <div className="modal-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#dc2626' }}>
-                <Archive size={20} />
-                <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Phê Duyệt Tiêu Hủy Tài Liệu</h3>
-              </div>
-              <button type="button" className="btn-icon" onClick={() => setApproveItem(null)}>
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="modal-body" style={{ padding: '1.2rem' }}>
-              <div
-                style={{
-                  padding: '0.85rem',
-                  borderRadius: '6px',
-                  backgroundColor: '#fef2f2',
-                  border: '1px solid #fee2e2',
-                  marginBottom: '1rem',
-                  fontSize: '0.85rem',
-                  color: '#991b1b',
-                  lineHeight: '1.4',
-                }}
-              >
-                <strong>Lưu ý quan trọng:</strong> Phê duyệt sẽ chuyển tài liệu sang trạng thái <strong>DISPOSED</strong>. Tệp vật lý và lịch sử kiểm toán được lưu trữ theo quy định bảo lưu.
-              </div>
-
-              <div style={{ marginBottom: '1rem', fontSize: '0.88rem' }}>
-                <p style={{ margin: '0 0 0.4rem 0' }}>
-                  Tài liệu: <strong>{approveItem.documentTitle}</strong> (#{approveItem.documentId})
-                </p>
-                <p style={{ margin: '0 0 0.4rem 0', color: '#64748b' }}>
-                  Lý do yêu cầu: <em>"{approveItem.reason}"</em>
-                </p>
-                <p style={{ margin: 0, color: '#64748b' }}>
-                  Người yêu cầu: <strong>{approveItem.requestedBy}</strong> ({formatDate(approveItem.requestedAt)})
-                </p>
-              </div>
-
-              <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.3rem' }}>
-                  Ghi chú phê duyệt (Tùy chọn):
-                </label>
-                <textarea
-                  rows={3}
-                  className="form-control"
-                  placeholder="Nhập ghi chú phê duyệt tiêu hủy..."
-                  value={approveComment}
-                  onChange={(e) => setApproveComment(e.target.value)}
-                  style={{ width: '100%', fontSize: '0.85rem' }}
-                  id="approve-disposition-comment-input"
-                />
-              </div>
-            </div>
-
-            <div className="modal-footer" style={{ borderTop: '1px solid #e2e8f0', padding: '0.8rem 1.2rem', display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
+        <EnterpriseModal
+          isOpen={Boolean(approveItem)}
+          onClose={() => setApproveItem(null)}
+          title="Phê Duyệt Tiêu Hủy Tài Liệu"
+          subtitle={`Tài liệu #${approveItem.documentId} — ${approveItem.documentTitle}`}
+          icon={<Archive size={20} />}
+          size="sm"
+          footer={
+            <>
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -479,60 +432,61 @@ export const DispositionQueuePage: React.FC = () => {
                 onClick={handleConfirmApprove}
                 disabled={isApproving}
                 id="confirm-approve-disposition-btn"
-                style={{ backgroundColor: '#dc2626', color: '#ffffff' }}
               >
                 {isApproving ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle size={15} />}
                 <span>Xác nhận tiêu hủy</span>
               </button>
+            </>
+          }
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="ent-alert ent-alert--danger" style={{ margin: 0, fontSize: '0.85rem', lineHeight: '1.4' }}>
+              <div>
+                <strong>Lưu ý quan trọng:</strong> Phê duyệt sẽ chuyển tài liệu sang trạng thái <strong>DISPOSED</strong>. Tệp vật lý và lịch sử kiểm toán được lưu trữ theo quy định bảo lưu.
+              </div>
+            </div>
+
+            <div style={{ fontSize: '0.88rem' }}>
+              <p style={{ margin: '0 0 0.35rem 0', color: 'var(--color-text-main)' }}>
+                Tài liệu: <strong>{approveItem.documentTitle}</strong> (#{approveItem.documentId})
+              </p>
+              <p style={{ margin: '0 0 0.35rem 0', color: 'var(--color-text-muted)' }}>
+                Lý do yêu cầu: <em>"{approveItem.reason}"</em>
+              </p>
+              <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>
+                Người yêu cầu: <strong>{approveItem.requestedBy}</strong> ({formatDate(approveItem.requestedAt)})
+              </p>
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label" style={{ fontSize: '0.825rem' }}>
+                Ghi chú phê duyệt (Tùy chọn):
+              </label>
+              <textarea
+                rows={3}
+                className="form-input"
+                placeholder="Nhập ghi chú phê duyệt tiêu hủy..."
+                value={approveComment}
+                onChange={(e) => setApproveComment(e.target.value)}
+                style={{ minHeight: '80px', height: 'auto', padding: '0.5rem 0.75rem', resize: 'vertical' }}
+                id="approve-disposition-comment-input"
+              />
             </div>
           </div>
-        </div>
+        </EnterpriseModal>
       )}
 
       {/* Reject Modal */}
       {rejectItem && (
-        <div className="modal-backdrop" style={{ zIndex: 1200 }}>
-          <div className="modal-card" style={{ maxWidth: '520px', width: '92%' }}>
-            <div className="modal-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#b91c1c' }}>
-                <XCircle size={20} />
-                <h3 style={{ margin: 0, fontSize: '1.15rem' }}>Từ Chối Yêu Cầu Tiêu Hủy</h3>
-              </div>
-              <button type="button" className="btn-icon" onClick={() => setRejectItem(null)}>
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="modal-body" style={{ padding: '1.2rem' }}>
-              {rejectError && (
-                <div style={{ padding: '0.75rem', borderRadius: '6px', backgroundColor: '#fee2e2', color: '#991b1b', marginBottom: '1rem', fontSize: '0.85rem' }}>
-                  {rejectError}
-                </div>
-              )}
-
-              <p style={{ margin: '0 0 1rem 0', fontSize: '0.88rem', color: '#475569' }}>
-                Từ chối yêu cầu tiêu hủy tài liệu <strong>{rejectItem.documentTitle}</strong> (#{rejectItem.documentId}).
-                Tài liệu sẽ tiếp tục duy trì ở trạng thái lưu trữ (ARCHIVED).
-              </p>
-
-              <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.3rem' }}>
-                  Lý do từ chối (Bắt buộc):
-                </label>
-                <textarea
-                  rows={3}
-                  className="form-control"
-                  placeholder="Nhập lý do từ chối yêu cầu tiêu hủy..."
-                  value={rejectComment}
-                  onChange={(e) => setRejectComment(e.target.value)}
-                  style={{ width: '100%', fontSize: '0.85rem' }}
-                  id="reject-disposition-comment-input"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="modal-footer" style={{ borderTop: '1px solid #e2e8f0', padding: '0.8rem 1.2rem', display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
+        <EnterpriseModal
+          isOpen={Boolean(rejectItem)}
+          onClose={() => setRejectItem(null)}
+          title="Từ Chối Yêu Cầu Tiêu Hủy"
+          subtitle={`Tài liệu #${rejectItem.documentId} — ${rejectItem.documentTitle}`}
+          icon={<XCircle size={20} />}
+          size="sm"
+          footer={
+            <>
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -551,9 +505,39 @@ export const DispositionQueuePage: React.FC = () => {
                 {isRejecting ? <Loader2 size={15} className="animate-spin" /> : <XCircle size={15} />}
                 <span>Xác nhận từ chối</span>
               </button>
+            </>
+          }
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {rejectError && (
+              <div className="ent-alert ent-alert--danger" style={{ margin: 0 }}>
+                <AlertTriangle size={16} style={{ flexShrink: 0 }} />
+                <span>{rejectError}</span>
+              </div>
+            )}
+
+            <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--color-text-main)' }}>
+              Từ chối yêu cầu tiêu hủy tài liệu <strong>{rejectItem.documentTitle}</strong> (#{rejectItem.documentId}).
+              Tài liệu sẽ tiếp tục duy trì ở trạng thái lưu trữ (ARCHIVED).
+            </p>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label" style={{ fontSize: '0.825rem' }}>
+                Lý do từ chối (Bắt buộc):
+              </label>
+              <textarea
+                rows={3}
+                className="form-input"
+                placeholder="Nhập lý do từ chối yêu cầu tiêu hủy..."
+                value={rejectComment}
+                onChange={(e) => setRejectComment(e.target.value)}
+                style={{ minHeight: '80px', height: 'auto', padding: '0.5rem 0.75rem', resize: 'vertical' }}
+                id="reject-disposition-comment-input"
+                required
+              />
             </div>
           </div>
-        </div>
+        </EnterpriseModal>
       )}
     </div>
   );

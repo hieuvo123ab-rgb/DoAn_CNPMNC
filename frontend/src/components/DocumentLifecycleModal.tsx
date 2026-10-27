@@ -301,16 +301,9 @@ export const DocumentLifecycleModal: React.FC<DocumentLifecycleModalProps> = ({
                 </span>
               </div>
               <div>
-                <span style={{ color: '#64748b' }}>Legal Hold: </span>
+                <span style={{ color: 'var(--color-text-muted)' }}>Legal Hold: </span>
                 <span
-                  style={{
-                    padding: '0.15rem 0.45rem',
-                    borderRadius: '4px',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    backgroundColor: document.legalHold ? '#fee2e2' : '#f0fdf4',
-                    color: document.legalHold ? '#991b1b' : '#166534',
-                  }}
+                  className={`ent-badge ${document.legalHold ? 'ent-badge--danger' : 'ent-badge--success'}`}
                 >
                   {document.legalHold ? 'ĐANG BẬT (HOLD ACTIVE)' : 'TẮT'}
                 </span>
@@ -318,13 +311,13 @@ export const DocumentLifecycleModal: React.FC<DocumentLifecycleModalProps> = ({
             </div>
 
             {isArchived && (
-              <div style={{ marginTop: '0.6rem', fontSize: '0.8rem', color: '#64748b' }}>
+              <div style={{ marginTop: '0.6rem', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
                 Lưu trữ bởi: <strong>{document.archivedBy || '—'}</strong> vào lúc: <strong>{formatDate(document.archivedAt)}</strong>
               </div>
             )}
 
             {isDisposed && (
-              <div style={{ marginTop: '0.6rem', fontSize: '0.8rem', color: '#991b1b' }}>
+              <div style={{ marginTop: '0.6rem', fontSize: '0.8rem', color: 'var(--color-danger)' }}>
                 Tiêu hủy bởi: <strong>{document.disposedBy || 'Admin'}</strong> vào lúc: <strong>{formatDate(document.disposedAt)}</strong>
               </div>
             )}
@@ -333,22 +326,18 @@ export const DocumentLifecycleModal: React.FC<DocumentLifecycleModalProps> = ({
           {/* DISPOSED Warning Banner */}
           {isDisposed && (
             <div
+              className="ent-alert ent-alert--danger"
               style={{
-                padding: '1rem',
-                borderRadius: '8px',
-                border: '1px solid #fecaca',
-                backgroundColor: '#fef2f2',
-                color: '#991b1b',
                 marginBottom: '1.2rem',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.75rem',
               }}
             >
-              <Archive size={24} />
+              <Archive size={24} style={{ flexShrink: 0 }} />
               <div>
                 <strong style={{ fontSize: '0.95rem', display: 'block' }}>Hồ sơ đã kết thúc vòng đời nghiệp vụ (DISPOSED)</strong>
-                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.82rem', color: '#7f1d1d' }}>
+                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.82rem' }}>
                   Tài liệu đã được tiêu hủy có kiểm soát. File vật lý, phiên bản lịch sử và nhật ký kiểm toán được lưu trữ bảo toàn phục vụ thanh tra và chứng thực.
                 </p>
               </div>
@@ -361,8 +350,8 @@ export const DocumentLifecycleModal: React.FC<DocumentLifecycleModalProps> = ({
               style={{
                 padding: '0.9rem',
                 borderRadius: '8px',
-                border: `1px solid ${document.eligibleForDisposition ? '#86efac' : '#e2e8f0'}`,
-                backgroundColor: document.eligibleForDisposition ? '#f0fdf4' : '#ffffff',
+                border: '1px solid var(--color-border)',
+                backgroundColor: 'var(--color-card-muted)',
                 marginBottom: '1.2rem',
                 display: 'flex',
                 alignItems: 'center',
@@ -372,11 +361,11 @@ export const DocumentLifecycleModal: React.FC<DocumentLifecycleModalProps> = ({
               }}
             >
               <div>
-                <div style={{ fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Clock size={16} color={document.eligibleForDisposition ? '#16a34a' : '#64748b'} />
+                <div style={{ fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-text-main)' }}>
+                  <Clock size={16} style={{ color: document.eligibleForDisposition ? 'var(--color-success)' : 'var(--color-text-muted)' }} />
                   <span>Điều kiện xử lý tiêu hủy (Disposition Eligibility):</span>
                 </div>
-                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
                   {document.retentionUntil ? `Thời hạn lưu trữ: ${document.retentionUntil}` : 'Chưa đặt thời hạn lưu trữ'}
                   {' • '}
                   (Không tự động xóa; chỉ sẵn sàng khi hết hạn lưu trữ & không có Legal Hold)
@@ -384,15 +373,7 @@ export const DocumentLifecycleModal: React.FC<DocumentLifecycleModalProps> = ({
               </div>
               <div>
                 <span
-                  style={{
-                    padding: '0.25rem 0.6rem',
-                    borderRadius: '6px',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    backgroundColor: document.eligibleForDisposition ? '#dcfce7' : '#f1f5f9',
-                    color: document.eligibleForDisposition ? '#15803d' : '#64748b',
-                    border: `1px solid ${document.eligibleForDisposition ? '#bbf7d0' : '#e2e8f0'}`,
-                  }}
+                  className={`ent-badge ${document.eligibleForDisposition ? 'ent-badge--success' : 'ent-badge--neutral'}`}
                 >
                   {document.eligibleForDisposition ? 'ĐỦ ĐIỀU KIỆN (ELIGIBLE)' : 'CHƯA ĐỦ ĐIỀU KIỆN'}
                 </span>

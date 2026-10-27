@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { verificationApi, PublicVerificationResponse } from '../api/verificationApi';
+import {
+  Search,
+  AlertTriangle,
+  ShieldCheck,
+  AlertOctagon,
+  Copy,
+  Check,
+  Loader2,
+  ArrowLeft,
+  FileCheck,
+  Shield,
+  Download,
+} from 'lucide-react';
 
 export const VerifyPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -105,108 +118,89 @@ export const VerifyPage: React.FC = () => {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#0f172a',
-      color: '#f8fafc',
-      fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-      padding: '2.5rem 1.5rem',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center'
-    }}>
-      {/* Top Brand Bar */}
-      <div style={{
-        maxWidth: '850px',
-        width: '100%',
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: 'var(--color-bg)',
+        color: 'var(--color-text-main)',
+        padding: '2rem 1.5rem',
         display: 'flex',
-        justifyContent: 'space-between',
+        flexDirection: 'column',
         alignItems: 'center',
-        marginBottom: '2rem',
-        borderBottom: '1px solid #1e293b',
-        paddingBottom: '1.25rem'
-      }}>
+      }}
+    >
+      {/* Top Brand Bar */}
+      <div
+        style={{
+          maxWidth: '860px',
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '2rem',
+          borderBottom: '1px solid var(--color-border)',
+          paddingBottom: '1.25rem',
+          flexWrap: 'wrap',
+          gap: '1rem',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '10px',
-            background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800,
-            fontSize: '1.2rem',
-            color: '#fff',
-            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
-          }}>
-            E
+          <div
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '10px',
+              backgroundColor: 'var(--color-primary)',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 700,
+              fontSize: '1.1rem',
+            }}
+          >
+            <Shield size={22} />
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#fff' }}>
-              EDMS — Xác thực tài liệu
+            <h1 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>
+              EDMS — Kiểm tra tính xác thực tài liệu
             </h1>
-            <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8' }}>
-              Kiểm tra tính xác thực của tài liệu
+            <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+              Đối soát toàn vẹn nội dung và chữ ký số
             </p>
           </div>
         </div>
 
         <a
           href="/"
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#1e293b',
-            color: '#93c5fd',
-            borderRadius: '8px',
-            textDecoration: 'none',
-            fontSize: '0.85rem',
-            fontWeight: 500,
-            border: '1px solid #334155',
-            transition: 'all 0.2s'
-          }}
+          className="btn btn-secondary btn-sm"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none' }}
         >
-          ← Truy cập Hệ thống EDMS
+          <ArrowLeft size={15} />
+          <span>Về trang chủ EDMS</span>
         </a>
       </div>
 
-      <div style={{ maxWidth: '850px', width: '100%' }}>
-        {/* Intro Hero */}
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '2.5rem',
-          padding: '1.5rem',
-          background: 'radial-gradient(ellipse at top, rgba(30, 58, 138, 0.25), transparent 70%)'
-        }}>
-          <span style={{
-            display: 'inline-block',
-            padding: '0.25rem 0.85rem',
-            borderRadius: '9999px',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            color: '#60a5fa',
-            background: 'rgba(59, 130, 246, 0.12)',
-            border: '1px solid rgba(59, 130, 246, 0.25)',
-            marginBottom: '0.75rem'
-          }}>
-            KIỂM TRA TÀI LIỆU
-          </span>
-          <h2 style={{ fontSize: '1.85rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#f8fafc' }}>
-            Kiểm tra tính xác thực tài liệu
+      <div style={{ maxWidth: '860px', width: '100%' }}>
+        {/* Intro */}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <h2 style={{ fontSize: '1.6rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--color-text-main)' }}>
+            Xác thực tính toàn vẹn của tài liệu
           </h2>
-          <p style={{ color: '#94a3b8', fontSize: '0.92rem', maxWidth: '620px', margin: '0 auto', lineHeight: 1.5 }}>
-            Đối chiếu mã QR, mã băm và thông tin ký số của tài liệu,
-            để phát hiện thay đổi so với bản lưu trữ.
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', maxWidth: '600px', margin: '0 auto', lineHeight: 1.5 }}>
+            Kiểm tra tệp tin bằng mã băm SHA-256 hoặc quét mã QR trên bản in để đối soát với bản ghi lưu trữ trên hệ thống.
           </p>
         </div>
 
-        {/* Tab or Forms Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-          gap: '1.5rem',
-          marginBottom: '2rem'
-        }}>
+        {/* Forms Grid */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '1.5rem',
+            marginBottom: '2rem',
+          }}
+        >
           {/* Box 1: File Dropzone */}
           <div
             onDragEnter={handleDrag}
@@ -215,16 +209,16 @@ export const VerifyPage: React.FC = () => {
             onDrop={handleDrop}
             style={{
               padding: '1.75rem',
-              borderRadius: '16px',
-              backgroundColor: dragActive ? 'rgba(30, 58, 138, 0.3)' : '#1e293b',
-              border: `2px dashed ${dragActive ? '#60a5fa' : '#334155'}`,
+              borderRadius: '12px',
+              backgroundColor: 'var(--color-surface)',
+              border: `2px dashed ${dragActive ? 'var(--color-primary)' : 'var(--color-border)'}`,
               textAlign: 'center',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
-              transition: 'all 0.2s',
-              cursor: 'pointer'
+              transition: 'border-color 0.2s',
+              cursor: 'pointer',
             }}
             onClick={() => document.getElementById('file-upload-input')?.click()}
           >
@@ -238,114 +232,100 @@ export const VerifyPage: React.FC = () => {
                 }
               }}
             />
-            <div style={{
-              width: '52px',
-              height: '52px',
-              borderRadius: '50%',
-              backgroundColor: '#0f172a',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '1rem',
-              color: '#38bdf8',
-              fontSize: '1.5rem'
-            }}>
-              📄
+            <div
+              style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--color-card-muted)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '0.85rem',
+                color: 'var(--color-primary)',
+              }}
+            >
+              <FileCheck size={24} />
             </div>
-            <h3 style={{ margin: '0 0 0.35rem 0', fontSize: '1rem', fontWeight: 600 }}>
+            <h3 style={{ margin: '0 0 0.35rem 0', fontSize: '0.95rem', fontWeight: 600, color: 'var(--color-text-main)' }}>
               Kéo thả tệp tin để đối soát
             </h3>
-            <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}>
-              Hỗ trợ PDF, DOCX, PNG và JPG. Hệ thống kiểm tra mã băm SHA-256.
+            <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+              Hỗ trợ PDF, DOCX, PNG, JPG. Kiểm tra mã băm SHA-256.
             </p>
             {uploadedFileName && (
-              <span style={{
-                marginTop: '1rem',
-                fontSize: '0.75rem',
-                color: '#38bdf8',
-                backgroundColor: 'rgba(56, 189, 248, 0.1)',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '6px'
-              }}>
+              <span
+                className="ent-badge ent-badge--info"
+                style={{ marginTop: '0.85rem', fontSize: '0.75rem' }}
+              >
                 Đang đối soát: {uploadedFileName}
               </span>
             )}
           </div>
 
           {/* Box 2: Manual Search */}
-          <div style={{
-            padding: '1.75rem',
-            borderRadius: '16px',
-            backgroundColor: '#1e293b',
-            border: '1px solid #334155'
-          }}>
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span>🔍</span> Tra cứu theo Mã băm / Số hiệu
+          <div
+            style={{
+              padding: '1.75rem',
+              borderRadius: '12px',
+              backgroundColor: 'var(--color-surface)',
+              border: '1px solid var(--color-border)',
+            }}
+          >
+            <h3
+              style={{
+                margin: '0 0 1rem 0',
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: 'var(--color-text-main)',
+              }}
+            >
+              <Search size={16} style={{ color: 'var(--color-primary)' }} />
+              <span>Tra cứu theo Mã băm / Số hiệu</span>
             </h3>
             <form onSubmit={handleManualSearch} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem' }}>
-                  Mã băm SHA-256 (hoặc quét từ QR):
+                <label className="form-label" style={{ fontSize: '0.78rem', marginBottom: '0.25rem' }}>
+                  Mã băm SHA-256 (hoặc quét từ mã QR):
                 </label>
                 <input
                   type="text"
                   placeholder="sha256:..."
                   value={queryHash}
                   onChange={(e) => setQueryHash(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem 0.75rem',
-                    backgroundColor: '#0f172a',
-                    border: '1px solid #334155',
-                    borderRadius: '8px',
-                    color: '#f8fafc',
-                    fontSize: '0.8rem',
-                    boxSizing: 'border-box'
-                  }}
+                  className="form-input"
+                  style={{ fontSize: '0.825rem' }}
                 />
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem' }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem' }}>
-                    Mã tài liệu (ID):
+                  <label className="form-label" style={{ fontSize: '0.78rem', marginBottom: '0.25rem' }}>
+                    Mã tài liệu:
                   </label>
                   <input
                     type="number"
                     placeholder="123"
                     value={queryDocId}
                     onChange={(e) => setQueryDocId(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.55rem 0.75rem',
-                      backgroundColor: '#0f172a',
-                      border: '1px solid #334155',
-                      borderRadius: '8px',
-                      color: '#f8fafc',
-                      fontSize: '0.8rem',
-                      boxSizing: 'border-box'
-                    }}
+                    className="form-input"
+                    style={{ fontSize: '0.825rem' }}
                   />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem' }}>
-                    Phiên bản (Version):
+                  <label className="form-label" style={{ fontSize: '0.78rem', marginBottom: '0.25rem' }}>
+                    Phiên bản:
                   </label>
                   <input
                     type="number"
                     placeholder="1"
                     value={queryVersion}
                     onChange={(e) => setQueryVersion(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.55rem 0.75rem',
-                      backgroundColor: '#0f172a',
-                      border: '1px solid #334155',
-                      borderRadius: '8px',
-                      color: '#f8fafc',
-                      fontSize: '0.8rem',
-                      boxSizing: 'border-box'
-                    }}
+                    className="form-input"
+                    style={{ fontSize: '0.825rem' }}
                   />
                 </div>
               </div>
@@ -353,19 +333,8 @@ export const VerifyPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                style={{
-                  marginTop: '0.5rem',
-                  padding: '0.65rem 1rem',
-                  backgroundColor: '#2563eb',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontWeight: 600,
-                  fontSize: '0.85rem',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  transition: 'background-color 0.2s',
-                  boxShadow: '0 2px 8px rgba(37, 99, 235, 0.4)'
-                }}
+                className="btn btn-primary"
+                style={{ marginTop: '0.25rem' }}
               >
                 {loading ? 'Đang kiểm tra...' : 'Kiểm tra tài liệu'}
               </button>
@@ -375,208 +344,194 @@ export const VerifyPage: React.FC = () => {
 
         {/* Error Notification */}
         {errorMsg && (
-          <div style={{
-            padding: '1rem 1.25rem',
-            backgroundColor: 'rgba(239, 68, 68, 0.12)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: '12px',
-            color: '#fca5a5',
-            fontSize: '0.85rem',
-            marginBottom: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem'
-          }}>
-            <span>⚠️</span> {errorMsg}
+          <div className="ent-alert ent-alert--danger" style={{ marginBottom: '1.5rem' }}>
+            <AlertTriangle size={18} style={{ flexShrink: 0 }} />
+            <span>{errorMsg}</span>
           </div>
         )}
 
         {/* Loading Spinner */}
         {loading && (
-          <div style={{ textAlign: 'center', padding: '2rem 0', color: '#94a3b8', fontSize: '0.9rem' }}>
-            <div style={{
-              width: '32px',
-              height: '32px',
-              border: '3px solid rgba(59, 130, 246, 0.2)',
-              borderTopColor: '#3b82f6',
-              borderRadius: '50%',
-              margin: '0 auto 1rem auto',
-              animation: 'spin 1s linear infinite'
-            }} />
-            Đang thực hiện giải mã mật mã và đối soát dữ liệu trên sổ cái EDMS...
+          <div style={{ textAlign: 'center', padding: '2.5rem 0', color: 'var(--color-text-muted)' }}>
+            <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto 0.75rem', color: 'var(--color-primary)' }} />
+            <p style={{ margin: 0, fontSize: '0.875rem' }}>Đang đối soát dữ liệu trên hệ thống EDMS...</p>
           </div>
         )}
 
         {/* Verification Result Card */}
         {result && (
-          <div style={{
-            backgroundColor: '#1e293b',
-            borderRadius: '18px',
-            border: result.found && !result.tampered
-              ? '1px solid rgba(34, 197, 94, 0.4)'
-              : '1px solid rgba(239, 68, 68, 0.4)',
-            overflow: 'hidden',
-            boxShadow: '0 8px 30px rgba(0, 0, 0, 0.35)',
-            marginBottom: '2rem'
-          }}>
+          <div
+            style={{
+              backgroundColor: 'var(--color-surface)',
+              borderRadius: '12px',
+              border: result.found && !result.tampered
+                ? '1px solid var(--color-success)'
+                : '1px solid var(--color-danger)',
+              overflow: 'hidden',
+              marginBottom: '2rem',
+            }}
+          >
             {/* Status Header Banner */}
-            <div style={{
-              padding: '1.25rem 1.75rem',
-              backgroundColor: result.found && !result.tampered
-                ? 'rgba(34, 197, 94, 0.12)'
-                : 'rgba(239, 68, 68, 0.12)',
-              borderBottom: result.found && !result.tampered
-                ? '1px solid rgba(34, 197, 94, 0.2)'
-                : '1px solid rgba(239, 68, 68, 0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
+            <div
+              style={{
+                padding: '1.25rem 1.5rem',
+                backgroundColor: result.found && !result.tampered
+                  ? 'var(--color-success-subtle)'
+                  : 'var(--color-danger-subtle)',
+                borderBottom: '1px solid var(--color-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '0.75rem',
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <span style={{ fontSize: '1.75rem' }}>
-                  {result.found && !result.tampered ? '🛡️' : '🚨'}
-                </span>
+                {result.found && !result.tampered ? (
+                  <ShieldCheck size={28} style={{ color: 'var(--color-success)' }} />
+                ) : (
+                  <AlertOctagon size={28} style={{ color: 'var(--color-danger)' }} />
+                )}
                 <div>
-                  <h3 style={{
-                    margin: 0,
-                    fontSize: '1.15rem',
-                    fontWeight: 700,
-                    color: result.found && !result.tampered ? '#4ade80' : '#f87171'
-                  }}>
+                  <h3
+                    style={{
+                      margin: 0,
+                      fontSize: '1.05rem',
+                      fontWeight: 700,
+                      color: result.found && !result.tampered
+                        ? 'var(--color-success)'
+                        : 'var(--color-danger)',
+                    }}
+                  >
                     {result.found && !result.tampered
-                      ? 'CHỨNG THỰC THÀNH CÔNG — TÍNH TOÀN VẸN HỢP LỆ'
-                      : (result.found ? 'CẢNH BÁO: TỆP TIN CÓ DẤU HIỆU XÂM PHẠM (TAMPERED)' : 'KHÔNG TÌM THẤY TÀI LIỆU CHÍNH HÃNG')}
+                      ? 'TÀI LIỆU HỢP LỆ — NỘI DUNG NGUYÊN VẸN'
+                      : result.found
+                      ? 'CẢNH BÁO: TỆP TIN ĐÃ BỊ THAY ĐỔI HOẶC CAN THIỆP'
+                      : 'KHÔNG TÌM THẤY TÀI LIỆU TRÊN HỆ THỐNG'}
                   </h3>
-                  <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                  <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.825rem', color: 'var(--color-text-muted)' }}>
                     {result.message}
                   </p>
                 </div>
               </div>
 
-              <div style={{
-                padding: '0.35rem 0.85rem',
-                borderRadius: '8px',
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                backgroundColor: result.found && !result.tampered ? '#166534' : '#991b1b',
-                color: '#fff'
-              }}>
+              <span
+                className={`ent-badge ${
+                  result.found && !result.tampered ? 'ent-badge--success' : 'ent-badge--danger'
+                }`}
+                style={{ fontSize: '0.8rem', padding: '0.3rem 0.75rem' }}
+              >
                 {result.integrityStatus || 'NOT FOUND'}
-              </div>
+              </span>
             </div>
 
             {/* Certificate Details Body */}
             {result.found && (
-              <div style={{ padding: '1.75rem' }}>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                  gap: '1.25rem',
-                  marginBottom: '1.5rem'
-                }}>
+              <div style={{ padding: '1.5rem' }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: '1.25rem',
+                    marginBottom: '1.5rem',
+                  }}
+                >
                   {/* Left Column: Document Info */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <div>
-                      <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Tiêu đề tài liệu:</span>
-                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>
-                        {result.title || 'N/A'}
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Tiêu đề tài liệu:</span>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--color-text-main)' }}>
+                        {result.title || '—'}
                       </div>
                     </div>
 
                     <div style={{ display: 'flex', gap: '1.5rem' }}>
                       <div>
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Mã tài liệu:</span>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#60a5fa' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Mã tài liệu:</span>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-primary)' }}>
                           #{result.documentId}
                         </div>
                       </div>
                       <div>
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Phiên bản:</span>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#f8fafc' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Phiên bản:</span>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-text-main)' }}>
                           v{result.versionNumber}
                         </div>
                       </div>
                       <div>
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Phân loại:</span>
-                        <div style={{ fontSize: '0.9rem', color: '#e2e8f0' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Phân loại:</span>
+                        <div style={{ fontSize: '0.875rem', color: 'var(--color-text-main)' }}>
                           {result.documentType || 'Chung'}
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Mã băm vật lý (SHA-256):</span>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        marginTop: '0.25rem',
-                        backgroundColor: '#0f172a',
-                        padding: '0.5rem 0.75rem',
-                        borderRadius: '8px',
-                        border: '1px solid #334155'
-                      }}>
-                        <code style={{ fontSize: '0.75rem', color: '#38bdf8', wordBreak: 'break-all' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Mã băm SHA-256:</span>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          marginTop: '0.25rem',
+                          backgroundColor: 'var(--color-card-muted)',
+                          padding: '0.5rem 0.75rem',
+                          borderRadius: '8px',
+                          border: '1px solid var(--color-border)',
+                        }}
+                      >
+                        <code style={{ fontSize: '0.75rem', color: 'var(--color-primary)', wordBreak: 'break-all', flex: 1 }}>
                           {result.fileHash}
                         </code>
                         <button
+                          type="button"
                           onClick={() => result.fileHash && copyToClipboard(result.fileHash)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: copiedHash ? '#4ade80' : '#94a3b8',
-                            cursor: 'pointer',
-                            fontSize: '0.85rem',
-                            padding: '0 0.25rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}
-                          title="Sao chép"
+                          className="btn-icon"
+                          title="Sao chép mã băm"
+                          style={{ flexShrink: 0 }}
                         >
-                          {copiedHash ? '✓ Đã chép' : '📋'}
+                          {copiedHash ? <Check size={14} style={{ color: 'var(--color-success)' }} /> : <Copy size={14} />}
                         </button>
                       </div>
                     </div>
                   </div>
 
                   {/* Right Column: Digital Signature & Seal */}
-                  <div style={{
-                    backgroundColor: '#0f172a',
-                    padding: '1.25rem',
-                    borderRadius: '12px',
-                    border: '1px solid #334155',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.65rem'
-                  }}>
+                  <div
+                    style={{
+                      backgroundColor: 'var(--color-card-muted)',
+                      padding: '1.25rem',
+                      borderRadius: '10px',
+                      border: '1px solid var(--color-border)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.65rem',
+                    }}
+                  >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Trạng thái chữ ký:</span>
-                      <span style={{
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '6px',
-                        backgroundColor: result.signatureStatus === 'VALID' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(148, 163, 184, 0.2)',
-                        color: result.signatureStatus === 'VALID' ? '#4ade80' : '#94a3b8'
-                      }}>
-                        {result.signatureStatus === 'VALID' ? 'ĐÃ KÝ SỐ HỢP LỆ (VALID)' : (result.signatureStatus || 'CHƯA KÝ')}
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Trạng thái chữ ký:</span>
+                      <span
+                        className={`ent-badge ${
+                          result.signatureStatus === 'VALID' ? 'ent-badge--success' : 'ent-badge--neutral'
+                        }`}
+                      >
+                        {result.signatureStatus === 'VALID' ? 'ĐÃ KÝ SỐ HỢP LỆ' : result.signatureStatus || 'CHƯA KÝ'}
                       </span>
                     </div>
 
                     {result.signerUsername && (
                       <div>
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Người ký xác thực:</span>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f8fafc' }}>
-                          {result.signerUsername} ({result.signedAt ? new Date(result.signedAt).toLocaleString() : ''})
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Người ký xác thực:</span>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-main)' }}>
+                          {result.signerUsername} {result.signedAt ? `(${new Date(result.signedAt).toLocaleString('vi-VN')})` : ''}
                         </div>
                       </div>
                     )}
 
                     {result.certSerialNumber && (
                       <div>
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Số sê-ri chứng thư số (CA):</span>
-                        <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Số sê-ri chứng thư số (CA):</span>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--color-text-main)' }}>
                           #{result.certSerialNumber}
                         </div>
                       </div>
@@ -584,38 +539,32 @@ export const VerifyPage: React.FC = () => {
 
                     {result.certSubject && (
                       <div>
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Đơn vị cấp chứng chỉ (Subject):</span>
-                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', wordBreak: 'break-all' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Đơn vị cấp chứng chỉ:</span>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', wordBreak: 'break-all' }}>
                           {result.certSubject}
                         </div>
                       </div>
                     )}
 
-                    <div style={{ marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid #1e293b' }}>
-                      <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                        Thời điểm đối soát: {result.verifiedAt ? new Date(result.verifiedAt).toLocaleString() : ''}
+                    <div style={{ marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid var(--color-border)' }}>
+                      <span style={{ fontSize: '0.725rem', color: 'var(--color-text-muted)' }}>
+                        Thời điểm đối soát: {result.verifiedAt ? new Date(result.verifiedAt).toLocaleString('vi-VN') : ''}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Direct Action: Open in EDMS */}
-                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', borderTop: '1px solid #334155', paddingTop: '1rem' }}>
+                {/* Direct Action */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
                   <a
                     href={`/api/documents/${result.documentId}/versions/${result.versionNumber}/preview-watermarked`}
                     target="_blank"
                     rel="noreferrer"
-                    style={{
-                      padding: '0.55rem 1rem',
-                      backgroundColor: '#3b82f6',
-                      color: '#fff',
-                      borderRadius: '8px',
-                      textDecoration: 'none',
-                      fontSize: '0.8rem',
-                      fontWeight: 600
-                    }}
+                    className="btn btn-primary btn-sm"
+                    style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
                   >
-                    Xem PDF có Watermark & QR
+                    <Download size={14} />
+                    <span>Xem bản in có Watermark & QR</span>
                   </a>
                 </div>
               </div>
@@ -624,8 +573,8 @@ export const VerifyPage: React.FC = () => {
         )}
 
         {/* Footer info */}
-        <div style={{ textAlign: 'center', marginTop: '3rem', fontSize: '0.75rem', color: '#64748b' }}>
-          EDMS — Kiểm tra tính toàn vẹn và chữ ký số nội bộ của tài liệu.
+        <div style={{ textAlign: 'center', marginTop: '2.5rem', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+          EDMS — Hệ thống quản lý và kiểm tra tính toàn vẹn tài liệu điện tử.
         </div>
       </div>
     </div>
