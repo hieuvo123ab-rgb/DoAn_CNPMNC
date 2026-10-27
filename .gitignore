@@ -7,6 +7,9 @@
 *.pem*
 
 # Environment and secrets
+.env.team-server
+.env.team-server.*
+!.env.team-server.example
 .env
 .env.local
 .env.*.local

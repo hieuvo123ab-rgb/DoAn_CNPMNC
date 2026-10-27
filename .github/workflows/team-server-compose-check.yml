@@ -1,0 +1,49 @@
+name: EDMS Team Server Compose validation
+
+on:
+  push:
+    branches:
+      - "deploy/**"
+    paths:
+      - "docker-compose.team-server.yml"
+      - "Dockerfile.team-server"
+      - "deploy/team-server/**"
+      - ".env.team-server.example"
+      - "scripts/setup-team-server.ps1"
+      - "backend/src/main/java/com/edms/config/TeamServerInitializer.java"
+      - ".github/workflows/team-server-compose-check.yml"
+  pull_request:
+    branches:
+      - "deploy/**"
+      - main
+    paths:
+      - "docker-compose.team-server.yml"
+      - "Dockerfile.team-server"
+      - "deploy/team-server/**"
+      - ".env.team-server.example"
+      - "scripts/setup-team-server.ps1"
+      - "backend/src/main/java/com/edms/config/TeamServerInitializer.java"
+      - ".github/workflows/team-server-compose-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compose-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check team server Compose syntax with placeholder credentials
+        run: |
+          cp .env.team-server.example .env.team-server
+          docker compose --env-file .env.team-server -f docker-compose.team-server.yml config --quiet
+          docker compose --env-file .env.team-server -f docker-compose.team-server.yml --profile remote config --quiet
+          rm .env.team-server
+      - name: Validate entrypoint shell syntax
+        run: sh -n deploy/team-server/entrypoint.sh
+      - name: Ensure secrets file is excluded from Git
+        run: |
+          printf 'EDMS_DB_PASSWORD=DO_NOT_COMMIT\n' > .env.team-server
+          git check-ignore -q .env.team-server
+          rm .env.team-server
