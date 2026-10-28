@@ -412,6 +412,7 @@ export const DispositionQueuePage: React.FC = () => {
         <EnterpriseModal
           isOpen={Boolean(approveItem)}
           onClose={() => setApproveItem(null)}
+          preventClose={isApproving}
           title="Phê Duyệt Tiêu Hủy Tài Liệu"
           subtitle={`Tài liệu #${approveItem.documentId} — ${approveItem.documentTitle}`}
           icon={<Archive size={20} />}
@@ -481,6 +482,7 @@ export const DispositionQueuePage: React.FC = () => {
         <EnterpriseModal
           isOpen={Boolean(rejectItem)}
           onClose={() => setRejectItem(null)}
+          preventClose={isRejecting}
           title="Từ Chối Yêu Cầu Tiêu Hủy"
           subtitle={`Tài liệu #${rejectItem.documentId} — ${rejectItem.documentTitle}`}
           icon={<XCircle size={20} />}

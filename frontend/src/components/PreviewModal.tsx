@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DocumentItem, documentApi } from '../api/documentApi';
-import { X, Download, FileText, AlertCircle, Loader2, ExternalLink } from 'lucide-react';
+import { Download, FileText, AlertCircle, Loader2, ExternalLink } from 'lucide-react';
+import { EnterpriseModal } from './common/EnterpriseModal';
 
 interface PreviewModalProps {
   document: DocumentItem | null;
@@ -101,178 +102,171 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
+  const footerActions = (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: '0.5rem' }}>
+      <div style={{ display: 'flex', gap: '0.5rem' }}>
+        {previewUrl && isPdf && (
+          <a
+            href={previewUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-secondary btn-sm"
+            title="Mở tab mới"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <ExternalLink size={15} />
+            <span>Mở tab mới</span>
+          </a>
+        )}
+        <button
+          type="button"
+          className="btn btn-primary btn-sm"
+          onClick={() => onDownload(document)}
+          title="Tải xuống tệp gốc"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+        >
+          <Download size={15} />
+          <span>Tải về</span>
+        </button>
+      </div>
+      <button type="button" className="btn btn-secondary btn-sm" onClick={onClose}>
+        Đóng
+      </button>
+    </div>
+  );
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <EnterpriseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={document.title}
+      subtitle={`${document.originalFileName} • ${formatFileSize(document.fileSize)} • ${document.documentType}`}
+      icon={<FileText size={20} className="text-primary" />}
+      size="xl"
+      footer={footerActions}
+    >
+      {/* Body Preview Area */}
       <div
-        className="modal-content modal-preview"
-        onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: '900px', width: '95%', height: '85vh', display: 'flex', flexDirection: 'column' }}
+        style={{
+          width: '100%',
+          height: '65vh',
+          minHeight: '360px',
+          overflow: 'hidden',
+          backgroundColor: isPdf ? 'transparent' : 'var(--color-card-muted)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-md)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+        }}
       >
-        {/* Header */}
-        <div className="modal-header" style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--color-border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
-            <FileText size={22} color="var(--color-primary)" style={{ flexShrink: 0 }} />
-            <div style={{ overflow: 'hidden' }}>
-              <h3 style={{ fontSize: '1.1rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {document.title}
-              </h3>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>
-                <span>{document.originalFileName}</span>
-                <span>•</span>
-                <span>{formatFileSize(document.fileSize)}</span>
-                <span>•</span>
-                <span className="badge-type">{document.documentType}</span>
-              </div>
-            </div>
+        {loading ? (
+          <div style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>
+            <Loader2 size={36} className="animate-spin" style={{ margin: '0 auto 0.75rem auto' }} />
+            <p style={{ margin: 0 }}>Đang tải dữ liệu xem trước...</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+        ) : error ? (
+          <div style={{ textAlign: 'center', color: 'var(--color-danger)', padding: '2rem' }}>
+            <AlertCircle size={40} style={{ margin: '0 auto 0.75rem auto' }} />
+            <p style={{ fontWeight: 500, margin: '0 0 1rem 0' }}>{error}</p>
             <button
-              className="btn btn-secondary btn-sm"
+              type="button"
+              className="btn btn-primary btn-sm"
               onClick={() => onDownload(document)}
-              title="Tải xuống tệp gốc"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', margin: '0 auto' }}
             >
               <Download size={15} />
-              <span>Tải về</span>
-            </button>
-            {previewUrl && isPdf && (
-              <a
-                href={previewUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-secondary btn-sm"
-                title="Mở tab mới"
-              >
-                <ExternalLink size={15} />
-              </a>
-            )}
-            <button
-              className="modal-close-btn"
-              onClick={onClose}
-              title="Đóng"
-              style={{ marginLeft: '0.25rem' }}
-            >
-              <X size={20} />
+              <span>Tải tệp xuống máy</span>
             </button>
           </div>
-        </div>
-
-        {/* Body Preview Area */}
-        <div
-          className="modal-body preview-body"
-          style={{
-            flex: 1,
-            overflow: 'auto',
-            padding: isPdf ? 0 : '1.5rem',
-            backgroundColor: '#0f172a',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {loading ? (
-            <div style={{ textAlign: 'center', color: '#94a3b8' }}>
-              <Loader2 size={36} className="animate-spin" style={{ margin: '0 auto 0.75rem auto' }} />
-              <p>Đang tải dữ liệu xem trước...</p>
-            </div>
-          ) : error ? (
-            <div style={{ textAlign: 'center', color: '#f87171', padding: '2rem' }}>
-              <AlertCircle size={40} style={{ margin: '0 auto 0.75rem auto' }} />
-              <p style={{ fontWeight: 500 }}>{error}</p>
-              <button
-                className="btn btn-primary"
-                style={{ marginTop: '1rem' }}
-                onClick={() => onDownload(document)}
-              >
-                <Download size={16} />
-                <span>Tải tệp xuống máy</span>
-              </button>
-            </div>
-          ) : isPdf && previewUrl ? (
-            <iframe
+        ) : isPdf && previewUrl ? (
+          <iframe
+            src={previewUrl}
+            title={document.title}
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              backgroundColor: '#fff',
+            }}
+          />
+        ) : isImage && previewUrl ? (
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+            <img
               src={previewUrl}
-              title={document.title}
+              alt={document.title}
               style={{
-                width: '100%',
-                height: '100%',
-                border: 'none',
-                backgroundColor: '#fff',
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: 'contain',
+                borderRadius: '6px',
+                boxShadow: 'var(--shadow-sm)',
               }}
             />
-          ) : isImage && previewUrl ? (
-            <div style={{ maxWidth: '100%', maxHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img
-                src={previewUrl}
-                alt={document.title}
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '70vh',
-                  objectFit: 'contain',
-                  borderRadius: '6px',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-                }}
-              />
-            </div>
-          ) : isText && textContent !== null ? (
-            <div style={{ width: '100%', height: '100%', overflow: 'auto', backgroundColor: '#1e293b', borderRadius: '6px', padding: '1.25rem' }}>
-              <pre
-                style={{
-                  color: '#e2e8f0',
-                  fontFamily: 'Consolas, Monaco, "Courier New", monospace',
-                  fontSize: '0.875rem',
-                  lineHeight: '1.5',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  margin: 0,
-                }}
-              >
-                {textContent}
-              </pre>
-            </div>
-          ) : (
-            /* Fallback for Office / Word / Excel / ZIP / Other binaries */
-            <div
+          </div>
+        ) : isText && textContent !== null ? (
+          <div style={{ width: '100%', height: '100%', overflow: 'auto', backgroundColor: 'var(--color-surface)', padding: '1.25rem' }}>
+            <pre
               style={{
-                textAlign: 'center',
-                backgroundColor: 'rgba(30, 41, 59, 0.85)',
-                border: '1px solid #334155',
-                borderRadius: '12px',
-                padding: '2.5rem 2rem',
-                maxWidth: '480px',
-                width: '100%',
+                color: 'var(--color-text-main)',
+                fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+                fontSize: '0.875rem',
+                lineHeight: '1.5',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                margin: 0,
               }}
             >
-              <div
-                style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '16px',
-                  backgroundColor: 'rgba(59, 130, 246, 0.15)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 1.25rem auto',
-                }}
-              >
-                <FileText size={32} color="#38bdf8" />
-              </div>
-              <h4 style={{ color: '#f8fafc', fontSize: '1.1rem', marginBottom: '0.5rem' }}>
-                Định dạng không hỗ trợ xem trực tiếp
-              </h4>
-              <p style={{ color: '#94a3b8', fontSize: '0.875rem', lineHeight: '1.5', marginBottom: '1.5rem' }}>
-                Tệp <strong>{document.originalFileName}</strong> ({formatFileSize(document.fileSize)}) cần ứng dụng chuyên dụng (Microsoft Office, LibreOffice, v.v.) để hiển thị trọn vẹn nội dung.
-              </p>
-              <button
-                className="btn btn-primary"
-                style={{ margin: '0 auto' }}
-                onClick={() => onDownload(document)}
-              >
-                <Download size={16} />
-                <span>Tải xuống tệp để mở</span>
-              </button>
+              {textContent}
+            </pre>
+          </div>
+        ) : (
+          /* Fallback for Office / Word / Excel / ZIP / Other binaries */
+          <div
+            style={{
+              textAlign: 'center',
+              backgroundColor: 'var(--color-surface)',
+              border: '1px solid var(--color-border)',
+              borderRadius: '12px',
+              padding: '2rem 1.5rem',
+              maxWidth: '440px',
+              width: '90%',
+              boxShadow: 'var(--shadow-sm)',
+            }}
+          >
+            <div
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '14px',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1rem auto',
+              }}
+            >
+              <FileText size={28} className="text-primary" />
             </div>
-          )}
-        </div>
+            <h4 style={{ color: 'var(--color-text-main)', fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+              Định dạng không hỗ trợ xem trực tiếp
+            </h4>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.825rem', lineHeight: '1.5', marginBottom: '1.25rem' }}>
+              Tệp <strong>{document.originalFileName}</strong> ({formatFileSize(document.fileSize)}) cần phần mềm văn phòng chuyên dụng để mở.
+            </p>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', margin: '0 auto' }}
+              onClick={() => onDownload(document)}
+            >
+              <Download size={15} />
+              <span>Tải xuống tệp để mở</span>
+            </button>
+          </div>
+        )}
       </div>
-    </div>
+    </EnterpriseModal>
   );
 };

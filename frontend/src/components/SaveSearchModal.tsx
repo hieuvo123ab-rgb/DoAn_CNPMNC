@@ -57,6 +57,7 @@ export const SaveSearchModal: React.FC<SaveSearchModalProps> = ({
     <EnterpriseModal
       isOpen={isOpen}
       onClose={onClose}
+      preventClose={isSubmitting}
       title="Lưu bộ lọc tìm kiếm"
       subtitle="Lưu lại điều kiện lọc để tái sử dụng nhanh chóng"
       icon={<BookmarkPlus size={20} />}

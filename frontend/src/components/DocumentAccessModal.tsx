@@ -154,12 +154,13 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
       <EnterpriseModal
         isOpen={isOpen}
         onClose={onClose}
+        preventClose={isSavingMode || isSharing || !!revokingUserId}
         title="Quyền truy cập & Chia sẻ"
         subtitle={document.title}
         icon={<Shield size={20} />}
         size="lg"
         footer={
-          <button type="button" onClick={onClose} className="btn btn-secondary">
+          <button type="button" onClick={onClose} disabled={isSavingMode || isSharing || !!revokingUserId} className="btn btn-secondary">
             Đóng
           </button>
         }
@@ -186,12 +187,20 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
             <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block' }}>
               Chế độ truy cập tài liệu
             </label>
-            <div className="ent-radio-grid-2">
-              <div
+            <div className="ent-radio-grid-2" role="radiogroup" aria-label="Chế độ truy cập tài liệu">
+              <label
                 className={`ent-radio-card ${accessMode === 'INTERNAL' ? 'ent-radio-card--selected' : ''}`}
-                onClick={() => !isSavingMode && handleUpdateAccessMode('INTERNAL')}
                 style={{ cursor: isSavingMode ? 'not-allowed' : 'pointer' }}
               >
+                <input
+                  type="radio"
+                  name="doc-access-mode"
+                  value="INTERNAL"
+                  checked={accessMode === 'INTERNAL'}
+                  onChange={() => !isSavingMode && handleUpdateAccessMode('INTERNAL')}
+                  disabled={isSavingMode}
+                  className="sr-only"
+                />
                 <div className="ent-radio-card__icon">
                   <Globe size={20} />
                 </div>
@@ -208,13 +217,21 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
                     Mọi người dùng đã xác thực đều có thể xem và tải xuống tài liệu.
                   </div>
                 </div>
-              </div>
+              </label>
 
-              <div
+              <label
                 className={`ent-radio-card ${accessMode === 'PRIVATE' ? 'ent-radio-card--selected' : ''}`}
-                onClick={() => !isSavingMode && handleUpdateAccessMode('PRIVATE')}
                 style={{ cursor: isSavingMode ? 'not-allowed' : 'pointer' }}
               >
+                <input
+                  type="radio"
+                  name="doc-access-mode"
+                  value="PRIVATE"
+                  checked={accessMode === 'PRIVATE'}
+                  onChange={() => !isSavingMode && handleUpdateAccessMode('PRIVATE')}
+                  disabled={isSavingMode}
+                  className="sr-only"
+                />
                 <div className="ent-radio-card__icon">
                   <Lock size={20} />
                 </div>
@@ -231,7 +248,7 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
                     Chỉ bạn, Quản trị viên và người dùng được chỉ định mới truy cập được.
                   </div>
                 </div>
-              </div>
+              </label>
             </div>
           </div>
 

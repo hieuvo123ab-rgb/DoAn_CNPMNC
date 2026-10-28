@@ -94,6 +94,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
     <EnterpriseModal
       isOpen={isOpen}
       onClose={onClose}
+      preventClose={isSubmitting}
       title="Cập nhật tài khoản"
       subtitle={`Chỉnh sửa thông tin cho người dùng @${user.username}`}
       icon={<Edit3 size={20} className="text-primary" />}

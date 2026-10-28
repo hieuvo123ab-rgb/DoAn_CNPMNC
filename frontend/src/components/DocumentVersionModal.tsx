@@ -195,12 +195,13 @@ export const DocumentVersionModal: React.FC<DocumentVersionModalProps> = ({
       <EnterpriseModal
         isOpen={isOpen}
         onClose={onClose}
+        preventClose={isUploading || isRestoring}
         title={`Lịch sử Phiên bản — v${currentVer}`}
         subtitle={document.title}
         icon={<History size={20} />}
         size="xl"
         footer={
-          <button type="button" onClick={onClose} className="btn btn-secondary">
+          <button type="button" onClick={onClose} disabled={isUploading || isRestoring} className="btn btn-secondary">
             Đóng
           </button>
         }

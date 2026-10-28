@@ -77,6 +77,7 @@ export const EditModal: React.FC<EditModalProps> = ({
     <EnterpriseModal
       isOpen={isOpen}
       onClose={onClose}
+      preventClose={isSubmitting}
       title="Cập Nhật Thông Tin Tài Liệu"
       subtitle={`Tài liệu #${document.id} — ${document.originalFileName}`}
       icon={<Edit3 size={20} />}

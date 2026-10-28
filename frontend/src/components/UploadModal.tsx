@@ -214,6 +214,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     <EnterpriseModal
       isOpen={isOpen}
       onClose={onClose}
+      preventClose={isSubmitting}
       title="Tải Lên Tài Liệu Mới"
       subtitle="Hỗ trợ định dạng PDF, DOCX, XLSX, TXT, hình ảnh (Dung lượng tối đa 20MB)"
       icon={<FileText size={20} className="text-primary" />}
@@ -285,21 +286,20 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             </span>
           </label>
           <div className="ent-radio-grid-2" role="radiogroup" aria-label="Quyền truy cập tài liệu">
-            <div
+            <label
               className={`ent-radio-card ${
                 accessMode === 'INTERNAL' ? 'ent-radio-card--selected' : ''
               }`}
-              onClick={() => setAccessMode('INTERNAL')}
-              role="radio"
-              aria-checked={accessMode === 'INTERNAL'}
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === ' ' || e.key === 'Enter') {
-                  e.preventDefault();
-                  setAccessMode('INTERNAL');
-                }
-              }}
             >
+              <input
+                type="radio"
+                name="upload-access-mode"
+                value="INTERNAL"
+                checked={accessMode === 'INTERNAL'}
+                onChange={() => setAccessMode('INTERNAL')}
+                disabled={isSubmitting}
+                className="sr-only"
+              />
               <div className="ent-radio-custom" aria-hidden="true">
                 <div className="ent-radio-custom-dot" />
               </div>
@@ -312,23 +312,22 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                   Tất cả tài khoản trong hệ thống đều được xem
                 </span>
               </div>
-            </div>
+            </label>
 
-            <div
+            <label
               className={`ent-radio-card ${
                 accessMode === 'PRIVATE' ? 'ent-radio-card--selected' : ''
               }`}
-              onClick={() => setAccessMode('PRIVATE')}
-              role="radio"
-              aria-checked={accessMode === 'PRIVATE'}
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === ' ' || e.key === 'Enter') {
-                  e.preventDefault();
-                  setAccessMode('PRIVATE');
-                }
-              }}
             >
+              <input
+                type="radio"
+                name="upload-access-mode"
+                value="PRIVATE"
+                checked={accessMode === 'PRIVATE'}
+                onChange={() => setAccessMode('PRIVATE')}
+                disabled={isSubmitting}
+                className="sr-only"
+              />
               <div className="ent-radio-custom" aria-hidden="true">
                 <div className="ent-radio-custom-dot" />
               </div>
@@ -341,7 +340,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                   Chỉ người tạo và người được chỉ định quyền truy cập
                 </span>
               </div>
-            </div>
+            </label>
           </div>
         </div>
 

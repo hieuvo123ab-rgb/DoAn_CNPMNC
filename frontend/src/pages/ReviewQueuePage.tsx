@@ -472,6 +472,7 @@ export const ReviewQueuePage: React.FC = () => {
         <EnterpriseModal
           isOpen={Boolean(approveReviewItem)}
           onClose={() => setApproveReviewItem(null)}
+          preventClose={isApproving}
           title="Xác nhận phê duyệt tài liệu"
           subtitle={`Tài liệu #${approveReviewItem.documentId} — v${approveReviewItem.versionNumber}`}
           icon={<CheckCircle size={20} />}
@@ -525,6 +526,7 @@ export const ReviewQueuePage: React.FC = () => {
         <EnterpriseModal
           isOpen={Boolean(rejectReviewItem)}
           onClose={() => setRejectReviewItem(null)}
+          preventClose={isRejecting}
           title="Từ chối yêu cầu xét duyệt"
           subtitle={`Tài liệu #${rejectReviewItem.documentId} — v${rejectReviewItem.versionNumber}`}
           icon={<XCircle size={20} />}

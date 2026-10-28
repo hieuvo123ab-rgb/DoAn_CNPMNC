@@ -93,6 +93,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
     <EnterpriseModal
       isOpen={isOpen}
       onClose={onClose}
+      preventClose={isSubmitting}
       title="Thêm người dùng mới"
       subtitle="Khởi tạo tài khoản và phân quyền truy cập hệ thống"
       icon={<UserPlus size={20} className="text-primary" />}

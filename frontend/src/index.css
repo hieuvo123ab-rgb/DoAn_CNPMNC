@@ -1525,6 +1525,12 @@ html[data-sidebar-collapsed="true"] .page-layout {
   border-color: var(--color-primary-light);
 }
 
+.ent-radio-card:focus-within,
+.ent-radio-card:has(input:focus-visible) {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .ent-radio-card--selected {
   border-color: var(--color-primary);
   background-color: rgba(37, 99, 235, 0.05);
@@ -1572,6 +1578,19 @@ html[data-sidebar-collapsed="true"] .page-layout {
 .ent-radio-card-subtext {
   font-size: 0.75rem;
   color: var(--color-text-muted);
+}
+
+/* Accessibility visually hidden utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 /* File Upload Dropzone */
@@ -2583,3 +2602,155 @@ html[data-sidebar-collapsed="true"] .page-layout {
   background-color: var(--color-card-muted) !important;
 }
 
+
+
+/* Print Metadata Sheet Styles */
+.printable-sheet {
+  background: var(--color-surface);
+  color: var(--color-text-main);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.sheet-header .org-name,
+.sheet-header .country-name {
+  font-weight: 700;
+  margin: 0;
+}
+
+.sheet-header .dep-name,
+.sheet-header .country-motto {
+  font-weight: 500;
+  margin: 0.2rem 0;
+}
+
+.sheet-header .header-line {
+  width: 60%;
+  height: 1px;
+  background-color: var(--color-border);
+  margin: 0.35rem auto 0 auto;
+}
+
+.sheet-title-container {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.sheet-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+}
+
+.sheet-subtitle {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin: 0 0 0.35rem 0;
+  font-style: italic;
+}
+
+.sheet-code {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.metadata-sheet-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+}
+
+.metadata-sheet-table td {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-border);
+}
+
+.metadata-sheet-table .meta-label {
+  width: 32%;
+  font-weight: 600;
+  background-color: var(--color-card-muted);
+}
+
+.metadata-sheet-table .meta-value {
+  color: var(--color-text-main);
+}
+
+.sheet-signatures {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.sig-box {
+  width: 40%;
+}
+
+.sig-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.sig-hint {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+  margin: 0.2rem 0;
+}
+
+.sig-space {
+  height: 55px;
+}
+
+.sig-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.sheet-footer {
+  margin-top: 2rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-sheet,
+  .printable-sheet * {
+    visibility: visible;
+  }
+  .printable-sheet {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 1.5cm;
+    border: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .metadata-sheet-table td {
+    border-color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
