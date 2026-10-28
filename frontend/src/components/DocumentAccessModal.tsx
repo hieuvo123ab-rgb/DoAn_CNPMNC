@@ -5,7 +5,6 @@ import {
   DocumentPermissionsResponse,
 } from '../api/documentApi';
 import {
-  X,
   Shield,
   Users,
   UserPlus,
@@ -17,6 +16,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { ConfirmationModal } from './common/ConfirmationModal';
+import { EnterpriseModal } from './common/EnterpriseModal';
 
 interface DocumentAccessModalProps {
   document: DocumentItem | null;
@@ -54,7 +54,9 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
       setAccessMode(res.accessMode === 'PRIVATE' ? 'PRIVATE' : 'INTERNAL');
     } catch (err: unknown) {
       console.error('Failed to load permissions:', err);
-      const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Không thể tải danh sách quyền truy cập.';
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Không thể tải danh sách quyền truy cập.';
       setMessage({ type: 'error', text: errorMsg });
     } finally {
       setIsLoading(false);
@@ -77,12 +79,16 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
       setAccessMode(newMode);
       setMessage({
         type: 'success',
-        text: `Đã chuyển chế độ truy cập sang ${newMode === 'INTERNAL' ? 'Nội bộ (INTERNAL)' : 'Riêng tư (PRIVATE)'} thành công.`,
+        text: `Đã chuyển chế độ truy cập sang ${
+          newMode === 'INTERNAL' ? 'Nội bộ (INTERNAL)' : 'Riêng tư (PRIVATE)'
+        } thành công.`,
       });
       if (onSuccess) onSuccess();
     } catch (err: unknown) {
       console.error('Failed to update access mode:', err);
-      const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Lỗi khi thay đổi chế độ truy cập.';
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Lỗi khi thay đổi chế độ truy cập.';
       setMessage({ type: 'error', text: errorMsg });
     } finally {
       setIsSavingMode(false);
@@ -112,7 +118,9 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
       if (onSuccess) onSuccess();
     } catch (err: unknown) {
       console.error('Share error:', err);
-      const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Lỗi khi chia sẻ tài liệu.';
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Lỗi khi chia sẻ tài liệu.';
       setMessage({ type: 'error', text: errorMsg });
     } finally {
       setIsSharing(false);
@@ -132,7 +140,9 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
       if (onSuccess) onSuccess();
     } catch (err: unknown) {
       console.error('Revoke error:', err);
-      const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Lỗi khi thu hồi quyền.';
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Lỗi khi thu hồi quyền.';
       setMessage({ type: 'error', text: errorMsg });
     } finally {
       setRevokingUserId(null);
@@ -140,125 +150,131 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
-              <Shield className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                Quyền truy cập & Chia sẻ
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
-                {document.title}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5" />
+    <>
+      <EnterpriseModal
+        isOpen={isOpen}
+        onClose={onClose}
+        preventClose={isSavingMode || isSharing || !!revokingUserId}
+        title="Quyền truy cập & Chia sẻ"
+        subtitle={document.title}
+        icon={<Shield size={20} />}
+        size="lg"
+        footer={
+          <button type="button" onClick={onClose} disabled={isSavingMode || isSharing || !!revokingUserId} className="btn btn-secondary">
+            Đóng
           </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1">
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {message && (
             <div
-              className={`p-3.5 rounded-xl flex items-start space-x-3 text-sm ${
-                message.type === 'success'
-                  ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
-                  : 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800'
+              className={`ent-alert ${
+                message.type === 'success' ? 'ent-alert--success' : 'ent-alert--danger'
               }`}
+              style={{ margin: 0 }}
             >
               {message.type === 'success' ? (
-                <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
+                <CheckCircle2 size={18} style={{ flexShrink: 0 }} />
               ) : (
-                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                <AlertCircle size={18} style={{ flexShrink: 0 }} />
               )}
-              <span className="flex-1 font-medium">{message.text}</span>
+              <span style={{ fontSize: '0.875rem' }}>{message.text}</span>
             </div>
           )}
 
           {/* Section 1: Access Mode */}
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold text-slate-900 dark:text-white">
+          <div>
+            <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block' }}>
               Chế độ truy cập tài liệu
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                type="button"
-                disabled={isSavingMode}
-                onClick={() => handleUpdateAccessMode('INTERNAL')}
-                className={`flex items-start p-4 rounded-xl border text-left transition-all ${
-                  accessMode === 'INTERNAL'
-                    ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/20 ring-2 ring-indigo-600/20'
-                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                }`}
+            <div className="ent-radio-grid-2" role="radiogroup" aria-label="Chế độ truy cập tài liệu">
+              <label
+                className={`ent-radio-card ${accessMode === 'INTERNAL' ? 'ent-radio-card--selected' : ''}`}
+                style={{ cursor: isSavingMode ? 'not-allowed' : 'pointer' }}
               >
-                <Globe className={`w-5 h-5 mr-3 shrink-0 mt-0.5 ${accessMode === 'INTERNAL' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`} />
-                <div>
-                  <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
-                    Nội bộ (INTERNAL)
+                <input
+                  type="radio"
+                  name="doc-access-mode"
+                  value="INTERNAL"
+                  checked={accessMode === 'INTERNAL'}
+                  onChange={() => !isSavingMode && handleUpdateAccessMode('INTERNAL')}
+                  disabled={isSavingMode}
+                  className="sr-only"
+                />
+                <div className="ent-radio-card__icon">
+                  <Globe size={20} />
+                </div>
+                <div className="ent-radio-card__body">
+                  <div className="ent-radio-card__title">
+                    <span>Nội bộ (INTERNAL)</span>
                     {accessMode === 'INTERNAL' && (
-                      <span className="text-[10px] bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded font-medium">Hiện tại</span>
+                      <span className="ent-badge ent-badge--primary" style={{ fontSize: '0.7rem' }}>
+                        Hiện tại
+                      </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <div className="ent-radio-card__desc">
                     Mọi người dùng đã xác thực đều có thể xem và tải xuống tài liệu.
-                  </p>
+                  </div>
                 </div>
-              </button>
+              </label>
 
-              <button
-                type="button"
-                disabled={isSavingMode}
-                onClick={() => handleUpdateAccessMode('PRIVATE')}
-                className={`flex items-start p-4 rounded-xl border text-left transition-all ${
-                  accessMode === 'PRIVATE'
-                    ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/20 ring-2 ring-indigo-600/20'
-                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                }`}
+              <label
+                className={`ent-radio-card ${accessMode === 'PRIVATE' ? 'ent-radio-card--selected' : ''}`}
+                style={{ cursor: isSavingMode ? 'not-allowed' : 'pointer' }}
               >
-                <Lock className={`w-5 h-5 mr-3 shrink-0 mt-0.5 ${accessMode === 'PRIVATE' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`} />
-                <div>
-                  <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
-                    Riêng tư (PRIVATE)
+                <input
+                  type="radio"
+                  name="doc-access-mode"
+                  value="PRIVATE"
+                  checked={accessMode === 'PRIVATE'}
+                  onChange={() => !isSavingMode && handleUpdateAccessMode('PRIVATE')}
+                  disabled={isSavingMode}
+                  className="sr-only"
+                />
+                <div className="ent-radio-card__icon">
+                  <Lock size={20} />
+                </div>
+                <div className="ent-radio-card__body">
+                  <div className="ent-radio-card__title">
+                    <span>Riêng tư (PRIVATE)</span>
                     {accessMode === 'PRIVATE' && (
-                      <span className="text-[10px] bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded font-medium">Hiện tại</span>
+                      <span className="ent-badge ent-badge--primary" style={{ fontSize: '0.7rem' }}>
+                        Hiện tại
+                      </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Chỉ bạn, Quản trị viên và người dùng được chia sẻ mới truy cập được.
-                  </p>
+                  <div className="ent-radio-card__desc">
+                    Chỉ bạn, Quản trị viên và người dùng được chỉ định mới truy cập được.
+                  </div>
                 </div>
-              </button>
+              </label>
             </div>
           </div>
 
-          <hr className="border-slate-200 dark:border-slate-800" />
+          <hr style={{ borderColor: 'var(--color-border)', margin: 0 }} />
 
           {/* Section 2: Share with user form */}
-          <form onSubmit={handleShare} className="space-y-3">
-            <label className="block text-sm font-semibold text-slate-900 dark:text-white">
+          <form onSubmit={handleShare}>
+            <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block' }}>
               Chia sẻ cho người dùng
             </label>
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <input
                 type="text"
                 placeholder="Nhập tên đăng nhập (username)..."
                 value={targetUsername}
                 onChange={(e) => setTargetUsername(e.target.value)}
-                className="flex-1 px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 dark:text-white"
+                className="form-input"
+                style={{ flex: 1, minWidth: '180px' }}
+                disabled={isSharing}
               />
               <select
                 value={targetPermission}
                 onChange={(e) => setTargetPermission(e.target.value as 'READ' | 'EDIT')}
-                className="px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-900 dark:text-white"
+                className="form-select"
+                style={{ width: 'auto', minWidth: '150px' }}
+                disabled={isSharing}
               >
                 <option value="READ">Chỉ xem (READ)</option>
                 <option value="EDIT">Xem & Sửa (EDIT)</option>
@@ -266,63 +282,101 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
               <button
                 type="submit"
                 disabled={isSharing || !targetUsername.trim()}
-                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-xl shadow-sm transition-colors whitespace-nowrap"
+                className="btn btn-primary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}
               >
                 {isSharing ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                  <Loader2 size={16} className="animate-spin" />
                 ) : (
-                  <UserPlus className="w-4 h-4 mr-1.5" />
+                  <UserPlus size={16} />
                 )}
-                Chia sẻ
+                <span>Chia sẻ</span>
               </button>
             </div>
           </form>
 
           {/* Section 3: Shared Users List */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="block text-sm font-semibold text-slate-900 dark:text-white">
+          <div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '0.5rem',
+              }}
+            >
+              <label className="form-label" style={{ margin: 0 }}>
                 Danh sách người dùng đã được chia sẻ
               </label>
-              <span className="text-xs text-slate-500 dark:text-slate-400">
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
                 {permissionsData?.permissions.length || 0} người
               </span>
             </div>
 
             {isLoading ? (
-              <div className="py-8 flex justify-center text-slate-400">
-                <Loader2 className="w-6 h-6 animate-spin" />
+              <div style={{ padding: '2rem 0', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                <Loader2 size={24} className="animate-spin" style={{ margin: '0 auto 0.5rem' }} />
+                <p style={{ margin: 0, fontSize: '0.85rem' }}>Đang tải danh sách quyền...</p>
               </div>
             ) : permissionsData && permissionsData.permissions.length > 0 ? (
-              <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-200 dark:divide-slate-800">
-                {permissionsData.permissions.map((p) => (
+              <div
+                style={{
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '10px',
+                  overflow: 'hidden',
+                  backgroundColor: 'var(--color-surface)',
+                }}
+              >
+                {permissionsData.permissions.map((p, idx) => (
                   <div
                     key={p.id}
-                    className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.75rem 1rem',
+                      borderBottom:
+                        idx < permissionsData.permissions.length - 1
+                          ? '1px solid var(--color-border)'
+                          : 'none',
+                    }}
                   >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-slate-300">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          backgroundColor: 'var(--color-primary-subtle)',
+                          color: 'var(--color-primary)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 700,
+                          fontSize: '0.8rem',
+                        }}
+                      >
                         {p.username.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-slate-900 dark:text-white flex items-center gap-2">
-                          <span>{p.username}</span>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-text-main)' }}>
+                          {p.username}
                           {p.fullName && (
-                            <span className="text-xs text-slate-400">({p.fullName})</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginLeft: '0.4rem', fontWeight: 400 }}>
+                              ({p.fullName})
+                            </span>
                           )}
                         </div>
-                        <div className="text-xs text-slate-400">
+                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
                           Cấp ngày: {new Date(p.createdAt).toLocaleDateString('vi-VN')}
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-2">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                       <span
-                        className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                          p.permission === 'EDIT'
-                            ? 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400'
-                            : 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400'
+                        className={`ent-badge ${
+                          p.permission === 'EDIT' ? 'ent-badge--warning' : 'ent-badge--info'
                         }`}
                       >
                         {p.permission === 'EDIT' ? 'Xem & Sửa' : 'Chỉ xem'}
@@ -332,12 +386,13 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
                         onClick={() => setRevokeTarget({ userId: p.userId, username: p.username })}
                         disabled={revokingUserId === p.userId}
                         title="Thu hồi quyền"
-                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
+                        className="btn-icon"
+                        style={{ color: 'var(--color-danger)' }}
                       >
                         {revokingUserId === p.userId ? (
-                          <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
+                          <Loader2 size={16} className="animate-spin" />
                         ) : (
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 size={16} />
                         )}
                       </button>
                     </div>
@@ -345,27 +400,24 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
                 ))}
               </div>
             ) : (
-              <div className="py-8 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
-                <Users className="w-8 h-8 mx-auto text-slate-300 dark:text-slate-600 mb-2" />
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Chưa có người dùng nào được chia sẻ riêng biệt.
+              <div
+                style={{
+                  padding: '2rem 1rem',
+                  textAlign: 'center',
+                  border: '1px dashed var(--color-border)',
+                  borderRadius: '10px',
+                  color: 'var(--color-text-muted)',
+                }}
+              >
+                <Users size={28} style={{ margin: '0 auto 0.5rem', opacity: 0.5 }} />
+                <p style={{ margin: 0, fontSize: '0.85rem' }}>
+                  Chưa có người dùng nào được cấp quyền riêng biệt.
                 </p>
               </div>
             )}
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-colors"
-          >
-            Đóng
-          </button>
-        </div>
-      </div>
+      </EnterpriseModal>
 
       {revokeTarget && (
         <ConfirmationModal
@@ -380,6 +432,6 @@ export const DocumentAccessModal: React.FC<DocumentAccessModalProps> = ({
           isLoading={revokingUserId === revokeTarget.userId}
         />
       )}
-    </div>
+    </>
   );
 };

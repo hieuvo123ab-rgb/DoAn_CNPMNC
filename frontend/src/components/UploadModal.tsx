@@ -7,7 +7,9 @@ import {
   FileCheck,
   AlertTriangle,
   Loader2,
-  FileText
+  FileText,
+  Globe,
+  Lock
 } from 'lucide-react';
 
 interface UploadModalProps {
@@ -212,6 +214,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     <EnterpriseModal
       isOpen={isOpen}
       onClose={onClose}
+      preventClose={isSubmitting}
       title="Tải Lên Tài Liệu Mới"
       subtitle="Hỗ trợ định dạng PDF, DOCX, XLSX, TXT, hình ảnh (Dung lượng tối đa 20MB)"
       icon={<FileText size={20} className="text-primary" />}
@@ -227,7 +230,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           </div>
         )}
 
-        {/* 1. Document Title (Full width) */}
+        {/* 1. Document Title */}
         <div className="form-group">
           <label className="form-label" htmlFor="doc-title">
             Tên tài liệu
@@ -248,95 +251,96 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           />
         </div>
 
-        {/* 2. Grid: Document Type & Access Mode */}
-        <div className="form-grid-2">
-          {/* Document Type Select */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="doc-type">
-              Loại tài liệu
-              <span className="form-label-required" aria-hidden="true">
-                *
-              </span>
-            </label>
-            <select
-              id="doc-type"
-              className="form-select"
-              value={documentType}
-              onChange={(e) => setDocumentType(e.target.value)}
-              required
+        {/* 2. Document Type */}
+        <div className="form-group">
+          <label className="form-label" htmlFor="doc-type">
+            Loại tài liệu
+            <span className="form-label-required" aria-hidden="true">
+              *
+            </span>
+          </label>
+          <select
+            id="doc-type"
+            className="form-select"
+            value={documentType}
+            onChange={(e) => setDocumentType(e.target.value)}
+            required
+          >
+            <option value="Báo cáo">Báo cáo</option>
+            <option value="Hợp đồng">Hợp đồng</option>
+            <option value="Hóa đơn">Hóa đơn</option>
+            <option value="Quyết định">Quyết định</option>
+            <option value="Công văn">Công văn</option>
+            <option value="Biên bản">Biên bản</option>
+            <option value="Tài liệu kỹ thuật">Tài liệu kỹ thuật</option>
+            <option value="Khác">Tài liệu chung / Khác</option>
+          </select>
+        </div>
+
+        {/* 3. Access Mode */}
+        <div className="form-group">
+          <label className="form-label">
+            Quyền truy cập
+            <span className="form-label-required" aria-hidden="true">
+              *
+            </span>
+          </label>
+          <div className="ent-radio-grid-2" role="radiogroup" aria-label="Quyền truy cập tài liệu">
+            <label
+              className={`ent-radio-card ${
+                accessMode === 'INTERNAL' ? 'ent-radio-card--selected' : ''
+              }`}
             >
-              <option value="Báo cáo">Báo cáo</option>
-              <option value="Hợp đồng">Hợp đồng</option>
-              <option value="Hóa đơn">Hóa đơn</option>
-              <option value="Quyết định">Quyết định</option>
-              <option value="Công văn">Công văn</option>
-              <option value="Biên bản">Biên bản</option>
-              <option value="Tài liệu kỹ thuật">Tài liệu kỹ thuật</option>
-              <option value="Khác">Tài liệu chung / Khác</option>
-            </select>
-          </div>
-
-          {/* Access Mode Custom Radio Group */}
-          <div className="form-group">
-            <label className="form-label">
-              Chế độ truy cập
-              <span className="form-label-required" aria-hidden="true">
-                *
-              </span>
+              <input
+                type="radio"
+                name="upload-access-mode"
+                value="INTERNAL"
+                checked={accessMode === 'INTERNAL'}
+                onChange={() => setAccessMode('INTERNAL')}
+                disabled={isSubmitting}
+                className="sr-only"
+              />
+              <div className="ent-radio-custom" aria-hidden="true">
+                <div className="ent-radio-custom-dot" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Globe size={15} style={{ color: 'var(--color-primary)' }} />
+                  <span className="ent-radio-card-text">Nội bộ cơ quan</span>
+                </div>
+                <span className="ent-radio-card-subtext">
+                  Tất cả tài khoản trong hệ thống đều được xem
+                </span>
+              </div>
             </label>
-            <div className="ent-radio-group" role="radiogroup" aria-label="Chế độ truy cập">
-              <div
-                className={`ent-radio-card ${
-                  accessMode === 'INTERNAL' ? 'ent-radio-card--selected' : ''
-                }`}
-                onClick={() => setAccessMode('INTERNAL')}
-                role="radio"
-                aria-checked={accessMode === 'INTERNAL'}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === ' ' || e.key === 'Enter') {
-                    e.preventDefault();
-                    setAccessMode('INTERNAL');
-                  }
-                }}
-              >
-                <div className="ent-radio-custom" aria-hidden="true">
-                  <div className="ent-radio-custom-dot" />
-                </div>
-                <div>
-                  <div className="ent-radio-card-text">Nội bộ cơ quan</div>
-                  <div className="ent-radio-card-subtext">
-                    Tất cả tài khoản trong hệ thống đều được xem
-                  </div>
-                </div>
-              </div>
 
-              <div
-                className={`ent-radio-card ${
-                  accessMode === 'PRIVATE' ? 'ent-radio-card--selected' : ''
-                }`}
-                onClick={() => setAccessMode('PRIVATE')}
-                role="radio"
-                aria-checked={accessMode === 'PRIVATE'}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === ' ' || e.key === 'Enter') {
-                    e.preventDefault();
-                    setAccessMode('PRIVATE');
-                  }
-                }}
-              >
-                <div className="ent-radio-custom" aria-hidden="true">
-                  <div className="ent-radio-custom-dot" />
-                </div>
-                <div>
-                  <div className="ent-radio-card-text">Riêng tư bảo mật</div>
-                  <div className="ent-radio-card-subtext">
-                    Chỉ người tạo và người được chỉ định quyền truy cập
-                  </div>
-                </div>
+            <label
+              className={`ent-radio-card ${
+                accessMode === 'PRIVATE' ? 'ent-radio-card--selected' : ''
+              }`}
+            >
+              <input
+                type="radio"
+                name="upload-access-mode"
+                value="PRIVATE"
+                checked={accessMode === 'PRIVATE'}
+                onChange={() => setAccessMode('PRIVATE')}
+                disabled={isSubmitting}
+                className="sr-only"
+              />
+              <div className="ent-radio-custom" aria-hidden="true">
+                <div className="ent-radio-custom-dot" />
               </div>
-            </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Lock size={15} style={{ color: 'var(--color-warning)' }} />
+                  <span className="ent-radio-card-text">Riêng tư bảo mật</span>
+                </div>
+                <span className="ent-radio-card-subtext">
+                  Chỉ người tạo và người được chỉ định quyền truy cập
+                </span>
+              </div>
+            </label>
           </div>
         </div>
 

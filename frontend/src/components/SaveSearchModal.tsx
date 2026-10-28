@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, BookmarkPlus, Loader2 } from 'lucide-react';
+import { BookmarkPlus, Loader2 } from 'lucide-react';
 import { savedSearchApi, SavedSearchItem } from '../api/savedSearchApi';
+import { EnterpriseModal } from './common/EnterpriseModal';
 
 interface SaveSearchModalProps {
   isOpen: boolean;
@@ -53,90 +54,102 @@ export const SaveSearchModal: React.FC<SaveSearchModalProps> = ({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 460 }}>
-        <div className="modal-header">
-          <div className="modal-title-group">
-            <BookmarkPlus size={20} className="text-primary" />
-            <h3 id="save-search-modal-title">Lưu bộ lọc tìm kiếm</h3>
-          </div>
+    <EnterpriseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      preventClose={isSubmitting}
+      title="Lưu bộ lọc tìm kiếm"
+      subtitle="Lưu lại điều kiện lọc để tái sử dụng nhanh chóng"
+      icon={<BookmarkPlus size={20} />}
+      size="sm"
+      footer={
+        <>
           <button
             type="button"
-            className="btn-icon-close"
+            className="btn btn-secondary"
             onClick={onClose}
-            title="Đóng"
-            id="close-save-search-btn"
+            disabled={isSubmitting}
           >
-            <X size={18} />
+            Hủy
           </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSubmit}
+            disabled={isSubmitting || !name.trim()}
+            id="confirm-save-search-btn"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 size={15} className="animate-spin" />
+                <span>Đang lưu...</span>
+              </>
+            ) : (
+              <>
+                <BookmarkPlus size={15} />
+                <span>Lưu bộ lọc</span>
+              </>
+            )}
+          </button>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {error && (
+          <div className="ent-alert ent-alert--danger" style={{ margin: 0 }}>
+            <span>{error}</span>
+          </div>
+        )}
+
+        <div
+          style={{
+            padding: '0.85rem',
+            borderRadius: '8px',
+            backgroundColor: 'var(--color-card-muted)',
+            border: '1px solid var(--color-border)',
+            fontSize: '0.825rem',
+          }}
+        >
+          <span style={{ fontWeight: 600, color: 'var(--color-text-main)', display: 'block', marginBottom: '0.4rem' }}>
+            Điều kiện lưu trữ:
+          </span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+            <span className="ent-badge ent-badge--info">
+              Từ khóa: <strong>{currentQuery.trim() || '(Tất cả)'}</strong>
+            </span>
+            <span className="ent-badge ent-badge--info">
+              Phân loại: <strong>{currentDocumentType || '(Tất cả)'}</strong>
+            </span>
+            <span className="ent-badge ent-badge--info">
+              Phạm vi:{' '}
+              <strong>
+                {currentSearchScope === 'CONTENT'
+                  ? 'Nội dung tài liệu'
+                  : currentSearchScope === 'ALL'
+                  ? 'Tất cả'
+                  : 'Thông tin tài liệu'}
+              </strong>
+            </span>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="modal-body">
-            {error && <div className="alert alert-danger">{error}</div>}
-
-            <div className="search-condition-preview-box">
-              <span className="preview-label">Điều kiện lưu trữ:</span>
-              <div className="preview-tags">
-                <span className="badge badge-info">
-                  Từ khóa: <strong>{currentQuery.trim() || '(Tất cả)'}</strong>
-                </span>
-                <span className="badge badge-info">
-                  Phân loại: <strong>{currentDocumentType || '(Tất cả)'}</strong>
-                </span>
-                <span className="badge badge-info">
-                  Phạm vi: <strong>{currentSearchScope === 'CONTENT' ? 'Nội dung tài liệu' : currentSearchScope === 'ALL' ? 'Tất cả' : 'Thông tin tài liệu'}</strong>
-                </span>
-              </div>
-            </div>
-
-            <div className="form-group" style={{ marginTop: '1rem' }}>
-              <label htmlFor="saved-search-name-input">
-                Tên bộ lọc tìm kiếm <span className="text-danger">*</span>
-              </label>
-              <input
-                id="saved-search-name-input"
-                type="text"
-                className="form-control"
-                placeholder="Ví dụ: Báo cáo kỹ thuật, Hợp đồng quý 3..."
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                autoFocus
-                required
-              />
-            </div>
-          </div>
-
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={isSubmitting}
-              id="confirm-save-search-btn"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  <span>Đang lưu...</span>
-                </>
-              ) : (
-                <>
-                  <BookmarkPlus size={16} />
-                  <span>Lưu bộ lọc</span>
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="form-group" style={{ margin: 0 }}>
+          <label className="form-label" htmlFor="saved-search-name-input">
+            Tên bộ lọc tìm kiếm <span style={{ color: 'var(--color-danger)' }}>*</span>
+          </label>
+          <input
+            id="saved-search-name-input"
+            type="text"
+            className="form-input"
+            placeholder="Ví dụ: Báo cáo kỹ thuật, Hợp đồng quý 3..."
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoFocus
+            required
+            disabled={isSubmitting}
+          />
+        </div>
+      </form>
+    </EnterpriseModal>
   );
 };
