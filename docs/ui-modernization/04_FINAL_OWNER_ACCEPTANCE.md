@@ -187,7 +187,11 @@ Tuân thủ nghiêm ngặt nguyên tắc chỉ phụ trách tầng Frontend/UI/U
 ## VIII. THÔNG TIN COMMIT VÀ KÍCH HOẠT CI WORKFLOW
 
 - **Nhánh:** `feat/edms-ui-consistency-final`
-- **Commit mới nhất:** Sẽ được push và kích hoạt workflow `EDMS CI - frontend and backend` qua `workflow_dispatch`.
+- **Commit mới nhất:** `f75ee5b` (`feat(ui): enforce modal accessibility, focus management and theme token consistency`)
+- **CI Workflow:** `EDMS CI - frontend and backend`
+- **CI Run ID:** `40639588395`
+- **CI Run URL:** https://github.com/hieuvo123ab-rgb/DoAn_CNPMNC/actions/runs/40639588395
+- **Trạng thái CI:** ✅ **SUCCESS** (Frontend typecheck and build: PASS 22s, Backend unit tests and package: PASS 46s)
 - **Lệnh kích hoạt CI từ GitHub CLI:**
   ```bash
   gh workflow run "EDMS CI - frontend and backend" --ref feat/edms-ui-consistency-final
