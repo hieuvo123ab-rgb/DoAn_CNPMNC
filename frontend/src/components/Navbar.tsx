@@ -274,7 +274,9 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView: initialView }) => {
               <ListTodo size={18} className="ent-sidebar__link-icon" />
               {!isSidebarCollapsed && <span className="ent-sidebar__link-text">Công việc</span>}
               {unreadCount > 0 && (
-                <span className="ent-sidebar__badge">{unreadCount}</span>
+                <span className="ent-sidebar__badge" title={`${unreadCount} công việc cần xử lý`}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
               )}
             </button>
 
