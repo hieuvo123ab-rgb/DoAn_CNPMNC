@@ -165,3 +165,4 @@ Hệ thống đã được kiểm tra thực tế, chụp ảnh đối chiếu v
 - **Địa chỉ:** `http://localhost:5173`
 - **Nhánh Git:** `feat/edms-modern-aurora-ui`
 - **Tình trạng:** **`READY_FOR_OWNER_REVIEW`**
+

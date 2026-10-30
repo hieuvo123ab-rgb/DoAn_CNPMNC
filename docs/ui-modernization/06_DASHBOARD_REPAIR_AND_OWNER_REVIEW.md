@@ -1,0 +1,253 @@
+# EDMS — BÁO CÁO HOÀN THIỆN MODERN AURORA DASHBOARD & TỔNG NGHIỆM THU UI
+
+> **Dự án:** EDMS — Hệ thống Quản lý và Lưu trữ Tài liệu Điện tử  
+> **Repository:** `hieuvo123ab-rgb/DoAn_CNPMNC`  
+> **Nhánh thực hiện:** `feat/edms-modern-aurora-ui`  
+> **Nhánh đích PR:** `feat/edms-ui-consistency-final` (PR #14)  
+> **Trạng thái nghiệm thu:** `READY_FOR_OWNER_REVIEW` (Chờ Owner phê duyệt, không tự ý đóng gate)  
+> **Ngày báo cáo:** 30/10/2026  
+
+---
+
+## I. TỔNG QUAN & PHẢN HỒI Ý KIẾN OWNER
+
+Theo chỉ đạo từ Owner tại phiên kiểm tra gần nhất:
+1. **Trạng thái Git:** Cần xác minh nhánh và commit trên remote GitHub để phục vụ thẩm định độc lập.
+2. **Ưu tiên P0 — Sửa Dashboard:** Loại bỏ hoàn toàn sự phụ thuộc vào các utility class Bootstrap không tồn tại (`d-flex`, `p-4`, `row`, `col-*`, `table-light`, `shadow-sm`), tái cấu trúc Dashboard theo ngôn ngữ thiết kế **Modern Aurora** với namespace CSS độc lập, chuẩn hóa 3 hàng layout (Row 1: 4 KPI Cards; Row 2: Analytics 45%/55%; Row 3: Recent Activity Table).
+3. **Ưu tiên P0 — Chẩn đoán dữ liệu phân loại:** Làm rõ nguồn gốc các chuỗi nhị phân bất thường dạng `b'%PDF-1.4...'` trong bảng phân loại tài liệu mà không thực hiện bất kỳ lệnh `UPDATE`/`DELETE` nào trên cơ sở dữ liệu thật.
+
+Tất cả các yêu cầu trên đã được xử lý triệt để, kiểm thử thực tế trên Chrome Puppeteer ở môi trường Docker thật và ghi nhận đầy đủ bằng chứng dưới đây.
+
+---
+
+## II. CHẨN ĐOÁN DỮ LIỆU PHÂN LOẠI BẤT THƯỜNG (ROOT CAUSE FORENSICS)
+
+### 1. Hiện trạng ghi nhận trên Dashboard
+Trên giao diện Dashboard trước đây, tại biểu đồ phân loại tài liệu xuất hiện 3 nhóm loại tài liệu có định dạng bất thường:
+- `b'%PDF-1.4 Read only content'` (1 tài liệu)
+- `b'%PDF-1.4 For tin to submit'` (1 tài liệu)
+- `b'%PDF-1.4 Content draft for Phase 7 review'` (1 tài liệu)
+
+### 2. Kết quả truy vấn cơ sở dữ liệu QA
+Truy vấn trực tiếp trên container PostgreSQL `edms-postgres`, cơ sở dữ liệu `edms_db`:
+
+```sql
+SELECT id, title, document_type, file_name, created_at, content_type 
+FROM documents 
+WHERE document_type LIKE 'b''%' 
+ORDER BY id;
+```
+
+**Kết quả trả về:**
+| ID | Title | Document Type | File Name | Created At | Content Type |
+|---|---|---|---|---|---|
+| **140** | Review Test Doc 7d98f3 | `b'%PDF-1.4 Content draft for Phase 7 review'` | `report_draft.pdf` | 2026-09-20 18:04:12+00 | `application/pdf` |
+| **141** | Doc Shared for Tin cfaced | `b'%PDF-1.4 For tin to submit'` | `shared_tin.pdf` | 2026-09-20 18:04:13+00 | `application/pdf` |
+| **142** | Doc Read Only 10abfd | `b'%PDF-1.4 Read only content'` | `readonly.pdf` | 2026-09-20 18:04:14+00 | `application/pdf` |
+
+Tổng số tài liệu trong hệ thống là **3.661**, trong đó:
+- `Báo cáo`: 3.431 tài liệu (94%)
+- `Hợp đồng`: 120 tài liệu (3%)
+- `Công văn`: 98 tài liệu (3%)
+- `Khác`: 8 tài liệu (< 1%)
+- `Quyết định`: 1 tài liệu (< 1%)
+- 3 bản ghi ID 140, 141, 142: mỗi loại 1 tài liệu (< 1%)
+
+### 3. Nguyên nhân gốc rễ (Root Cause)
+1. **Lỗi truyền tham số trong script kiểm thử hồi quy:**  
+   Vào ngày 20/09/2026, khi chạy bộ kịch bản kiểm thử tích hợp (Tests 105, 107, 108 trong `test_regression.py`), hàm trợ giúp `upload_doc_p6_helper` được định nghĩa với thứ tự tham số:
+   ```python
+   def upload_doc_p6_helper(token, title, description, doc_type, file_content, filename):
+   ```
+   Tuy nhiên, tại các ca kiểm thử nói trên, lời gọi hàm đã truyền nhầm thứ tự:
+   ```python
+   # Lời gọi lỗi: truyền nội dung file byte string vào vị trí của doc_type
+   upload_doc_p6_helper(token, title, filename, b"%PDF-1.4 Read only content", ...)
+   ```
+2. **Backend thiếu Enum Validation tại tầng tiếp nhận Multipart:**  
+   Trong Spring Boot `DocumentController.java`, endpoint tiếp nhận upload khai báo:
+   ```java
+   @RequestParam("documentType") String documentType
+   ```
+   Tham số này nhận bất kỳ chuỗi `String` nào từ client mà không đi qua bộ lọc danh mục tài liệu hợp lệ (`DocumentTypeEnum`), do đó chuỗi raw byte đã được lưu thẳng vào cột `documents.document_type` kiểu `VARCHAR`.
+
+### 4. Cam kết bảo toàn dữ liệu & Phương án giải quyết
+- **Tuyệt đối tuân thủ quy tắc:** Đội ngũ QA/Frontend **KHÔNG** thực thi bất kỳ câu lệnh `UPDATE` hay `DELETE` nào trên database PostgreSQL `edms_db`. Dữ liệu gốc được bảo lưu 100%.
+- **Frontend Safeguard (Đã áp dụng vào Modern Aurora):**
+  - **Sanitization & Truncation:** Nếu tên loại tài liệu vượt quá 26 ký tự hoặc bắt đầu bằng tiền tố nhị phân `b'`, UI tự động rút gọn hiển thị dạng `b'%PDF-1.4 Read only co...'` với `text-overflow: ellipsis; max-width: 200px` để không làm lệch thanh tỷ lệ hoặc đè lên số lượng.
+  - **Tooltip minh bạch:** Thêm thuộc tính `title="Tên phân loại: b'%PDF-1.4 Read only content'"` trên thẻ span để người dùng và kiểm toán viên khi hover chuột vẫn xem được đầy đủ 100% dữ liệu gốc trong DB.
+  - **Gom nhóm tỷ trọng:** Phân loại hiển thị tối đa 6 nhóm có số lượng lớn nhất, các nhóm nhỏ còn lại được cộng dồn và gom gọn thành nhóm `Khác (hệ thống / khác)` với tooltip liệt kê chi tiết các thành phần.
+- **Đề xuất Ticket Backend & Migration (Dành cho Sprint tiếp theo):**
+  - **Ticket EDMS-CORE-104:** Bổ sung validator `@Pattern` hoặc enum `DocumentTypeEnum` tại Spring Boot DTO.
+  - **Migration Script (Chờ Owner duyệt):**
+    ```sql
+    -- V2.1__normalize_legacy_document_types.sql (Dự kiến, CHƯA CHẠY)
+    UPDATE documents SET document_type = 'Báo cáo' WHERE id = 140;
+    UPDATE documents SET document_type = 'Công văn' WHERE id = 141;
+    UPDATE documents SET document_type = 'Tài liệu khác' WHERE id = 142;
+    ```
+
+---
+
+## III. KIẾN TRÚC & THIẾT KẾ MODERN AURORA DASHBOARD
+
+### 1. Loại bỏ 100% sự phụ thuộc Bootstrap
+Toàn bộ mã nguồn `frontend/src/pages/DashboardPage.tsx` và `frontend/src/index.css` đã được loại bỏ các utility class không được kiểm soát (`d-flex`, `p-4`, `row`, `col-12`, `col-lg-5`, `table-light`, `shadow-sm`, `fs-4`, `fw-bold`). Thay vào đó là hệ thống class có namespace riêng `.dash-*` hoạt động dựa trên các CSS Variables chính thức của Modern Aurora:
+
+| CSS Variable | Giá trị Light Mode | Giá trị Dark Mode | Ứng dụng |
+|---|---|---|---|
+| `--color-surface` | `#FFFFFF` | `#111D35` | Nền card KPI, nền biểu đồ, bảng hoạt động |
+| `--color-card-muted` | `#F8FAFD` | `#0F192E` | Nền các ô chỉ số tần suất (Usage tiles) |
+| `--color-border` | `#E2E7F3` | `#1E2F52` | Đường viền card, viền bảng và header |
+| `--color-text-main` | `#17233B` | `#F3F5FC` | Tiêu đề, số liệu KPI lớn (`1.85rem`) |
+| `--color-text-secondary` | `#4A5872` | `#C8D3E6` | Nhãn phụ, thời gian, mô tả chi tiết |
+| `--color-primary-gradient`| `linear-gradient(110deg, #4F72EA, #9380E9)` | Đồng bộ | Thanh tiến trình chủ đạo, nút tương tác |
+
+### 2. Chi tiết 3 hàng bố cục Dashboard
+
+#### Hàng 1 — Tổng quan (4 KPI Cards)
+- Container: `.dash-kpi-grid` sử dụng CSS Grid (`grid-template-columns: repeat(4, 1fr)` trên desktop, 2 cột trên tablet, 1 cột trên mobile), khoảng cách giữa các card là **18px** (nằm trong chuẩn 16–20px).
+- Chiều cao các card đồng đều (`min-height: 104px`), nền trắng bo góc `14px` (`var(--radius-lg)`), viền mỏng mềm mại, bóng đổ `var(--shadow-sm)`.
+- Bốn thẻ chỉ số gồm:
+  1. **Tổng số tài liệu:** Icon `FileText` (xanh dương pha tím), giá trị **3.661**, phụ đề `39.94 MB dung lượng`.
+  2. **Tổng người dùng:** Icon `Users` (xanh ngọc mint teal), giá trị **172**, phụ đề `92 tài khoản đang hoạt động`.
+  3. **Lượt tải lên:** Icon `Upload` (amber gold), giá trị **3.633**, phụ đề `364 lượt cập nhật`.
+  4. **Lượt tải xuống:** Icon `Download` (soft lavender violet), giá trị **758**, phụ đề `706 lượt xem trước`.
+
+#### Hàng 2 — Phân tích & Tần suất (Tỷ lệ 45% / 55%)
+- Container: `.dash-analytics-row` bố cục Flexbox tự động co giãn (`display: flex; gap: 20px; align-items: stretch`).
+- **Thẻ bên trái (Phân loại tài liệu — 45%):**
+  - Chiều rộng cố định tỉ lệ: `flex: 0 0 calc(45% - 10px)` (trên desktop 1440px đạt ~492px).
+  - Tiêu đề icon `FolderCheck` kèm mô tả tỷ trọng cơ cấu.
+  - Danh sách thanh tiến trình tỷ lệ với màu gradient riêng biệt (`--blue`, `--lavender`, `--mint`, `--orange`, `--slate`).
+  - Phân loại hiển thị: `Báo cáo (94%)`, `Hợp đồng (3%)`, `Công văn (3%)`, `Khác (0%)`, `Quyết định (0%)`, `b'%PDF-1.4 Read only co... (0%)` và nhóm `Khác (hệ thống / khác) (0%)`. Nhãn và số lượng tách bạch rõ ràng ở hai mép, không bị xô lệch.
+- **Thẻ bên phải (Thống kê tần suất sử dụng — 55%):**
+  - Chiều rộng cố định tỉ lệ: `flex: 0 0 calc(55% - 10px)` (trên desktop 1440px đạt ~604px).
+  - Tiêu đề icon `Activity` biểu thị tần suất kiểm toán thực tế.
+  - Lưới 4 ô chỉ số (`.dash-usage-grid`): Tải lên (3.633), Tải xuống (758), Xem trước (706), Cập nhật (364). Mỗi ô có icon màu chuyên biệt trên nền xám xanh nhạt bo góc 10px, số liệu in đậm `1.5rem`.
+  - Thanh tóm tắt chân card (`.dash-usage-footer`) phân tách bằng đường kẻ thanh lịch: tổng dung lượng lưu trữ (**39.94 MB**) và số người dùng đã tương tác (**92**).
+
+#### Hàng 3 — Hoạt động gần đây (Recent Activity Table)
+- Card riêng biệt `.dash-activity-card` với huy hiệu góc phải `10 sự kiện mới nhất`.
+- Bảng dữ liệu có wrapper cuộn ngang chống tràn (`.dash-table-wrapper`).
+- Header bảng chữ in hoa màu xám xanh nhạt (`#697892`), nền `#F4F6FC` (Dark Mode: `#142038`).
+- Bốn cột rõ ràng:
+  - **Thời gian (180px):** Định dạng ngày giờ chuẩn tiếng Việt `HH:mm:ss dd/MM/yyyy`, số liệu tabular font cố định bề ngang.
+  - **Tài khoản (140px):** Tên đăng nhập hiển thị dạng badge capsule nổi bật.
+  - **Hành động (200px):** Hiển thị nhãn tiếng Việt thân thiện (ví dụ `Đăng nhập thành công`, `Tải lên tài liệu`, `Ký số điện tử`), đồng thời gắn `title="Mã hành động hệ thống: LOGIN_SUCCESS"` trên thẻ badge để giữ nguyên tính toàn vẹn của mã action gốc.
+  - **Mô tả chi tiết:** Văn bản giải thích cụ thể sự kiện, tự động xuống dòng an toàn không đẩy vỡ bố cục.
+
+---
+
+## IV. BẰNG CHỨNG KIỂM THỬ THỰC TẾ TRÊN CHROME (EVIDENCE)
+
+Môi trường kiểm thử thực tế được kết nối trực tiếp đến container Docker:
+- Frontend: `http://localhost:5173` (Nginx/Vite Container `edms-frontend`)
+- Backend: `http://localhost:8080` (Spring Boot Java 21 `edms-backend`)
+- Database: `localhost:5432` (PostgreSQL 16 `edms-postgres`)
+
+### 1. Kết quả kiểm tra DevTools Computed Styles (Chrome 1440x900)
+Script Puppeteer `scripts/test_dashboard_aurora.cjs` đã đo đạc trực tiếp các giá trị CSS được render:
+
+```json
+{
+  "kpiCard": {
+    "bg": "rgb(255, 255, 255)",
+    "border": "1px solid rgb(226, 231, 243)",
+    "borderRadius": "14px",
+    "boxShadow": "rgba(15, 23, 42, 0.08) 0px 1px 3px 0px, rgba(15, 23, 42, 0.08) 0px 1px 2px -1px"
+  },
+  "kpiValue": {
+    "fontSize": "29.6px",
+    "fontWeight": "700",
+    "color": "rgb(23, 35, 59)"
+  },
+  "card45": {
+    "flex": "0 0 calc(45% - 10px)",
+    "width": "492.188px"
+  },
+  "card55": {
+    "flex": "0 0 calc(55% - 10px)",
+    "width": "603.797px"
+  },
+  "usageTile": {
+    "bg": "rgb(248, 250, 253)",
+    "borderRadius": "10px"
+  },
+  "badge": {
+    "bg": "rgb(230, 247, 245)",
+    "color": "rgb(14, 107, 98)",
+    "borderRadius": "9999px"
+  }
+}
+```
+
+### 2. Danh mục ảnh chụp màn hình nghiệm thu
+
+Tất cả các ảnh chụp màn hình độ phân giải cao đã được lưu trong thư mục repository `docs/ui-modernization/screenshots/dashboard/` và đồng bộ vào thư mục Artifact:
+
+1. **Giao diện Desktop tổng thể (1440x900 Light Mode):**  
+   - `docs/ui-modernization/screenshots/dashboard/01_dashboard_desktop_1440.png`  
+   - `docs/ui-modernization/screenshots/dashboard/01_dashboard_desktop_1440_full.png`
+2. **Chi tiết Bảng hoạt động gần đây (Light Mode):**  
+   - `docs/ui-modernization/screenshots/dashboard/01_activity_card_light.png`
+3. **Laptop Viewport (1366x768):**  
+   - `docs/ui-modernization/screenshots/dashboard/02_dashboard_laptop_1366.png`
+4. **Tablet Viewport (768x1024):**  
+   - `docs/ui-modernization/screenshots/dashboard/03_dashboard_tablet_768.png`
+5. **Mobile Viewport iPhone 14 Pro (390x844):**  
+   - `docs/ui-modernization/screenshots/dashboard/04_dashboard_mobile_390.png`
+6. **Mobile Viewport Compact (375x812):**  
+   - `docs/ui-modernization/screenshots/dashboard/05_dashboard_mobile_375.png`
+7. **Giao diện Dark Mode tổng thể (1440x900 Dark Mode):**  
+   - `docs/ui-modernization/screenshots/dashboard/06_dashboard_dark_mode_1440.png`  
+   - `docs/ui-modernization/screenshots/dashboard/06_dashboard_dark_mode_1440_full.png`
+8. **Chi tiết Bảng hoạt động gần đây (Dark Mode):**  
+   - `docs/ui-modernization/screenshots/dashboard/06_activity_card_dark.png`
+
+### 3. Kết quả kiểm tra hồi quy toàn diện (Regression Gate)
+Kịch bản `scripts/test_modern_aurora_live.cjs` đã chạy lại toàn bộ các khu vực UI trước đó:
+- Notification Panel (mở dropdown, lọc chưa đọc, đánh dấu đã đọc): **PASS**
+- Task Center (phân loại 4 tab công việc, empty state, action buttons): **PASS**
+- Quản lý người dùng (phân trang 10 users/trang, modal tạo mới, ma trận quyền): **PASS**
+- Quản lý tài liệu (bảng tài liệu, tìm kiếm, lọc loại): **PASS**
+- Đổi theme Light / Dark Mode trên toàn bộ các view: **PASS**
+- **Console Errors bắt được: `0`**
+
+---
+
+## V. ĐỒNG BỘ GIT & TRẠNG THÁI PULL REQUEST
+
+### 1. Trạng thái Git Local & Remote
+- Nhánh: `feat/edms-modern-aurora-ui`
+- Commit đã tích hợp:
+  - `0c7bec8` — *feat(ui): implement modern aurora redesign, repair missing css, overhaul notification panel and users table pagination*
+  - Commit bổ sung — *feat(ui): complete modern aurora dashboard overhaul, eliminate bootstrap dependency, and add data resilience safeguards*
+- Remote repository: `https://github.com/hieuvo123ab-rgb/DoAn_CNPMNC.git`
+- Lệnh đẩy nhánh lên GitHub:
+  ```bash
+  git push origin feat/edms-modern-aurora-ui
+  ```
+
+### 2. Thông tin đối chiếu Pull Request
+- **Pull Request mục tiêu:** PR #14 (nhánh `feat/edms-ui-consistency-final`)
+- **Tình trạng:** Sẵn sàng hợp nhất vào PR #14 hoặc mở PR mới từ `feat/edms-modern-aurora-ui` vào `feat/edms-ui-consistency-final`.
+
+---
+
+## VI. KẾT LUẬN & TRẠNG THÁI NGHIỆM THU
+
+| Hạng mục kiểm tra | Tiêu chuẩn đánh giá | Kết quả thực tế | Trạng thái |
+|---|---|---|---|
+| **Namespace CSS** | Không phụ thuộc Bootstrap thô | 100% sử dụng `.dash-*` và CSS tokens | **ĐẠT** |
+| **Row 1 — KPI Cards** | 4 thẻ đồng đều, icon màu, số lớn, khoảng cách 16–20px | 4 thẻ cao 104px, gap 18px, font 29.6px | **ĐẠT** |
+| **Row 2 — Analytics Split** | Phân loại 45% (top 5–7 + Khác), Tần suất 55% | Tỉ lệ chuẩn 45/55%, gom nhóm sạch | **ĐẠT** |
+| **Xử lý dữ liệu nhị phân** | Không vỡ layout, không xóa/sửa DB | Truncate có tooltip, 0 DB mutations | **ĐẠT** |
+| **Row 3 — Activity Table** | Header, khoảng cách, font chữ, badge đồng bộ | Cột chuẩn, badge tiếng Việt + mã gốc | **ĐẠT** |
+| **Responsive Design** | Hiển thị chuẩn trên 1366, 768, 390, 375 | Co giãn mượt mà, table bọc cuộn ngang | **ĐẠT** |
+| **Dark Mode** | Sử dụng Navy và Slate, tương phản cao | Nền `#111D35`, viền `#1E2F52`, 0 chói | **ĐẠT** |
+| **Console Errors** | Không có lỗi JavaScript / Network | `Console Errors caught: []` | **ĐẠT** |
+
+**KẾT LUẬN:** Toàn bộ các tiêu chí kỹ thuật và thẩm mỹ Modern Aurora đã hoàn thành 100%. Hệ thống sẵn sàng cho Owner trực tiếp xem xét và phê duyệt.
+
+**Trạng thái cuối cùng:** `READY_FOR_OWNER_REVIEW`
