@@ -23,6 +23,8 @@ async function run() {
   });
 
   const page = await browser.newPage();
+  page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+  page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
 
   try {
     // 1. Login as Admin
@@ -43,76 +45,81 @@ async function run() {
     await page.waitForSelector('.kanban-grid', { timeout: 10000 });
     await delay(1000);
 
-    // Screenshot 1: Kanban View (Default)
-    console.log('[3] Capturing 01_task_center_kanban_desktop_1440.png...');
-    await page.screenshot({ path: path.join(OUT_DIR, '01_task_center_kanban_desktop_1440.png'), fullPage: false });
+    // Screenshot 1: Kanban View (Default Unified Kanban)
+    console.log('[3] Capturing 01_task_center_2_kanban_view.png...');
+    await page.screenshot({ path: path.join(OUT_DIR, '01_task_center_2_kanban_view.png'), fullPage: false });
 
     // Screenshot 2: Switch to List View
-    console.log('[4] Switching to List View and capturing 02_task_center_list_desktop_1440.png...');
+    console.log('[4] Switching to List View and capturing 02_task_center_2_list_view.png...');
     await page.click('#btn-view-list');
     await page.waitForSelector('.data-table', { timeout: 10000 });
     await delay(1000);
-    await page.screenshot({ path: path.join(OUT_DIR, '02_task_center_list_desktop_1440.png'), fullPage: false });
+    await page.screenshot({ path: path.join(OUT_DIR, '02_task_center_2_list_view.png'), fullPage: false });
 
-    // Screenshot 3: Open Create Task Modal
-    console.log('[5] Opening Create Task Modal and capturing 03_task_center_create_modal.png...');
-    await page.click('#btn-create-task');
-    await page.waitForSelector('.ent-modal', { timeout: 10000 });
-    await delay(1000);
-    await page.screenshot({ path: path.join(OUT_DIR, '03_task_center_create_modal.png'), fullPage: false });
-
-    // Close Create Modal
-    await page.click('.ent-modal__close-btn');
-    await delay(1000);
-
-    // Screenshot 4: Open Detail & Activity History Modal
-    console.log('[6] Opening Detail & Activity History Modal...');
-    // Click on the first row in List view to open detail
+    // Screenshot 3: Open Task Detail Drawer from right edge
+    console.log('[5] Opening Task Detail Drawer and capturing 03_task_center_2_detail_drawer.png...');
     const firstRow = await page.$('.data-table tbody tr');
     if (firstRow) {
       await firstRow.click();
-      await page.waitForSelector('.ent-modal', { timeout: 10000 });
-      await delay(1000);
-      await page.screenshot({ path: path.join(OUT_DIR, '04_task_center_detail_timeline.png'), fullPage: false });
-      // Close detail modal
-      const closeBtn = await page.$('.ent-modal__close-btn');
-      if (closeBtn) await closeBtn.click();
+      await page.waitForSelector('.task-drawer', { timeout: 10000 });
+      await delay(1200);
+      await page.screenshot({ path: path.join(OUT_DIR, '03_task_center_2_detail_drawer.png'), fullPage: false });
+      
+      // Close Drawer cleanly
+      await page.evaluate(() => {
+        const btn = document.querySelector('.task-drawer .ent-modal__close-btn') || document.querySelector('.task-drawer-overlay');
+        if (btn) btn.click();
+      });
       await delay(1000);
     }
 
-    // Screenshot 5: Switch to System Derived Tasks Tab
-    console.log('[7] Switching to System Derived Tasks Tab...');
-    await page.click('#tab-system-tasks');
-    await delay(1500);
-    await page.screenshot({ path: path.join(OUT_DIR, '05_task_center_system_tasks_tab.png'), fullPage: false });
+    // Screenshot 4: Open Workload & Backlog Analytics Modal
+    console.log('[6] Opening Workload & Backlog Analytics Modal and capturing 04_task_center_2_workload_analytics.png...');
+    await page.evaluate(() => {
+      const btn = document.getElementById('btn-workload-analytics');
+      if (btn) btn.click();
+    });
+    await page.waitForSelector('.ent-modal', { timeout: 10000 });
+    await delay(1200);
+    await page.screenshot({ path: path.join(OUT_DIR, '04_task_center_2_workload_analytics.png'), fullPage: false });
 
-    // Screenshot 6: Dark Mode Toggle
-    console.log('[8] Toggling Dark Mode...');
+    // Close Workload Modal
+    await page.evaluate(() => {
+      const btn = document.querySelector('.ent-modal .ent-modal__close-btn') || document.querySelector('.ent-modal__footer button');
+      if (btn) btn.click();
+    });
+    await delay(1000);
+
+    // Switch back to Kanban
+    await page.click('#btn-view-kanban');
+    await delay(800);
+
+    // Screenshot 5: Dark Mode Toggle
+    console.log('[7] Toggling Dark Mode and capturing 05_task_center_2_dark_mode.png...');
     await page.click('#theme-toggle-btn');
     await delay(1000);
-    // Switch back to manual tasks tab in dark mode
-    await page.click('#tab-manual-tasks');
-    await delay(1000);
-    await page.screenshot({ path: path.join(OUT_DIR, '06_task_center_dark_mode.png'), fullPage: false });
+    await page.screenshot({ path: path.join(OUT_DIR, '05_task_center_2_dark_mode.png'), fullPage: false });
 
     // Switch back to light theme
     await page.click('#theme-toggle-btn');
-    await delay(500);
+    await delay(600);
 
-    // Screenshot 7: Mobile Viewport (375x812)
-    console.log('[9] Testing Mobile Viewport 375x812...');
+    // Screenshot 6: Mobile Viewport (375x812) with Drawer Open
+    console.log('[8] Testing Mobile Viewport 375x812 and capturing 06_task_center_2_mobile_drawer.png...');
     await page.setViewport({ width: 375, height: 812, isMobile: true, hasTouch: true });
-    await delay(1000);
-    const hamburger = await page.$('#mobile-menu-toggle-btn');
-    if (hamburger) {
-      await hamburger.click();
-      await delay(800);
-      await page.click('#nav-tasks-btn');
-      await delay(1500);
+    await delay(800);
+    await page.evaluate(() => {
+      window.dispatchEvent(new CustomEvent('app-navigate', { detail: 'tasks' }));
+    });
+    await delay(1200);
+    const card = await page.$('.kanban-card');
+    if (card) {
+      await card.click();
+      await delay(1200);
     }
-    await page.screenshot({ path: path.join(OUT_DIR, '07_task_center_mobile_responsive_375.png'), fullPage: false });
+    await page.screenshot({ path: path.join(OUT_DIR, '06_task_center_2_mobile_drawer.png'), fullPage: false });
 
-    console.log('\n[SUCCESS] All 7 UI evidence screenshots captured successfully!');
+    console.log('\n[SUCCESS] All Task Center 2.0 visual evidence screenshots captured successfully!');
   } catch (err) {
     console.error('Error during capture:', err);
   } finally {

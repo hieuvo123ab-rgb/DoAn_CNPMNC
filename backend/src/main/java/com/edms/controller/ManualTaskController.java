@@ -100,6 +100,35 @@ public class ManualTaskController {
         return ResponseEntity.ok(task);
     }
 
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<ManualTaskResponse> addComment(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody ManualTaskCommentRequest request,
+            Authentication authentication,
+            HttpServletRequest servletRequest) {
+        boolean isAdmin = isAdmin(authentication);
+        String ipAddress = servletRequest.getRemoteAddr();
+        ManualTaskResponse task = manualTaskService.addComment(id, request, authentication.getName(), isAdmin, ipAddress);
+        return ResponseEntity.ok(task);
+    }
+
+    @GetMapping("/workload")
+    public ResponseEntity<List<ManualTaskWorkloadDto>> getWorkload(Authentication authentication) {
+        boolean isAdmin = isAdmin(authentication);
+        List<ManualTaskWorkloadDto> workload = manualTaskService.getWorkload(authentication.getName(), isAdmin);
+        return ResponseEntity.ok(workload);
+    }
+
+    @PostMapping("/escalate-check")
+    public ResponseEntity<EscalationResultDto> checkEscalation(
+            Authentication authentication,
+            HttpServletRequest servletRequest) {
+        boolean isAdmin = isAdmin(authentication);
+        String ipAddress = servletRequest.getRemoteAddr();
+        EscalationResultDto result = manualTaskService.checkEscalation(authentication.getName(), isAdmin, ipAddress);
+        return ResponseEntity.ok(result);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(
             @PathVariable("id") Long id,

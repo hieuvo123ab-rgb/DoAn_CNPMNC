@@ -165,6 +165,8 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
         return <PenTool size={16} className="text-success" />;
       case 'TASK_ASSIGNED':
       case 'TASK_STATUS_UPDATED':
+      case 'TASK_DEADLINE_REMINDER':
+      case 'TASK_COMMENT_ADDED':
         return <ListTodo size={16} className="text-primary" />;
       case 'INTEGRITY_TAMPER_DETECTED':
         return <AlertTriangle size={16} className="text-danger" />;

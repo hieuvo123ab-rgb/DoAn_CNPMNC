@@ -2,11 +2,12 @@
 # Using Ubuntu-based image (glibc) for ONNX Runtime compatibility
 FROM maven:3.9.6-eclipse-temurin-21 AS builder
 WORKDIR /app
+ENV MAVEN_OPTS="-Djava.net.preferIPv4Stack=true"
 COPY pom.xml .
 # Download dependencies
 RUN mvn dependency:go-offline -B || true
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTests -o || mvn clean package -DskipTests
 
 # Stage 2: Runtime image with Java 21 (Ubuntu Jammy for glibc - required by ONNX Runtime)
 # NOTE: Alpine musl libc is NOT compatible with ONNX Runtime prebuilt binaries

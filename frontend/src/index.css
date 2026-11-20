@@ -206,7 +206,8 @@ button, input, select, textarea {
 .dashboard-page,
 .audit-page,
 .layout-root,
-.page-layout {
+.page-layout,
+.ent-app-layout {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -221,7 +222,8 @@ html[data-sidebar-collapsed="true"] .app-container,
 html[data-sidebar-collapsed="true"] .dashboard-page,
 html[data-sidebar-collapsed="true"] .audit-page,
 html[data-sidebar-collapsed="true"] .layout-root,
-html[data-sidebar-collapsed="true"] .page-layout {
+html[data-sidebar-collapsed="true"] .page-layout,
+html[data-sidebar-collapsed="true"] .ent-app-layout {
   margin-left: var(--sidebar-collapsed-width);
 }
 
@@ -230,7 +232,8 @@ html[data-sidebar-collapsed="true"] .page-layout {
   .dashboard-page,
   .audit-page,
   .layout-root,
-  .page-layout {
+  .page-layout,
+  .ent-app-layout {
     margin-left: 0 !important;
   }
 }
@@ -239,7 +242,8 @@ html[data-sidebar-collapsed="true"] .page-layout {
 .dashboard-container,
 .audit-container,
 .main-area,
-.page-layout > main {
+.page-layout > main,
+.ent-main-content {
   flex: 1;
   max-width: 1440px;
   width: 100%;
@@ -3801,6 +3805,74 @@ html[data-sidebar-collapsed="true"] .page-layout {
   gap: 1.125rem;
 }
 
+/* Task Center 2.0 Summary KPI Grid */
+.dash-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+  .dash-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dash-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .dash-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dash-stat-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.15rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dash-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.dash-stat-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.dash-stat-card__title {
+  font-size: 0.725rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.dash-stat-card__value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0.25rem;
+  color: var(--color-text-main);
+}
+
+.dash-stat-card__subtext {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
 @media (max-width: 1200px) {
   .dash-kpi-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -4690,4 +4762,147 @@ html[data-sidebar-collapsed="true"] .page-layout {
   border: 1px solid var(--color-border-subtle);
   font-size: 0.8rem;
   color: var(--color-text-main);
+}
+
+/* ==========================================================================
+   TASK CENTER 2.0: SLIDE-OVER DRAWER, DRAG-AND-DROP & WORKLOAD STYLES
+   ========================================================================== */
+.task-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 1040;
+  animation: entDrawerFadeIn 0.2s ease-out;
+}
+
+@keyframes entDrawerFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.task-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(640px, 94vw);
+  background: var(--color-surface);
+  box-shadow: -8px 0 28px rgba(0, 0, 0, 0.2);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  animation: entDrawerSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes entDrawerSlideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.task-drawer__header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  background: var(--color-surface);
+}
+
+.task-drawer__body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.task-drawer__footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-card-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Drag & Drop Visual States */
+.kanban-col.drag-over {
+  border: 2px dashed var(--color-primary);
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.kanban-card.is-dragging {
+  opacity: 0.35;
+  transform: scale(0.97);
+}
+
+.kanban-card[draggable="true"] {
+  cursor: grab;
+}
+
+.kanban-card[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* Source Type Badges */
+.task-source-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.task-source-tag--manual {
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563EB;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+}
+
+.task-source-tag--system {
+  background: rgba(217, 119, 6, 0.1);
+  color: #D97706;
+  border: 1px solid rgba(217, 119, 6, 0.25);
+}
+
+/* Workload & Analytics Modal Styles */
+.workload-card {
+  padding: 1rem;
+  background: var(--color-surface-hover);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.85rem;
+}
+
+.workload-bar-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-border);
+  overflow: hidden;
+  display: flex;
+  margin: 0.6rem 0;
+}
+
+.workload-bar-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.workload-bar-segment--todo {
+  background: #3B82F6;
+}
+
+.workload-bar-segment--progress {
+  background: #8B5CF6;
+}
+
+.workload-bar-segment--done {
+  background: #10B981;
+}
+
+.workload-bar-segment--overdue {
+  background: #EF4444;
 }

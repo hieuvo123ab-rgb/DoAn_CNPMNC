@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -453,6 +455,161 @@ public class ManualTaskService {
                 ))
                 .sorted(Comparator.comparing(AssigneeOptionDto::getFullName, String.CASE_INSENSITIVE_ORDER))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public ManualTaskResponse addComment(Long id, ManualTaskCommentRequest request, String currentUsername, boolean isAdmin, String ipAddress) {
+        ManualTask task = manualTaskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy công việc với mã ID: " + id));
+
+        boolean isCreator = currentUsername.equals(task.getCreatedBy());
+        boolean isAssignee = currentUsername.equals(task.getAssignee());
+
+        if (!isAdmin && !isCreator && !isAssignee) {
+            throw new AccessDeniedException("Bạn không có quyền bình luận trên công việc này.");
+        }
+
+        User currentUser = userRepository.findByUsername(currentUsername).orElse(null);
+        String userFullName = currentUser != null && currentUser.getFullName() != null ? currentUser.getFullName() : currentUsername;
+
+        manualTaskActivityRepository.save(new ManualTaskActivity(
+                task.getId(), currentUsername, userFullName, "COMMENT_ADDED",
+                null, null, request.getComment()
+        ));
+
+        task.setUpdatedAt(Instant.now());
+        manualTaskRepository.save(task);
+
+        auditService.log(currentUsername, "MANUAL_TASK_COMMENT", "MANUAL_TASK", String.valueOf(task.getId()),
+                "Thêm bình luận cho công việc #" + task.getId(), ipAddress);
+
+        // Notify counterpart
+        String targetUser = isAssignee ? task.getCreatedBy() : task.getAssignee();
+        if (targetUser != null && !targetUser.equals(currentUsername)) {
+            try {
+                notificationService.publishNotification(
+                        targetUser,
+                        NotificationType.TASK_COMMENT_ADDED,
+                        "Bình luận mới trên công việc #" + task.getId(),
+                        userFullName + " đã bình luận: \"" + truncate(request.getComment(), 80) + "\"",
+                        task.getDocumentId(),
+                        null,
+                        "MANUAL_TASK",
+                        task.getId(),
+                        "OPEN_TASK_CENTER",
+                        "TASK_COMMENT_" + task.getId() + "_" + Instant.now().toEpochMilli()
+                );
+            } catch (Exception ignored) {
+            }
+        }
+
+        Map<String, User> userCache = getUserCache();
+        return mapToResponse(task, userCache, true);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ManualTaskWorkloadDto> getWorkload(String currentUsername, boolean isAdmin) {
+        List<User> users = userRepository.findAll().stream()
+                .filter(User::isEnabled)
+                .toList();
+
+        if (!isAdmin) {
+            users = users.stream()
+                    .filter(u -> u.getUsername().equals(currentUsername))
+                    .toList();
+        }
+
+        List<ManualTask> allActiveTasks = manualTaskRepository.findAll();
+        Instant now = Instant.now();
+
+        List<ManualTaskWorkloadDto> result = new ArrayList<>();
+        for (User u : users) {
+            String uname = u.getUsername();
+            List<ManualTask> userTasks = allActiveTasks.stream()
+                    .filter(t -> uname.equals(t.getAssignee()))
+                    .toList();
+
+            long total = userTasks.size();
+            long todo = userTasks.stream().filter(t -> t.getStatus() == ManualTaskStatus.TODO).count();
+            long inProgress = userTasks.stream().filter(t -> t.getStatus() == ManualTaskStatus.IN_PROGRESS).count();
+            long done = userTasks.stream().filter(t -> t.getStatus() == ManualTaskStatus.DONE).count();
+            long overdue = userTasks.stream().filter(t ->
+                    t.getDueDate() != null &&
+                    t.getDueDate().isBefore(now) &&
+                    t.getStatus() != ManualTaskStatus.DONE &&
+                    t.getStatus() != ManualTaskStatus.CANCELLED
+            ).count();
+
+            result.add(new ManualTaskWorkloadDto(
+                    uname,
+                    u.getFullName() != null ? u.getFullName() : uname,
+                    total, todo, inProgress, done, overdue
+            ));
+        }
+
+        return result;
+    }
+
+    @Transactional
+    public EscalationResultDto checkEscalation(String currentUsername, boolean isAdmin, String ipAddress) {
+        if (!isAdmin) {
+            throw new AccessDeniedException("Chỉ Quản trị viên mới có quyền kích hoạt kiểm tra và gửi cảnh báo nhắc hạn.");
+        }
+
+        Instant now = Instant.now();
+        Instant soonThreshold = now.plus(24, ChronoUnit.HOURS);
+        LocalDate today = LocalDate.now();
+
+        List<ManualTask> tasks = manualTaskRepository.findAll().stream()
+                .filter(t -> t.getDueDate() != null)
+                .filter(t -> t.getStatus() == ManualTaskStatus.TODO || t.getStatus() == ManualTaskStatus.IN_PROGRESS)
+                .toList();
+
+        int remindedCount = 0;
+        int overdueCount = 0;
+
+        for (ManualTask t : tasks) {
+            boolean isOverdue = t.getDueDate().isBefore(now);
+            boolean isDueSoon = !isOverdue && t.getDueDate().isBefore(soonThreshold);
+
+            if (isOverdue || isDueSoon) {
+                if (isOverdue) overdueCount++;
+                String dedupKey = "REMIND_" + t.getId() + "_" + today;
+                String title = isOverdue ? "Cảnh báo: Công việc quá hạn #" + t.getId() : "Nhắc nhở: Công việc sắp đến hạn #" + t.getId();
+                String content = (isOverdue ? "Công việc đã quá hạn xử lý: " : "Công việc sắp hết hạn xử lý (trong 24h): ") + t.getTitle();
+
+                if (t.getAssignee() != null) {
+                    try {
+                        notificationService.publishNotification(
+                                t.getAssignee(),
+                                NotificationType.TASK_DEADLINE_REMINDER,
+                                title,
+                                content,
+                                t.getDocumentId(),
+                                null,
+                                "MANUAL_TASK",
+                                t.getId(),
+                                "OPEN_TASK_CENTER",
+                                dedupKey
+                        );
+                        remindedCount++;
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+        }
+
+        auditService.log(currentUsername, "MANUAL_TASK_ESCALATION_CHECK", "MANUAL_TASK", "SYSTEM",
+                "Kiểm tra cảnh báo nhắc hạn: " + remindedCount + " lời nhắc, " + overdueCount + " việc quá hạn", ipAddress);
+
+        return new EscalationResultDto(remindedCount, overdueCount,
+                "Đã kiểm tra và gửi " + remindedCount + " thông báo nhắc hạn thành công (" + overdueCount + " công việc quá hạn).");
+    }
+
+    private String truncate(String text, int maxLen) {
+        if (text == null) return "";
+        if (text.length() <= maxLen) return text;
+        return text.substring(0, maxLen - 3) + "...";
     }
 
     private Map<String, User> getUserCache() {

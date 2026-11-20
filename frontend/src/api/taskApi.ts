@@ -102,6 +102,22 @@ export interface ManualTaskStatusParams {
   note?: string;
 }
 
+export interface ManualTaskWorkloadDto {
+  username: string;
+  fullName: string;
+  total: number;
+  todo: number;
+  inProgress: number;
+  done: number;
+  overdue: number;
+}
+
+export interface EscalationResultDto {
+  remindedTasksCount: number;
+  overdueTasksCount: number;
+  message: string;
+}
+
 export interface PageResponse<T> {
   content: T[];
   totalElements: number;
@@ -171,6 +187,21 @@ export const taskApi = {
 
   updateManualTaskStatus: async (id: number, data: ManualTaskStatusParams): Promise<ManualTaskItem> => {
     const res = await apiClient.patch<ManualTaskItem>(`/manual-tasks/${id}/status`, data);
+    return res.data;
+  },
+
+  addComment: async (id: number, comment: string): Promise<ManualTaskItem> => {
+    const res = await apiClient.post<ManualTaskItem>(`/manual-tasks/${id}/comments`, { comment });
+    return res.data;
+  },
+
+  getWorkload: async (): Promise<ManualTaskWorkloadDto[]> => {
+    const res = await apiClient.get<ManualTaskWorkloadDto[]>('/manual-tasks/workload');
+    return res.data;
+  },
+
+  checkEscalation: async (): Promise<EscalationResultDto> => {
+    const res = await apiClient.post<EscalationResultDto>('/manual-tasks/escalate-check');
     return res.data;
   },
 

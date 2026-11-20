@@ -87,7 +87,7 @@ def main():
     assert any(t["id"] == task_id for t in items), f"Expected task #{task_id} in filtered results"
     print(f"SUCCESS: Keyword search 'pháp lý' correctly returned task #{task_id}")
 
-    # 8. Staff Updates Status: TODO -> IN_PROGRESS -> DONE
+    # 8. Staff Updates Status: TODO -> IN_PROGRESS
     print(f"\n[STEP 8] Staff user 'tin' advances task #{task_id} to IN_PROGRESS...")
     status_resp_1 = requests.patch(
         f"{BASE_URL}/manual-tasks/{task_id}/status",
@@ -98,7 +98,35 @@ def main():
     assert status_resp_1.json()["status"] == "IN_PROGRESS"
     print(f"SUCCESS: Task #{task_id} status updated to IN_PROGRESS by staff 'tin'")
 
-    print(f"[STEP 8.2] Staff user 'tin' completes task #{task_id} (DONE)...")
+    # 8.1 Post Comment & Discussion Thread
+    print(f"\n[STEP 8.1] Adding a collaborative comment on task #{task_id}...")
+    comment_payload = {"comment": "Đã đính kèm biên bản thẩm định pháp lý chi tiết theo yêu cầu."}
+    comment_resp = requests.post(f"{BASE_URL}/manual-tasks/{task_id}/comments", headers=headers_tin, json=comment_payload)
+    assert comment_resp.status_code == 200, f"Expected 200 but got {comment_resp.status_code}: {comment_resp.text}"
+    comment_task = comment_resp.json()
+    activities_after_comment = comment_task.get("activities", [])
+    has_comment_activity = any(a.get("action") == "COMMENT_ADDED" for a in activities_after_comment)
+    assert has_comment_activity, "Expected activity COMMENT_ADDED in task history"
+    print(f"SUCCESS: Successfully added comment to task #{task_id} and recorded COMMENT_ADDED in audit trail.")
+
+    # 8.2 Workload & Backlog Analytics
+    print("\n[STEP 8.2] Verifying workload analytics endpoint (/api/manual-tasks/workload)...")
+    workload_resp = requests.get(f"{BASE_URL}/manual-tasks/workload", headers=headers_admin)
+    assert workload_resp.status_code == 200, f"Expected 200 but got {workload_resp.status_code}"
+    workload_data = workload_resp.json()
+    print(f"SUCCESS: Retrieved workload distribution for {len(workload_data)} team members:")
+    for w in workload_data:
+        print(f"  - @{w['username']} ({w['fullName']}): total={w['total']}, inProgress={w['inProgress']}, done={w['done']}, overdue={w['overdue']}")
+    assert any(w["username"] == "tin" for w in workload_data), "Assignee 'tin' should be present in workload summary"
+
+    # 8.3 Escalation & Reminder Scan
+    print("\n[STEP 8.3] Triggering deadline escalation scan (/api/manual-tasks/escalate-check)...")
+    escalate_resp = requests.post(f"{BASE_URL}/manual-tasks/escalate-check", headers=headers_admin)
+    assert escalate_resp.status_code == 200, f"Expected 200 but got {escalate_resp.status_code}"
+    escalate_result = escalate_resp.json()
+    print(f"SUCCESS: Escalation scan completed: reminded={escalate_result.get('remindedTasksCount')}, overdue={escalate_result.get('overdueTasksCount')}, message='{escalate_result.get('message')}'")
+
+    print(f"\n[STEP 8.4] Staff user 'tin' completes task #{task_id} (DONE)...")
     status_resp_2 = requests.patch(
         f"{BASE_URL}/manual-tasks/{task_id}/status",
         headers=headers_tin,
@@ -109,7 +137,7 @@ def main():
     assert status_resp_2.json()["completedAt"] is not None
     print(f"SUCCESS: Task #{task_id} status updated to DONE with completedAt={status_resp_2.json()['completedAt']}")
 
-    # 9. Verify Activity History Timeline After Status Updates
+    # 9. Verify Activity History Timeline After Status Updates and Comments
     print(f"\n[STEP 9] Inspecting updated activity timeline for task #{task_id}...")
     detail_resp_2 = requests.get(f"{BASE_URL}/manual-tasks/{task_id}", headers=headers_admin)
     updated_detail = detail_resp_2.json()
@@ -117,13 +145,17 @@ def main():
     print(f"SUCCESS: Activity count is now {len(updated_activities)}:")
     for a in updated_activities:
         print(f"  - [{a.get('action')}] by @{a.get('username')}: {a.get('oldValue')} -> {a.get('newValue')} (comment: {a.get('comment')})")
-    assert len(updated_activities) >= 3, "Expected at least 3 activities (CREATED, STATUS_CHANGED x 2)"
+    assert len(updated_activities) >= 4, "Expected at least 4 activities (CREATED, STATUS_CHANGED, COMMENT_ADDED, STATUS_CHANGED)"
 
     # 10. Verify RBAC Security Boundaries
-    print("\n[STEP 10] Testing RBAC boundaries (unauthorized user deletion)...")
+    print("\n[STEP 10] Testing RBAC boundaries (unauthorized operations)...")
     unauth_delete_resp = requests.delete(f"{BASE_URL}/manual-tasks/{task_id}", headers=headers_user)
     assert unauth_delete_resp.status_code == 403, f"Expected 403 Forbidden but got {unauth_delete_resp.status_code}"
     print(f"SUCCESS: Ordinary user correctly forbidden (403) from deleting task #{task_id}")
+
+    unauth_escalate_resp = requests.post(f"{BASE_URL}/manual-tasks/escalate-check", headers=headers_user)
+    assert unauth_escalate_resp.status_code == 403, f"Expected 403 Forbidden for escalation scan but got {unauth_escalate_resp.status_code}"
+    print("SUCCESS: Ordinary user correctly forbidden (403) from triggering escalation check")
 
     # 11. Cleanup Test Task
     print(f"\n[STEP 11] Cleaning up test task #{task_id} as admin...")
