@@ -17,7 +17,8 @@ import {
   Sun,
   Moon,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  FolderLock
 } from 'lucide-react';
 import { notificationApi } from '../api/notificationApi';
 import { NotificationPanel } from './NotificationPanel';
@@ -31,7 +32,9 @@ export type AppView =
   | 'review-queue'
   | 'disposition-queue'
   | 'tasks'
-  | 'system-status';
+  | 'system-status'
+  | 'investigations'
+  | 'vdr';
 
 export interface NavbarProps {
   currentView?: AppView;
@@ -194,6 +197,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView: initialView }) => {
         return { name: 'Nhật ký kiểm toán', icon: <ShieldAlert size={18} /> };
       case 'system-status':
         return { name: 'Trạng thái hệ thống', icon: <Activity size={18} /> };
+      case 'investigations':
+        return { name: 'Điều tra tài liệu', icon: <ShieldAlert size={18} /> };
+      case 'vdr':
+        return { name: 'Phòng dữ liệu bảo mật', icon: <FolderLock size={18} /> };
       case 'documents':
       default:
         return { name: 'Quản lý tài liệu', icon: <FileText size={18} /> };
@@ -314,6 +321,38 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView: initialView }) => {
                 </button>
               </>
             )}
+          </div>
+
+          {/* Section: Bảo Mật & Điều Tra */}
+          <div className="ent-sidebar__section">
+            {!isSidebarCollapsed && (
+              <div className="ent-sidebar__section-title">Bảo mật & Điều tra</div>
+            )}
+            <button
+              type="button"
+              className={`ent-sidebar__link ${activeView === 'investigations' ? 'active' : ''}`}
+              onClick={() => navigateTo('investigations')}
+              id="nav-investigations-btn"
+              title="Điều tra sai lệch tài liệu"
+            >
+              <ShieldAlert size={18} className="ent-sidebar__link-icon" />
+              {!isSidebarCollapsed && (
+                <span className="ent-sidebar__link-text">Điều tra tài liệu</span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              className={`ent-sidebar__link ${activeView === 'vdr' ? 'active' : ''}`}
+              onClick={() => navigateTo('vdr')}
+              id="nav-vdr-btn"
+              title="Phòng dữ liệu bảo mật (VDR)"
+            >
+              <FolderLock size={18} className="ent-sidebar__link-icon" />
+              {!isSidebarCollapsed && (
+                <span className="ent-sidebar__link-text">Phòng dữ liệu (VDR)</span>
+              )}
+            </button>
           </div>
 
           {/* Section: Quản Trị Hệ Thống (ROLE_ADMIN) */}

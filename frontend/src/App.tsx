@@ -10,6 +10,8 @@ import { DispositionQueuePage } from './pages/DispositionQueuePage';
 import { VerifyPage } from './pages/VerifyPage';
 import { TaskCenterPage } from './pages/TaskCenterPage';
 import { SystemStatusPage } from './pages/SystemStatusPage';
+import { InvestigationPage } from './pages/InvestigationPage';
+import { VirtualDataRoomPage } from './pages/VirtualDataRoomPage';
 import { AppView } from './components/Navbar';
 
 const AppContent: React.FC = () => {
@@ -17,7 +19,14 @@ const AppContent: React.FC = () => {
   const [activeView, setActiveView] = useState<AppView>('documents');
 
   useEffect(() => {
-    if (user && user.role !== 'ROLE_ADMIN' && activeView !== 'documents' && activeView !== 'tasks') {
+    if (
+      user &&
+      user.role !== 'ROLE_ADMIN' &&
+      activeView !== 'documents' &&
+      activeView !== 'tasks' &&
+      activeView !== 'investigations' &&
+      activeView !== 'vdr'
+    ) {
       setActiveView('documents');
     }
   }, [user, activeView]);
@@ -82,6 +91,14 @@ const AppContent: React.FC = () => {
 
   if (activeView === 'system-status' && isAdmin) {
     return <SystemStatusPage />;
+  }
+
+  if (activeView === 'investigations') {
+    return <InvestigationPage />;
+  }
+
+  if (activeView === 'vdr') {
+    return <VirtualDataRoomPage />;
   }
 
   return <DocumentsPage />;

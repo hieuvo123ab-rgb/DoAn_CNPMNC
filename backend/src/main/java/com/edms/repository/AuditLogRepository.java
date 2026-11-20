@@ -21,4 +21,6 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long>, JpaSp
 
     @Query("SELECT a FROM AuditLog a ORDER BY a.timestamp DESC")
     List<AuditLog> findRecentActivities(Pageable pageable);
+
+    List<AuditLog> findByResourceTypeAndResourceIdOrderByTimestampAsc(String resourceType, String resourceId);
 }
