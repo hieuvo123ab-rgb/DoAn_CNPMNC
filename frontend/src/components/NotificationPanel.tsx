@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { notificationApi, NotificationItem } from '../api/notificationApi';
 import { 
   Bell, Check, CheckCheck, FileText, Archive, 
-  Share2, PenTool, AlertTriangle, X, Clock
+  Share2, PenTool, AlertTriangle, X, Clock, ListTodo
 } from 'lucide-react';
 
 interface NotificationPanelProps {
@@ -125,6 +125,9 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
       onNavigate(item.actionKey, item.documentId);
     } else if (item.actionKey) {
       switch (item.actionKey) {
+        case 'OPEN_TASK_CENTER':
+          window.dispatchEvent(new CustomEvent('app-navigate', { detail: 'tasks' }));
+          break;
         case 'OPEN_REVIEW_QUEUE':
           window.dispatchEvent(new CustomEvent('app-navigate', { detail: 'review-queue' }));
           break;
@@ -160,6 +163,9 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
         return <Archive size={16} className="text-danger" />;
       case 'DOCUMENT_SIGNED':
         return <PenTool size={16} className="text-success" />;
+      case 'TASK_ASSIGNED':
+      case 'TASK_STATUS_UPDATED':
+        return <ListTodo size={16} className="text-primary" />;
       case 'INTEGRITY_TAMPER_DETECTED':
         return <AlertTriangle size={16} className="text-danger" />;
       default:

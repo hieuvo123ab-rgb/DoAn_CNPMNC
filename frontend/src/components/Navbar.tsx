@@ -160,6 +160,9 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView: initialView }) => {
     setShowNotifications(false);
     if (!actionKey) return;
     switch (actionKey) {
+      case 'OPEN_TASK_CENTER':
+        navigateTo('tasks');
+        break;
       case 'OPEN_REVIEW_QUEUE':
         navigateTo('review-queue');
         break;
