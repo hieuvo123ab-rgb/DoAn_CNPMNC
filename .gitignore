@@ -10,7 +10,10 @@
 .env
 .env.local
 .env.*.local
+.env.qa
+.env.team-server
 !.env.example
+!.env.team-server.example
 
 # Build and dependencies
 node_modules/
