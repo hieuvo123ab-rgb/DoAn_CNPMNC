@@ -30,44 +30,26 @@ def main():
     headers_tin = {"Authorization": f"Bearer {tin_token}"}
     headers_user = {"Authorization": f"Bearer {user_token}"}
 
-    # Find or create sample document with 2 versions to simulate payment terms discrepancy
-    doc_resp = requests.get(f"{BASE_URL}/documents", headers=headers_admin)
-    assert doc_resp.status_code == 200, f"Failed to list documents: {doc_resp.status_code}"
-    docs = doc_resp.json()
-    if isinstance(docs, dict) and "content" in docs:
-        docs = docs["content"]
+    # Create dedicated sample document with 2 versions to simulate payment terms discrepancy
+    print("[SETUP] Creating dedicated sample document v1 (30 days payment terms)...")
+    file_v1 = ("HopDong_MuaSam_v1.txt", b"HOP DONG NGUYEN TAC MUA SAM THIET BI\nDieu 1: Pham vi cung cap thiet bi may chu.\nDieu 2: Thoi han thanh toan la 30 ngay ke tu ngay nghiem thu ky bien ban.\nDieu 3: Bao hanh 24 thang tan noi.\nDieu 4: Cam ket bao mat tuyet doi thong tin.", "text/plain")
+    up_resp = requests.post(f"{BASE_URL}/documents",
+                            data={"title": "Hợp đồng nguyên tắc mua sắm CNTT - Case INV", "description": "Hợp đồng đối tác phần cứng 2026 dùng cho điều tra", "documentType": "Hợp đồng", "accessMode": "INTERNAL"},
+                            files={"file": file_v1},
+                            headers=headers_admin)
+    assert up_resp.status_code == 201, f"Failed to upload document v1: {up_resp.status_code} {up_resp.text}"
+    sample_doc = up_resp.json()
+    sample_doc_id = sample_doc["id"]
+    print(f"Uploaded Document v1: ID={sample_doc_id}")
 
-    if not docs:
-        print("[SETUP] Creating sample document v1 (30 days payment terms)...")
-        file_v1 = ("HopDong_MuaSam_v1.txt", b"HOP DONG NGUYEN TAC MUA SAM THIET BI\nDieu 1: Pham vi cung cap thiet bi may chu.\nDieu 2: Thoi han thanh toan la 30 ngay ke tu ngay nghiem thu ky bien ban.\nDieu 3: Bao hanh 24 thang tan noi.\nDieu 4: Cam ket bao mat tuyet doi thong tin.", "text/plain")
-        up_resp = requests.post(f"{BASE_URL}/documents",
-                                data={"title": "Hợp đồng nguyên tắc mua sắm trang thiết bị CNTT", "description": "Hợp đồng đối tác phần cứng 2026", "documentType": "Hợp đồng", "accessMode": "INTERNAL"},
-                                files={"file": file_v1},
-                                headers=headers_admin)
-        assert up_resp.status_code == 201, f"Failed to upload document v1: {up_resp.status_code} {up_resp.text}"
-        sample_doc = up_resp.json()
-        sample_doc_id = sample_doc["id"]
-        print(f"Uploaded Document v1: ID={sample_doc_id}")
-
-        print("[SETUP] Uploading version v2 with discrepancy (7 days payment terms)...")
-        file_v2 = ("HopDong_MuaSam_v2.txt", b"HOP DONG NGUYEN TAC MUA SAM THIET BI\nDieu 1: Pham vi cung cap thiet bi may chu.\nDieu 2: Thoi han thanh toan la 7 ngay ke tu ngay nghiem thu ky bien ban.\nDieu 3: Bao hanh 24 thang tan noi.\nDieu 4: Cam ket bao mat tuyet doi thong tin.", "text/plain")
-        v2_resp = requests.post(f"{BASE_URL}/documents/{sample_doc_id}/versions",
-                                data={"changeNote": "Sửa đổi điều khoản thời hạn thanh toán thành 7 ngày"},
-                                files={"file": file_v2},
-                                headers=headers_admin)
-        assert v2_resp.status_code == 201, f"Failed to upload document v2: {v2_resp.status_code} {v2_resp.text}"
-        print("Uploaded Document v2 with discrepancy.")
-    else:
-        sample_doc = docs[0]
-        sample_doc_id = sample_doc["id"]
-        # Ensure version 2 exists for diff test
-        versions_resp = requests.get(f"{BASE_URL}/documents/{sample_doc_id}/versions", headers=headers_admin)
-        if versions_resp.status_code == 200 and len(versions_resp.json()) < 2:
-            file_v2 = ("HopDong_MuaSam_v2.txt", b"HOP DONG NGUYEN TAC MUA SAM THIET BI\nDieu 1: Pham vi cung cap thiet bi may chu.\nDieu 2: Thoi han thanh toan la 7 ngay ke tu ngay nghiem thu ky bien ban.\nDieu 3: Bao hanh 24 thang tan noi.\nDieu 4: Cam ket bao mat tuyet doi thong tin.", "text/plain")
-            requests.post(f"{BASE_URL}/documents/{sample_doc_id}/versions",
-                          data={"changeNote": "Sửa đổi điều khoản thời hạn thanh toán thành 7 ngày"},
-                          files={"file": file_v2},
-                          headers=headers_admin)
+    print("[SETUP] Uploading version v2 with discrepancy (7 days payment terms)...")
+    file_v2 = ("HopDong_MuaSam_v2.txt", b"HOP DONG NGUYEN TAC MUA SAM THIET BI\nDieu 1: Pham vi cung cap thiet bi may chu.\nDieu 2: Thoi han thanh toan la 7 ngay ke tu ngay nghiem thu ky bien ban.\nDieu 3: Bao hanh 24 thang tan noi.\nDieu 4: Cam ket bao mat tuyet doi thong tin.", "text/plain")
+    v2_resp = requests.post(f"{BASE_URL}/documents/{sample_doc_id}/versions",
+                            data={"changeNote": "Sửa đổi điều khoản thời hạn thanh toán thành 7 ngày"},
+                            files={"file": file_v2},
+                            headers=headers_admin)
+    assert v2_resp.status_code == 201, f"Failed to upload document v2: {v2_resp.status_code} {v2_resp.text}"
+    print("Uploaded Document v2 with discrepancy.")
 
     print(f"Using sample document: ID={sample_doc_id}, Title='{sample_doc.get('title')}'")
 
