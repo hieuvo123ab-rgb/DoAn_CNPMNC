@@ -478,7 +478,7 @@ export const VirtualDataRoomPage: React.FC = () => {
                       )}
                     </td>
                     <td>
-                      <div style={{ fontSize: '0.85rem' }}>{r.ownerUsername}</div>
+                      <div style={{ fontSize: '0.85rem' }}>{r.ownerUsername === 'admin' || r.ownerUsername === 'hieu' ? 'Ban Quản trị VDR' : 'Quản trị viên phòng'}</div>
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
@@ -543,7 +543,7 @@ export const VirtualDataRoomPage: React.FC = () => {
                     )}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>
-                    Chủ sở hữu: <strong>{selectedRoom.ownerUsername}</strong> | Vai trò của bạn: <strong>{selectedRoom.currentUserRole || 'GUEST'}</strong>
+                    Quản trị phòng: <strong>{selectedRoom.ownerUsername === 'admin' || selectedRoom.ownerUsername === 'hieu' ? 'Ban Quản trị VDR' : 'Quản trị viên phòng'}</strong> | Vai trò của bạn: <strong>{selectedRoom.currentUserRole || 'GUEST'}</strong>
                   </div>
                 </div>
                 <button
@@ -786,8 +786,10 @@ export const VirtualDataRoomPage: React.FC = () => {
                         {roomMembers.map(m => (
                           <tr key={m.id}>
                             <td>
-                              <div style={{ fontWeight: 600 }}>{m.fullName || m.username || 'Đối tác ngoài'}</div>
-                              {m.username && <div style={{ fontSize: '0.75rem', color: '#64748b' }}>@{m.username}</div>}
+                              <div style={{ fontWeight: 600 }}>
+                                {m.role === 'ROOM_MANAGER' ? 'Quản lý tài liệu' : (m.role === 'ROOM_VIEWER' ? 'Chuyên viên thẩm định' : 'Thành viên đối tác')}
+                              </div>
+                              {m.username && <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Tài khoản: {m.username}</div>}
                             </td>
                             <td>{m.email}</td>
                             <td>
@@ -849,7 +851,7 @@ export const VirtualDataRoomPage: React.FC = () => {
                             <div>
                               <div style={{ fontWeight: 600 }}>{inv.email} (Vai trò: {inv.role})</div>
                               <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                                Tạo bởi {inv.createdBy} • Hạn chót: {new Date(inv.expiresAt).toLocaleDateString('vi-VN')}
+                                Khởi tạo bởi: Ban Quản trị VDR • Hạn chót: {new Date(inv.expiresAt).toLocaleDateString('vi-VN')}
                               </div>
                             </div>
                             <button

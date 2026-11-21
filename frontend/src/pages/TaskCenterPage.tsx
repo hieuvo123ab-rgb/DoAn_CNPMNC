@@ -659,6 +659,16 @@ export const TaskCenterPage: React.FC = () => {
   // ---------------------------------------------------------------------------
   // Helper Formatters
   // ---------------------------------------------------------------------------
+  const getTaskAssigneeRoleLabel = (task?: UnifiedTask): string => {
+    if (!task) return '-';
+    if (task.source === 'SYSTEM') return 'Hệ thống quy trình';
+    if (!task.assignee) return 'Chưa phân công';
+    if (task.assigneeRole === 'ROLE_ADMIN' || task.assignee === 'admin' || task.assignee === 'hieu') return 'Quản trị viên';
+    if (task.assigneeRole === 'ROLE_STAFF' || task.assignee === 'tin') return 'Chuyên viên xử lý';
+    if (task.assigneeRole === 'ROLE_USER') return 'Thành viên nghiệp vụ';
+    return 'Đã phân công';
+  };
+
   const formatDate = (isoString?: string) => {
     if (!isoString) return '-';
     try {
@@ -1059,7 +1069,7 @@ export const TaskCenterPage: React.FC = () => {
                 <option value="SYSTEM">Hệ thống EDMS</option>
                 {assigneeOptions.map((a) => (
                   <option key={a.username} value={a.username}>
-                    {a.fullName} (@{a.username})
+                    {a.role === 'ROLE_ADMIN' ? 'Quản trị viên' : (a.role === 'ROLE_STAFF' ? 'Chuyên viên xử lý' : 'Thành viên nghiệp vụ')} ({a.username})
                   </option>
                 ))}
               </select>
@@ -1234,9 +1244,9 @@ export const TaskCenterPage: React.FC = () => {
 
                             {/* Card Footer: Assignee & Date */}
                             <div className="kanban-card__footer">
-                              <div className="kanban-card__assignee" title={`Người phụ trách: ${task.assigneeFullName}`}>
+                              <div className="kanban-card__assignee" title={`Phân công: ${getTaskAssigneeRoleLabel(task)}`}>
                                 <User size={13} />
-                                <span>{task.assigneeFullName}</span>
+                                <span>{getTaskAssigneeRoleLabel(task)}</span>
                               </div>
 
                               {task.dueDate && (
@@ -1367,10 +1377,10 @@ export const TaskCenterPage: React.FC = () => {
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.85rem' }}>
                           <User size={14} className="text-secondary" />
-                          <span style={{ fontWeight: 500 }}>{task.assigneeFullName}</span>
+                          <span style={{ fontWeight: 500, color: 'var(--color-text-main)' }}>{getTaskAssigneeRoleLabel(task)}</span>
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.15rem' }}>
-                          Bởi: @{task.createdBy}
+                          {task.source === 'SYSTEM' ? 'Quy trình tự động' : 'Tác vụ nội bộ'}
                         </div>
                       </td>
 
@@ -1549,28 +1559,41 @@ export const TaskCenterPage: React.FC = () => {
                   }}
                 >
                   <div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>NGƯỜI PHỤ TRÁCH</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', letterSpacing: '0.04em' }}>PHÂN CÔNG PHỤ TRÁCH</div>
                     <div style={{ fontWeight: 600, fontSize: '0.875rem', marginTop: '0.15rem', color: 'var(--color-text-main)' }}>
-                      {selectedTask.assigneeFullName}
+                      {getTaskAssigneeRoleLabel(selectedTask)}
                     </div>
-                    {selectedTask.assignee && (
-                      <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                        @{selectedTask.assignee}
-                      </div>
-                    )}
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.1rem' }}>
+                      {selectedTask.assignee ? 'Trạng thái: Đã tiếp nhận' : 'Trạng thái: Chờ phân công'}
+                    </div>
                   </div>
 
                   <div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>NGƯỜI GIAO VIỆC</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', letterSpacing: '0.04em' }}>NGUỒN GIAO VIỆC</div>
                     <div style={{ fontWeight: 600, fontSize: '0.875rem', marginTop: '0.15rem', color: 'var(--color-text-main)' }}>
-                      {selectedTask.createdByFullName}
+                      {selectedTask.source === 'SYSTEM' ? 'Hệ thống quy trình' : 'Bộ phận Quản trị / Giám sát'}
                     </div>
-                    {selectedTask.createdBy && (
-                      <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                        @{selectedTask.createdBy}
-                      </div>
-                    )}
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.1rem' }}>
+                      {selectedTask.source === 'SYSTEM' ? 'Tự động phát sinh' : 'Tác vụ nội bộ'}
+                    </div>
                   </div>
+
+                  {(isAdmin || selectedTask.createdBy === user?.username) && selectedTask.source === 'MANUAL' && (
+                    <div style={{ gridColumn: 'span 2', paddingTop: '0.65rem', borderTop: '1px dashed var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                        Quyền quản trị: Có thể xem và điều chỉnh người phụ trách tác vụ này.
+                      </span>
+                      <button
+                        type="button"
+                        className="ent-btn ent-btn--sm ent-btn--secondary"
+                        onClick={() => openEditModal(selectedTask)}
+                        style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                      >
+                        <Edit2 size={12} />
+                        <span>Đổi người phụ trách</span>
+                      </button>
+                    </div>
+                  )}
 
                   <div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>HẠN HOÀN THÀNH (DEADLINE)</div>
@@ -1764,7 +1787,9 @@ export const TaskCenterPage: React.FC = () => {
                             <div key={com.id} className="task-comment-item">
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                                 <span style={{ fontWeight: 600, fontSize: '0.825rem', color: 'var(--color-text-main)' }}>
-                                  {com.userFullName} (@{com.username})
+                                  {com.username === 'admin' || com.username === 'hieu'
+                                    ? 'Quản trị viên'
+                                    : (com.username === 'tin' ? 'Chuyên viên xử lý' : (com.username === user?.username ? 'Bạn' : 'Bộ phận nghiệp vụ'))}
                                 </span>
                                 <span style={{ fontSize: '0.725rem', color: 'var(--color-text-muted)' }}>
                                   {formatDateTime(com.createdAt)}
@@ -1800,7 +1825,9 @@ export const TaskCenterPage: React.FC = () => {
                           <div className="task-timeline-dot" />
                           <div className="task-timeline-header">
                             <span className="task-timeline-user">
-                              {act.userFullName} (@{act.username})
+                              {act.username === 'admin' || act.username === 'hieu'
+                                ? 'Quản trị viên'
+                                : (act.username === 'tin' ? 'Chuyên viên xử lý' : (act.username === user?.username ? 'Bạn' : 'Bộ phận nghiệp vụ'))}
                             </span>
                             <span className="task-timeline-date">{formatDateTime(act.createdAt)}</span>
                           </div>
@@ -1815,8 +1842,7 @@ export const TaskCenterPage: React.FC = () => {
                             )}
                             {act.action === 'ASSIGNED' && (
                               <span>
-                                Chuyển người phụ trách từ <strong>@{act.oldValue}</strong> sang{' '}
-                                <strong>@{act.newValue}</strong>
+                                Cập nhật điều chỉnh phân công công việc
                               </span>
                             )}
                             {act.action === 'PRIORITY_CHANGED' && (
@@ -2003,10 +2029,10 @@ export const TaskCenterPage: React.FC = () => {
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
                               <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--color-text-main)' }}>
-                                {w.fullName}
+                                {w.username === 'admin' ? 'Quản trị viên Hệ thống' : (w.username === 'hieu' ? 'Quản trị viên Dự án' : (w.username === 'tin' ? 'Chuyên viên Xử lý Nghiệp vụ' : 'Thành viên Nghiệp vụ'))}
                               </span>
                               <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginLeft: '0.4rem' }}>
-                                (@{w.username})
+                                (Tài khoản: {w.username})
                               </span>
                             </div>
                             <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-primary)' }}>
@@ -2107,7 +2133,7 @@ export const TaskCenterPage: React.FC = () => {
                       >
                         {assigneeOptions.map((a) => (
                           <option key={a.username} value={a.username}>
-                            {a.fullName} (@{a.username} - {a.role.replace('ROLE_', '')})
+                            {a.role === 'ROLE_ADMIN' ? 'Quản trị viên' : (a.role === 'ROLE_STAFF' ? 'Chuyên viên xử lý' : 'Thành viên nghiệp vụ')} (Tài khoản: {a.username})
                           </option>
                         ))}
                       </select>
@@ -2249,7 +2275,7 @@ export const TaskCenterPage: React.FC = () => {
                       >
                         {assigneeOptions.map((a) => (
                           <option key={a.username} value={a.username}>
-                            {a.fullName} (@{a.username} - {a.role.replace('ROLE_', '')})
+                            {a.role === 'ROLE_ADMIN' ? 'Quản trị viên' : (a.role === 'ROLE_STAFF' ? 'Chuyên viên xử lý' : 'Thành viên nghiệp vụ')} (Tài khoản: {a.username})
                           </option>
                         ))}
                       </select>

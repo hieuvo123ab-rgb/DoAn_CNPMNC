@@ -487,8 +487,12 @@ export const InvestigationPage: React.FC = () => {
                     </td>
                     <td>{getSeverityBadge(c.severity)}</td>
                     <td>
-                      <div style={{ fontSize: '0.85rem' }}>{c.assignedToFullName || c.assignedTo}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Mở bởi: {c.createdBy}</div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 500 }}>
+                        {c.assignedTo === 'admin' || c.assignedTo === 'hieu' ? 'Quản trị viên' : (c.assignedTo === 'tin' ? 'Chuyên viên giám định' : (c.assignedTo ? 'Chuyên viên xử lý' : 'Chưa phân công'))}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                        Yêu cầu: {c.createdBy === 'admin' || c.createdBy === 'hieu' ? 'Ban Quản trị' : 'Bộ phận Nghiệp vụ'}
+                      </div>
                     </td>
                     <td>
                       {c.dueDate ? (
@@ -539,7 +543,7 @@ export const InvestigationPage: React.FC = () => {
                     {getSeverityBadge(selectedCase.severity)}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>
-                    Mục tiêu: {selectedCase.targetDocumentTitle || 'Không xác định'} | Phụ trách: {selectedCase.assignedToFullName || selectedCase.assignedTo} | Ngày mở: {new Date(selectedCase.createdAt).toLocaleString('vi-VN')}
+                    Mục tiêu: {selectedCase.targetDocumentTitle || 'Không xác định'} | Phụ trách: {selectedCase.assignedTo === 'admin' || selectedCase.assignedTo === 'hieu' ? 'Quản trị viên' : (selectedCase.assignedTo === 'tin' ? 'Chuyên viên giám định' : (selectedCase.assignedTo ? 'Chuyên viên xử lý' : 'Chưa phân công'))} | Ngày mở: {new Date(selectedCase.createdAt).toLocaleString('vi-VN')}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -1066,13 +1070,17 @@ export const InvestigationPage: React.FC = () => {
                       <label style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '4px', display: 'block' }}>
                         Người phụ trách *
                       </label>
-                      <input
-                        type="text"
+                      <select
                         className="form-control"
                         required
                         value={createForm.assignedTo}
                         onChange={e => setCreateForm({ ...createForm, assignedTo: e.target.value })}
-                      />
+                      >
+                        <option value="tin">Chuyên viên giám định (tin)</option>
+                        <option value="hieu">Quản trị viên pháp chế (hieu)</option>
+                        <option value="admin">Quản trị viên an ninh (admin)</option>
+                        <option value="user">Chuyên viên phối hợp (user)</option>
+                      </select>
                     </div>
                   </div>
 
