@@ -5,6 +5,11 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface RegisterPayload extends LoginPayload {
+  fullName: string;
+  email?: string;
+}
+
 export interface LoginResponseData {
   token: string;
   tokenType: string;
@@ -14,6 +19,11 @@ export interface LoginResponseData {
 }
 
 export const authApi = {
+  register: async (payload: RegisterPayload): Promise<{ message: string }> => {
+    const res = await apiClient.post<{ message: string }>('/auth/register', payload);
+    return res.data;
+  },
+
   login: async (payload: LoginPayload): Promise<LoginResponseData> => {
     const res = await apiClient.post<LoginResponseData>('/auth/login', payload);
     return res.data;

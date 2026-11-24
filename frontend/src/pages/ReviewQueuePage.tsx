@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ReviewItem, documentApi } from '../api/documentApi';
 import { Navbar } from '../components/Navbar';
 import { PreviewModal } from '../components/PreviewModal';
+import { EnterpriseModal } from '../components/common/EnterpriseModal';
 import {
   CheckCircle,
   XCircle,
@@ -154,52 +155,36 @@ export const ReviewQueuePage: React.FC = () => {
     switch (status) {
       case 'APPROVED':
         return (
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
-            padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600,
-            backgroundColor: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0'
-          }}>
+          <span className="ent-badge ent-badge--success">
             <CheckCircle size={12} /> Đã duyệt
           </span>
         );
       case 'REJECTED':
         return (
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
-            padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600,
-            backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca'
-          }}>
+          <span className="ent-badge ent-badge--danger">
             <AlertTriangle size={12} /> Bị từ chối
           </span>
         );
       case 'PENDING':
         return (
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
-            padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600,
-            backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a'
-          }}>
+          <span className="ent-badge ent-badge--warning">
             <Clock size={12} /> Chờ duyệt
           </span>
         );
       case 'SUPERSEDED':
         return (
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
-            padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600,
-            backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0'
-          }}>
+          <span className="ent-badge ent-badge--neutral">
             Đã thay thế
           </span>
         );
       default:
-        return <span>{status}</span>;
+        return <span className="ent-badge ent-badge--neutral">{status}</span>;
     }
   };
 
   return (
     <div className="layout-root">
-      <Navbar />
+      <Navbar currentView="review-queue" />
 
       <main className="main-content" style={{ padding: '1.75rem 2rem' }}>
         {/* Page Header */}
@@ -218,7 +203,7 @@ export const ReviewQueuePage: React.FC = () => {
                   Hàng đợi xét duyệt tài liệu
                 </h2>
                 <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-text-muted)', marginTop: '0.2rem' }}>
-                  Phê duyệt hoặc từ chối các phiên bản tài liệu do người dùng gửi duyệt (Phase 7 Approval Workflow)
+                  Phê duyệt hoặc từ chối các phiên bản tài liệu do người dùng gửi duyệt
                 </p>
               </div>
             </div>
@@ -484,39 +469,19 @@ export const ReviewQueuePage: React.FC = () => {
 
       {/* Approve Confirmation Modal */}
       {approveReviewItem && (
-        <div className="modal-backdrop" onClick={() => setApproveReviewItem(null)}>
-          <div className="modal-card" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#166534', fontSize: '1.1rem' }}>
-                <CheckCircle size={20} />
-                <span>Xác nhận phê duyệt tài liệu</span>
-              </h3>
-              <button type="button" className="btn-icon" onClick={() => setApproveReviewItem(null)}>
-                <X size={18} />
-              </button>
-            </div>
-            <div style={{ padding: '1.25rem 1.5rem' }}>
-              <p style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: 'var(--color-text-main)' }}>
-                Bạn có chắc chắn muốn phê duyệt phiên bản <strong>v{approveReviewItem.versionNumber}</strong> của tài liệu <strong>"{approveReviewItem.documentTitle}"</strong>?
-              </p>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ fontSize: '0.85rem' }}>
-                  Ghi chú phê duyệt (Tùy chọn):
-                </label>
-                <textarea
-                  className="form-textarea"
-                  rows={3}
-                  placeholder="Nhập nhận xét hoặc lưu ý khi phê duyệt..."
-                  value={approveComment}
-                  onChange={(e) => setApproveComment(e.target.value)}
-                  id="approve-comment-input"
-                />
-              </div>
-            </div>
-            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', padding: '0.85rem 1.5rem' }}>
+        <EnterpriseModal
+          isOpen={Boolean(approveReviewItem)}
+          onClose={() => setApproveReviewItem(null)}
+          preventClose={isApproving}
+          title="Xác nhận phê duyệt tài liệu"
+          subtitle={`Tài liệu #${approveReviewItem.documentId} — v${approveReviewItem.versionNumber}`}
+          icon={<CheckCircle size={20} />}
+          size="sm"
+          footer={
+            <>
               <button
                 type="button"
-                className="btn btn-secondary btn-sm"
+                className="btn btn-secondary"
                 onClick={() => setApproveReviewItem(null)}
                 disabled={isApproving}
               >
@@ -524,66 +489,53 @@ export const ReviewQueuePage: React.FC = () => {
               </button>
               <button
                 type="button"
-                className="btn btn-sm"
-                style={{ backgroundColor: '#16a34a', color: '#fff', border: 'none' }}
+                className="btn btn-primary"
                 onClick={handleConfirmApprove}
                 disabled={isApproving}
                 id="confirm-approve-btn"
               >
                 {isApproving ? 'Đang duyệt...' : 'Phê duyệt'}
               </button>
+            </>
+          }
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-main)' }}>
+              Bạn có chắc chắn muốn phê duyệt phiên bản <strong>v{approveReviewItem.versionNumber}</strong> của tài liệu <strong>"{approveReviewItem.documentTitle}"</strong>?
+            </p>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label" style={{ fontSize: '0.85rem' }}>
+                Ghi chú phê duyệt (Tùy chọn):
+              </label>
+              <textarea
+                className="form-input"
+                style={{ minHeight: '80px', height: 'auto', padding: '0.5rem 0.75rem', resize: 'vertical' }}
+                rows={3}
+                placeholder="Nhập nhận xét hoặc lưu ý khi phê duyệt..."
+                value={approveComment}
+                onChange={(e) => setApproveComment(e.target.value)}
+                id="approve-comment-input"
+              />
             </div>
           </div>
-        </div>
+        </EnterpriseModal>
       )}
 
       {/* Reject Confirmation Modal */}
       {rejectReviewItem && (
-        <div className="modal-backdrop" onClick={() => setRejectReviewItem(null)}>
-          <div className="modal-card" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#991b1b', fontSize: '1.1rem' }}>
-                <XCircle size={20} />
-                <span>Từ chối yêu cầu xét duyệt</span>
-              </h3>
-              <button type="button" className="btn-icon" onClick={() => setRejectReviewItem(null)}>
-                <X size={18} />
-              </button>
-            </div>
-            <div style={{ padding: '1.25rem 1.5rem' }}>
-              <p style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: 'var(--color-text-main)' }}>
-                Từ chối phiên bản <strong>v{rejectReviewItem.versionNumber}</strong> của tài liệu <strong>"{rejectReviewItem.documentTitle}"</strong>.
-              </p>
-
-              {rejectError && (
-                <div className="alert alert-error" style={{ marginBottom: '1rem', fontSize: '0.85rem' }}>
-                  <AlertTriangle size={14} />
-                  <span>{rejectError}</span>
-                </div>
-              )}
-
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ fontSize: '0.85rem' }}>
-                  Lý do từ chối <span style={{ color: '#dc2626' }}>* (Bắt buộc)</span>:
-                </label>
-                <textarea
-                  className="form-textarea"
-                  rows={4}
-                  placeholder="Nêu rõ lý do cần bổ sung, chỉnh sửa hoặc không đạt yêu cầu..."
-                  value={rejectComment}
-                  onChange={(e) => {
-                    setRejectComment(e.target.value);
-                    if (rejectError) setRejectError(null);
-                  }}
-                  id="reject-comment-input"
-                  required
-                />
-              </div>
-            </div>
-            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', padding: '0.85rem 1.5rem' }}>
+        <EnterpriseModal
+          isOpen={Boolean(rejectReviewItem)}
+          onClose={() => setRejectReviewItem(null)}
+          preventClose={isRejecting}
+          title="Từ chối yêu cầu xét duyệt"
+          subtitle={`Tài liệu #${rejectReviewItem.documentId} — v${rejectReviewItem.versionNumber}`}
+          icon={<XCircle size={20} />}
+          size="sm"
+          footer={
+            <>
               <button
                 type="button"
-                className="btn btn-secondary btn-sm"
+                className="btn btn-secondary"
                 onClick={() => setRejectReviewItem(null)}
                 disabled={isRejecting}
               >
@@ -591,17 +543,48 @@ export const ReviewQueuePage: React.FC = () => {
               </button>
               <button
                 type="button"
-                className="btn btn-sm"
-                style={{ backgroundColor: '#dc2626', color: '#fff', border: 'none' }}
+                className="btn btn-danger"
                 onClick={handleConfirmReject}
                 disabled={isRejecting}
                 id="confirm-reject-btn"
               >
                 {isRejecting ? 'Đang xử lý...' : 'Xác nhận từ chối'}
               </button>
+            </>
+          }
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-main)' }}>
+              Từ chối phiên bản <strong>v{rejectReviewItem.versionNumber}</strong> của tài liệu <strong>"{rejectReviewItem.documentTitle}"</strong>.
+            </p>
+
+            {rejectError && (
+              <div className="ent-alert ent-alert--danger" style={{ margin: 0 }}>
+                <AlertTriangle size={16} style={{ flexShrink: 0 }} />
+                <span>{rejectError}</span>
+              </div>
+            )}
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label" style={{ fontSize: '0.85rem' }}>
+                Lý do từ chối <span style={{ color: 'var(--color-danger)' }}>* (Bắt buộc)</span>:
+              </label>
+              <textarea
+                className="form-input"
+                style={{ minHeight: '90px', height: 'auto', padding: '0.5rem 0.75rem', resize: 'vertical' }}
+                rows={4}
+                placeholder="Nêu rõ lý do cần bổ sung, chỉnh sửa hoặc không đạt yêu cầu..."
+                value={rejectComment}
+                onChange={(e) => {
+                  setRejectComment(e.target.value);
+                  if (rejectError) setRejectError(null);
+                }}
+                id="reject-comment-input"
+                required
+              />
             </div>
           </div>
-        </div>
+        </EnterpriseModal>
       )}
     </div>
   );

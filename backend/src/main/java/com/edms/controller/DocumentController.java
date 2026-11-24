@@ -5,6 +5,7 @@ import com.edms.entity.Document;
 import com.edms.service.AuditService;
 import com.edms.service.DocumentService;
 import com.edms.service.HybridSearchService;
+import com.edms.service.OperationalDiagnosticsService;
 import com.edms.service.SemanticSearchService;
 import jakarta.validation.Valid;
 import org.springframework.core.io.Resource;
@@ -31,14 +32,17 @@ public class DocumentController {
     private final AuditService auditService;
     private final SemanticSearchService semanticSearchService;
     private final HybridSearchService hybridSearchService;
+    private final OperationalDiagnosticsService diagnosticsService;
 
     public DocumentController(DocumentService documentService, AuditService auditService,
                                SemanticSearchService semanticSearchService,
-                               HybridSearchService hybridSearchService) {
+                               HybridSearchService hybridSearchService,
+                               OperationalDiagnosticsService diagnosticsService) {
         this.documentService = documentService;
         this.auditService = auditService;
         this.semanticSearchService = semanticSearchService;
         this.hybridSearchService = hybridSearchService;
+        this.diagnosticsService = diagnosticsService;
     }
 
     private boolean checkIsAdmin(Authentication authentication) {
@@ -99,7 +103,11 @@ public class DocumentController {
         String username = getUsername(principal);
         DocumentMetadataRequest metadata = new DocumentMetadataRequest(title, description, documentType, accessMode);
 
-        DocumentResponse response = documentService.uploadDocument(file, metadata, username, forceExtractionFailure, syncOcr, forceOcrTimeout);
+        boolean allowSimulation = diagnosticsService.isFailureSimulationAllowed();
+        boolean actualForceExtractionFailure = allowSimulation && forceExtractionFailure;
+        boolean actualForceOcrTimeout = allowSimulation && forceOcrTimeout;
+
+        DocumentResponse response = documentService.uploadDocument(file, metadata, username, actualForceExtractionFailure, syncOcr, actualForceOcrTimeout);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -353,7 +361,11 @@ public class DocumentController {
         String username = getUsername(principal);
         boolean isAdmin = checkIsAdmin(authentication);
 
-        DocumentVersionResponse response = documentService.uploadNewVersion(id, file, changeNote, username, isAdmin, forceExtractionFailure, syncOcr, forceOcrTimeout);
+        boolean allowSimulation = diagnosticsService.isFailureSimulationAllowed();
+        boolean actualForceExtractionFailure = allowSimulation && forceExtractionFailure;
+        boolean actualForceOcrTimeout = allowSimulation && forceOcrTimeout;
+
+        DocumentVersionResponse response = documentService.uploadNewVersion(id, file, changeNote, username, isAdmin, actualForceExtractionFailure, syncOcr, actualForceOcrTimeout);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -437,7 +449,11 @@ public class DocumentController {
         String username = getUsername(principal);
         boolean isAdmin = checkIsAdmin(authentication);
 
-        DocumentVersionResponse response = documentService.restoreVersion(id, versionNumber, username, isAdmin, forceExtractionFailure, syncOcr, forceOcrTimeout);
+        boolean allowSimulation = diagnosticsService.isFailureSimulationAllowed();
+        boolean actualForceExtractionFailure = allowSimulation && forceExtractionFailure;
+        boolean actualForceOcrTimeout = allowSimulation && forceOcrTimeout;
+
+        DocumentVersionResponse response = documentService.restoreVersion(id, versionNumber, username, isAdmin, actualForceExtractionFailure, syncOcr, actualForceOcrTimeout);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

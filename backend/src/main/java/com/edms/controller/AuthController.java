@@ -2,9 +2,13 @@ package com.edms.controller;
 
 import com.edms.dto.LoginRequest;
 import com.edms.dto.LoginResponse;
+import com.edms.dto.RegisterRequest;
 import com.edms.service.AuthService;
+import com.edms.service.OperationalDiagnosticsService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,10 +25,14 @@ public class AuthController {
 
     private final AuthService authService;
     private final com.edms.security.LoginRateLimiterService loginRateLimiterService;
+    private final OperationalDiagnosticsService diagnosticsService;
 
-    public AuthController(AuthService authService, com.edms.security.LoginRateLimiterService loginRateLimiterService) {
+    public AuthController(AuthService authService,
+                          com.edms.security.LoginRateLimiterService loginRateLimiterService,
+                          OperationalDiagnosticsService diagnosticsService) {
         this.authService = authService;
         this.loginRateLimiterService = loginRateLimiterService;
+        this.diagnosticsService = diagnosticsService;
     }
 
     @PostMapping("/login")
@@ -33,7 +41,7 @@ public class AuthController {
             @RequestHeader(value = "X-Test-Lockout-Seconds", required = false) Long testLockoutSeconds,
             jakarta.servlet.http.HttpServletRequest httpRequest) {
 
-        if (testLockoutSeconds != null && testLockoutSeconds > 0) {
+        if (testLockoutSeconds != null && testLockoutSeconds > 0 && diagnosticsService.isFailureSimulationAllowed()) {
             loginRateLimiterService.setLockoutSeconds(testLockoutSeconds);
         }
 
@@ -42,13 +50,34 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest request) {
+        authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("message", "Đăng ký thành công. Vui lòng đăng nhập."));
+    }
+
     @PostMapping("/reset-rate-limit")
-    public ResponseEntity<Map<String, String>> resetRateLimit() {
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Map<String, String>> resetRateLimit(
+            @RequestBody(required = false) Map<String, String> request) {
+        if (request != null && request.containsKey("username")) {
+            String username = request.get("username");
+            if (username == null || username.isBlank()) {
+                return ResponseEntity.badRequest().body(
+                        Map.of("message", "username must not be blank"));
+            }
+
+            int cleared = loginRateLimiterService.clearUser(username);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Rate limit cleared for the selected user",
+                    "clearedEntries", Integer.toString(cleared)));
+        }
+
+        // Backward-compatible global administrative reset (no request body).
         loginRateLimiterService.resetDefaults();
         loginRateLimiterService.clearAll();
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Rate limit state reset successfully");
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of("message", "Rate limit state reset successfully"));
     }
 
     @PostMapping("/logout")

@@ -133,7 +133,7 @@ Write-Host "  -> Storage and KeyStore populated in isolated recovery volumes wit
 Write-Host "[4/7] Starting Recovery PostgreSQL (Port 15432)..." -ForegroundColor Yellow
 docker compose -f $recoveryComposeFile up -d recovery-postgres
 
-$maxRetries = 20
+$maxRetries = 60
 $isHealthy = $false
 for ($i = 1; $i -le $maxRetries; $i++) {
     $status = docker inspect edms-recovery-postgres --format "{{.State.Health.Status}}" 2>$null
@@ -145,7 +145,7 @@ for ($i = 1; $i -le $maxRetries; $i++) {
 }
 
 if (-not $isHealthy) {
-    Write-Error "Recovery PostgreSQL failed to become healthy within 20 seconds."
+    Write-Error "Recovery PostgreSQL failed to become healthy within 60 seconds."
     exit 1
 }
 Write-Host "  -> Recovery PostgreSQL is healthy." -ForegroundColor Green
@@ -169,7 +169,7 @@ Write-Host "[6/7] Starting Recovery Backend (Port 18080)..." -ForegroundColor Ye
 docker compose -f $recoveryComposeFile up -d recovery-backend
 
 $backendHealthy = $false
-for ($i = 1; $i -le 30; $i++) {
+for ($i = 1; $i -le 90; $i++) {
     try {
         $resp = Invoke-RestMethod -Uri "http://localhost:18080/api/health" -Method Get -TimeoutSec 2 -ErrorAction SilentlyContinue
         if ($resp.status -eq "UP") {
@@ -183,7 +183,7 @@ for ($i = 1; $i -le 30; $i++) {
 }
 
 if (-not $backendHealthy) {
-    Write-Error "Recovery Backend failed to report status UP within 30 seconds."
+    Write-Error "Recovery Backend failed to report status UP within 90 seconds."
     exit 1
 }
 Write-Host "  -> Recovery Backend is UP and operational on http://localhost:18080." -ForegroundColor Green
