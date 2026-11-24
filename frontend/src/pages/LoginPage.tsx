@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { authApi } from '../api/authApi';
 import {
   Lock,
   AlertCircle,
@@ -16,6 +17,10 @@ import {
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [success, setSuccess] = useState<string | null>(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -40,6 +45,32 @@ export const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isRegistering) {
+      if (password.length < 8) {
+        setError('Mật khẩu cần có ít nhất 8 ký tự.');
+        return;
+      }
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await authApi.register({
+          username: username.trim(), password, fullName: fullName.trim(), email: email.trim() || undefined,
+        });
+        setSuccess(response.message || 'Đăng ký thành công. Vui lòng đăng nhập.');
+        setIsRegistering(false);
+        setPassword('');
+      } catch (err: any) {
+        const status = err.response?.status;
+        if (!err.response) setError('Không thể kết nối máy chủ. Vui lòng kiểm tra mạng và thử lại.');
+        else if (status === 409) setError(err.response.data?.message || 'Tên đăng nhập đã được sử dụng.');
+        else if (status === 400) setError(err.response.data?.message || 'Thông tin đăng ký chưa hợp lệ.');
+        else if (status >= 500) setError('Hệ thống đang gặp sự cố. Vui lòng thử lại sau.');
+        else setError(err.response.data?.message || 'Đăng ký không thành công. Vui lòng thử lại.');
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
     if (lockoutSeconds !== null && lockoutSeconds > 0) return;
 
     if (!username.trim() || !password.trim()) {
@@ -50,6 +81,7 @@ export const LoginPage: React.FC = () => {
     try {
       setIsLoading(true);
       setError(null);
+      setSuccess(null);
       await login({ username: username.trim(), password });
     } catch (err: any) {
       const resData = err.response?.data;
@@ -131,7 +163,7 @@ export const LoginPage: React.FC = () => {
 
           <div className="ent-login-hero__footer">
             <span className="ent-login-hero__status-indicator" />
-            <span>Truy cập dành cho người dùng được cấp tài khoản</span>
+            <span>Đăng ký tài khoản người dùng hoặc đăng nhập để tiếp tục</span>
           </div>
         </div>
       </div>
@@ -144,11 +176,15 @@ export const LoginPage: React.FC = () => {
               <div className="ent-login-card__badge">
                 <Lock size={22} />
               </div>
-              <h2 className="ent-login-card__title">Đăng nhập</h2>
+              <h2 className="ent-login-card__title">{isRegistering ? 'Tạo tài khoản' : 'Đăng nhập'}</h2>
               <p className="ent-login-card__desc">
-                Nhập thông tin xác thực để truy cập kho lưu trữ điện tử
+                {isRegistering ? 'Đăng ký tài khoản người dùng để truy cập hệ thống' : 'Nhập thông tin xác thực để truy cập kho lưu trữ điện tử'}
               </p>
             </div>
+
+            {success && !isRegistering && (
+              <div className="ent-alert ent-alert--success mb-4" role="status">{success}</div>
+            )}
 
             {error && (
               <div className="ent-alert ent-alert--danger mb-4" id="login-error-alert" role="alert">
@@ -165,6 +201,12 @@ export const LoginPage: React.FC = () => {
             )}
 
             <form onSubmit={handleSubmit} className="ent-login-form">
+              {isRegistering && <div className="ent-form-group">
+                <label className="ent-form-label" htmlFor="full-name-input">Họ và tên</label>
+                <div className="ent-input-wrapper"><input id="full-name-input" type="text" className="ent-input"
+                  placeholder="Nhập họ và tên" value={fullName} onChange={(e) => setFullName(e.target.value)}
+                  autoComplete="name" maxLength={100} required disabled={isLoading} /></div>
+              </div>}
               <div className="ent-form-group">
                 <label className="ent-form-label" htmlFor="username-input">
                   Tên đăng nhập
@@ -178,12 +220,20 @@ export const LoginPage: React.FC = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     autoComplete="username"
+                    minLength={isRegistering ? 3 : undefined}
+                    maxLength={50}
                     required
                     disabled={isLoading || (lockoutSeconds !== null && lockoutSeconds > 0)}
                   />
                 </div>
               </div>
 
+              {isRegistering && <div className="ent-form-group">
+                <label className="ent-form-label" htmlFor="email-input">Email <span>(không bắt buộc)</span></label>
+                <div className="ent-input-wrapper"><input id="email-input" type="email" className="ent-input"
+                  placeholder="name@example.com" value={email} onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email" maxLength={100} disabled={isLoading} /></div>
+              </div>}
               <div className="ent-form-group">
                 <div className="ent-form-label-row">
                   <label className="ent-form-label" htmlFor="password-input">
@@ -198,7 +248,9 @@ export const LoginPage: React.FC = () => {
                     placeholder="Nhập mật khẩu an toàn"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="current-password"
+                    autoComplete={isRegistering ? 'new-password' : 'current-password'}
+                    minLength={isRegistering ? 8 : undefined}
+                    maxLength={100}
                     required
                     disabled={isLoading || (lockoutSeconds !== null && lockoutSeconds > 0)}
                   />
@@ -218,7 +270,7 @@ export const LoginPage: React.FC = () => {
                 type="submit"
                 className="ent-btn ent-btn--primary ent-btn--lg ent-btn--block mt-4"
                 disabled={isLoading || (lockoutSeconds !== null && lockoutSeconds > 0)}
-                id="login-submit-btn"
+                id={isRegistering ? 'register-submit-btn' : 'login-submit-btn'}
               >
                 {isLoading ? (
                   <>
@@ -227,12 +279,18 @@ export const LoginPage: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <span>Đăng nhập</span>
+                    <span>{isRegistering ? 'Tạo tài khoản' : 'Đăng nhập'}</span>
                     <ArrowRight size={18} className="ml-2" />
                   </>
                 )}
               </button>
             </form>
+
+            <button type="button" className="ent-login-card__verify-link" style={{ margin: '18px auto 0', border: 0, background: 'none', cursor: 'pointer' }}
+              disabled={isLoading}
+              onClick={() => { setIsRegistering(!isRegistering); setError(null); setSuccess(null); }}>
+              {isRegistering ? 'Đã có tài khoản? Đăng nhập' : 'Chưa có tài khoản? Đăng ký'}
+            </button>
 
             <div className="ent-login-card__footer">
               <a

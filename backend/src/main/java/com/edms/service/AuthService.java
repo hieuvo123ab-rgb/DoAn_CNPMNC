@@ -2,8 +2,11 @@ package com.edms.service;
 
 import com.edms.dto.LoginRequest;
 import com.edms.dto.LoginResponse;
+import com.edms.dto.RegisterRequest;
 import com.edms.entity.User;
+import com.edms.entity.Role;
 import com.edms.exception.LoginRateLimitedException;
+import com.edms.exception.UserAlreadyExistsException;
 import com.edms.repository.UserRepository;
 import com.edms.security.JwtTokenProvider;
 import com.edms.security.LoginRateLimiterService;
@@ -12,7 +15,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
@@ -22,17 +27,36 @@ public class AuthService {
     private final UserRepository userRepository;
     private final AuditService auditService;
     private final LoginRateLimiterService loginRateLimiterService;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthService(AuthenticationManager authenticationManager,
                        JwtTokenProvider tokenProvider,
                        UserRepository userRepository,
                        AuditService auditService,
-                       LoginRateLimiterService loginRateLimiterService) {
+                       LoginRateLimiterService loginRateLimiterService,
+                       PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
         this.userRepository = userRepository;
         this.auditService = auditService;
         this.loginRateLimiterService = loginRateLimiterService;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Transactional
+    public void register(RegisterRequest request) {
+        String username = request.getUsername().trim();
+        if (userRepository.existsByUsername(username)) {
+            throw new UserAlreadyExistsException("Tên đăng nhập '" + username + "' đã được sử dụng.");
+        }
+
+        User user = new User(username, passwordEncoder.encode(request.getPassword()),
+                request.getFullName().trim(),
+                request.getEmail() != null && !request.getEmail().isBlank() ? request.getEmail().trim() : null,
+                Role.ROLE_USER);
+        User savedUser = userRepository.save(user);
+        auditService.log(savedUser.getUsername(), "USER_REGISTER", "AUTH", savedUser.getUsername(),
+                "Đăng ký tài khoản người dùng", null);
     }
 
     public LoginResponse login(LoginRequest request) {

@@ -1697,6 +1697,15 @@ html[data-sidebar-collapsed="true"] .ent-app-layout {
   color: var(--color-danger-text);
 }
 
+.ent-alert--success {
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  color: var(--color-success-text);
+  font-size: 0.85rem;
+}
+
 .ent-alert__countdown {
   margin-top: 0.35rem;
   font-weight: 700;

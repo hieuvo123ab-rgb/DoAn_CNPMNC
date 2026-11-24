@@ -2,10 +2,12 @@ package com.edms.controller;
 
 import com.edms.dto.LoginRequest;
 import com.edms.dto.LoginResponse;
+import com.edms.dto.RegisterRequest;
 import com.edms.service.AuthService;
 import com.edms.service.OperationalDiagnosticsService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,6 +48,13 @@ public class AuthController {
         String clientIp = httpRequest != null ? httpRequest.getRemoteAddr() : "127.0.0.1";
         LoginResponse response = authService.login(request, clientIp);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest request) {
+        authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("message", "Đăng ký thành công. Vui lòng đăng nhập."));
     }
 
     @PostMapping("/reset-rate-limit")
